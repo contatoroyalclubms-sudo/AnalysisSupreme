@@ -1,0 +1,232 @@
+{
+  "geral": {
+    "paper_mode": true,
+    "max_concurrent_bots": 6,
+    "risk_limit_percent": 2.0,
+    "symbols_principais": ["BTC/USDT", "ETH/USDT", "ADA/USDT"]
+  },
+  "exchanges": {
+    "binance": {
+      "api_key": "",
+      "api_secret": "",
+      "sandbox": true
+    },
+    "coinbase": {
+      "api_key": "",
+      "api_secret": "",
+      "passphrase": "",
+      "sandbox": true
+    }
+  },
+  "bots": {
+    "arbitragem": {
+      "ativo": true,
+      "parametros": {
+        "min_profit_percent": 0.5,
+        "max_position_size": 1000,
+        "timeout_seconds": 30
+      },
+      "casos_uso": {
+        "1": {
+          "tipo": "simples",
+          "exchanges": ["binance", "coinbase"],
+          "symbols": ["BTC/USDT", "ETH/USDT"]
+        },
+        "2": {
+          "tipo": "triangular",
+          "exchange": "binance",
+          "triangulos": [
+            ["BTC/USDT", "ETH/BTC", "ETH/USDT"],
+            ["BTC/USDT", "ADA/BTC", "ADA/USDT"]
+          ]
+        },
+        "3": {
+          "tipo": "funding",
+          "exchange": "binance",
+          "symbols": ["BTC/USDT", "ETH/USDT"],
+          "min_funding_rate": 0.01
+        }
+      }
+    },
+    "grid": {
+      "ativo": true,
+      "parametros": {
+        "grid_size": 10,
+        "grid_spacing": 0.01,
+        "amount_per_level": 0.001
+      },
+      "casos_uso": {
+        "1": {
+          "tipo": "fixo",
+          "range_percent": 5,
+          "symbols": ["BTC/USDT"]
+        },
+        "2": {
+          "tipo": "dinamico",
+          "ajuste_auto": true,
+          "volatilidade_base": true,
+          "symbols": ["ETH/USDT"]
+        },
+        "3": {
+          "tipo": "stop_loss",
+          "stop_percent": 2,
+          "symbols": ["ADA/USDT"]
+        }
+      }
+    },
+    "momentum": {
+      "ativo": true,
+      "parametros": {
+        "lookback_period": 20,
+        "momentum_threshold": 0.02,
+        "volume_threshold": 1.5
+      },
+      "casos_uso": {
+        "1": {
+          "tipo": "breakout",
+          "volume_confirm": false,
+          "symbols": ["BTC/USDT", "ETH/USDT"]
+        },
+        "2": {
+          "tipo": "continuacao",
+          "trend_confirm": true,
+          "symbols": ["BTC/USDT", "ETH/USDT", "ADA/USDT"]
+        },
+        "3": {
+          "tipo": "volume",
+          "volume_threshold": 1.5,
+          "symbols": ["BTC/USDT", "ETH/USDT"]
+        }
+      }
+    },
+    "scalping": {
+      "ativo": true,
+      "parametros": {
+        "target_profit": 0.001,
+        "max_hold_time": 300,
+        "min_volume": 100
+      },
+      "casos_uso": {
+        "1": {
+          "tipo": "spread",
+          "min_spread": 0.0005,
+          "symbols": ["BTC/USDT", "ETH/USDT"]
+        },
+        "2": {
+          "tipo": "micro",
+          "tick_size": 0.0001,
+          "symbols": ["BTC/USDT", "ETH/USDT"]
+        },
+        "3": {
+          "tipo": "orderbook",
+          "depth_levels": 5,
+          "imbalance_threshold": 0.65,
+          "symbols": ["BTC/USDT"]
+        }
+      }
+    },
+    "mean_reversion": {
+      "ativo": true,
+      "parametros": {
+        "lookback_period": 50,
+        "deviation_threshold": 2.0,
+        "volatility_window": 20
+      },
+      "casos_uso": {
+        "1": {
+          "tipo": "simples",
+          "media_type": "sma",
+          "symbols": ["BTC/USDT", "ETH/USDT"]
+        },
+        "2": {
+          "tipo": "bollinger",
+          "std_dev": 2,
+          "period": 20,
+          "symbols": ["BTC/USDT", "ETH/USDT", "ADA/USDT"]
+        },
+        "3": {
+          "tipo": "rsi_divergence",
+          "rsi_period": 14,
+          "divergence_lookback": 15,
+          "symbols": ["BTC/USDT", "ETH/USDT"]
+        }
+      }
+    },
+    "swing": {
+      "ativo": true,
+      "parametros": {
+        "swing_period": 100,
+        "min_swing_size": 0.05,
+        "pivot_window": 10
+      },
+      "casos_uso": {
+        "1": {
+          "tipo": "suporte_resistencia",
+          "levels": 5,
+          "proximity_percent": 2,
+          "symbols": ["BTC/USDT", "ETH/USDT"]
+        },
+        "2": {
+          "tipo": "candlestick",
+          "patterns": ["doji", "hammer", "engulfing"],
+          "timeframe": "1h",
+          "symbols": ["BTC/USDT", "ETH/USDT"]
+        },
+        "3": {
+          "tipo": "fibonacci",
+          "retracement_levels": [0.382, 0.618],
+          "extension_levels": [1.272, 1.618],
+          "symbols": ["BTC/USDT", "ETH/USDT"]
+        }
+      }
+    }
+  },
+  "ia": {
+    "modelo_path": "models/",
+    "treinamento_ativo": true,
+    "intervalo_retreino": 24,
+    "parametros": {
+      "features": ["price", "volume", "volatility", "momentum", "rsi"],
+      "lookback_window": 100,
+      "prediction_horizon": 10,
+      "model_type": "random_forest",
+      "n_estimators": 100
+    },
+    "otimizacao": {
+      "ativa": true,
+      "intervalo_otimizacao": 168,
+      "min_trades_otimizacao": 50
+    }
+  },
+  "observabilidade": {
+    "prometheus_port": 8000,
+    "grafana_url": "http://localhost:3000",
+    "grafana_api_key": "",
+    "metricas_ativas": true,
+    "alertas": {
+      "perda_maxima": 100,
+      "drawdown_maximo": 0.2,
+      "win_rate_minimo": 0.3,
+      "tempo_inatividade": 3600
+    },
+    "relatorios": {
+      "intervalo_relatorio": 3600,
+      "salvar_metricas": true,
+      "backup_dados": true
+    }
+  },
+  "risk_management": {
+    "max_drawdown_percent": 20,
+    "max_daily_loss": 500,
+    "max_position_size_percent": 10,
+    "correlation_limit": 0.8,
+    "volatility_adjustment": true
+  },
+  "logging": {
+    "level": "INFO",
+    "file_rotation": true,
+    "max_file_size": "10MB",
+    "backup_count": 5,
+    "structured_logging": true
+  }
+}

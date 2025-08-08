@@ -1,0 +1,111 @@
+version: '3.8'
+
+services:
+  analysissupreme:
+    build: .
+    container_name: analysissupreme-trading
+    restart: unless-stopped
+    environment:
+      - PAPER_MODE=true
+      - LOG_LEVEL=INFO
+      - PROMETHEUS_PORT=8000
+      - DATABASE_URL=postgresql://trader:password@postgres:5432/analysissupreme
+      - REDIS_URL=redis://redis:6379/0
+    volumes:
+      - ./logs:/app/logs
+      - ./models:/app/models
+      - ./data:/app/data
+      - ./config/config.json:/app/config/config.json:ro
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - trading-network
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: analysissupreme-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=analysissupreme
+      - POSTGRES_USER=trader
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - trading-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: analysissupreme-cache
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - trading-network
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: analysissupreme-prometheus
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - trading-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: analysissupreme-grafana
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+    ports:
+      - "3000:3000"
+    networks:
+      - trading-network
+
+  jupyter:
+    image: jupyter/scipy-notebook:latest
+    container_name: analysissupreme-jupyter
+    restart: unless-stopped
+    environment:
+      - JUPYTER_ENABLE_LAB=yes
+    volumes:
+      - ./notebooks:/home/jovyan/work
+      - ./data:/home/jovyan/work/data
+      - ./logs:/home/jovyan/work/logs
+    ports:
+      - "8888:8888"
+    networks:
+      - trading-network
+
+volumes:
+  postgres_data:
+  redis_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  trading-network:
+    driver: bridge
