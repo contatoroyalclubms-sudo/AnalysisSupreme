@@ -11,6 +11,7 @@ from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
 import json
 import time
+import secrets
 from datetime import datetime
 
 
@@ -74,7 +75,7 @@ class DeepLearningSupremo:
 
         features = self._extract_transformer_features(market_data)
 
-        direction_score = np.random.uniform(0.7, 0.95)
+        direction_score = secrets.SystemRandom().uniform(0.7, 0.95)
         direction = "BUY" if direction_score > 0.5 else "SELL"
 
         return {
@@ -114,7 +115,7 @@ class DeepLearningSupremo:
         features = ["price", "volume", "volatility", "momentum", "sentiment"]
         attention_weights = np.random.dirichlet(np.ones(len(features)))
 
-        weighted_score = np.random.uniform(0.75, 0.92)
+        weighted_score = secrets.SystemRandom().uniform(0.75, 0.92)
         direction = "BUY" if weighted_score > 0.5 else "SELL"
 
         return {
@@ -184,7 +185,7 @@ class DeepLearningSupremo:
         """Predição de um único modelo LSTM"""
         await asyncio.sleep(0.0003)
 
-        confidence = np.random.uniform(0.65, 0.88)
+        confidence = secrets.SystemRandom().uniform(0.65, 0.88)
         direction = "BUY" if confidence > 0.5 else "SELL"
 
         return {
@@ -208,7 +209,7 @@ class DeepLearningSupremo:
         await asyncio.sleep(0.0003)
 
         advantage_factor = quantum_states["entanglement_factor"] * 0.1
-        confidence = np.random.uniform(0.8, 0.95)
+        confidence = secrets.SystemRandom().uniform(0.8, 0.95)
         direction = "BUY" if confidence > 0.5 else "SELL"
 
         return {

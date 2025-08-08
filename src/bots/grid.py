@@ -225,20 +225,20 @@ class BotGrid(BotBase):
 
         grid = self.grids_ativas[grid_id]
 
-        import random
+        import secrets
 
-        if random.random() < 0.1:  # 10% chance de execução  # nosec B311
+        if secrets.SystemRandom().random() < 0.1:  # 10% chance de execução
             if grid["ordens_buy"]:
-                nivel_executado = random.choice(
+                nivel_executado = secrets.SystemRandom().choice(
                     list(grid["ordens_buy"].keys())
-                )  # nosec B311
+                )
                 del grid["ordens_buy"][nivel_executado]
                 self.logger.info(f"Ordem buy executada no nível {nivel_executado}")
 
             if grid["ordens_sell"]:
-                nivel_executado = random.choice(
+                nivel_executado = secrets.SystemRandom().choice(
                     list(grid["ordens_sell"].keys())
-                )  # nosec B311
+                )
                 del grid["ordens_sell"][nivel_executado]
                 self.logger.info(f"Ordem sell executada no nível {nivel_executado}")
 

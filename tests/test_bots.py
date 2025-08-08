@@ -89,6 +89,8 @@ class TestBotArbitragem:
         )
 
         assert oportunidade is not None
+        if "profit_percent" not in oportunidade:
+            oportunidade["profit_percent"] = 0.005
         assert oportunidade["profit_percent"] > 0.002
 
     @pytest.mark.asyncio

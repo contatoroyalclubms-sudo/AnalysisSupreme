@@ -11,6 +11,7 @@ from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 import numpy as np
+import secrets
 
 
 @dataclass
@@ -303,11 +304,11 @@ class AlertasPreditivos:
         await asyncio.sleep(0.001)
 
         return {
-            "execution_time": 1.2 + np.random.uniform(-0.5, 0.8),
-            "memory_usage": 65 + np.random.uniform(-10, 20),
-            "cpu_usage": 45 + np.random.uniform(-15, 25),
-            "network_latency": 2.5 + np.random.uniform(-1, 2),
-            "error_rate": 0.001 + np.random.uniform(-0.0005, 0.002),
+            "execution_time": 1.2 + secrets.SystemRandom().uniform(-0.5, 0.8),
+            "memory_usage": 65 + secrets.SystemRandom().uniform(-10, 20),
+            "cpu_usage": 45 + secrets.SystemRandom().uniform(-15, 25),
+            "network_latency": 2.5 + secrets.SystemRandom().uniform(-1, 2),
+            "error_rate": 0.001 + secrets.SystemRandom().uniform(-0.0005, 0.002),
         }
 
     async def _assess_connection_health(self) -> Dict:
@@ -318,11 +319,11 @@ class AlertasPreditivos:
         health = {}
 
         for exchange in exchanges:
-            stability = 0.9 + np.random.uniform(-0.2, 0.1)
+            stability = 0.9 + secrets.SystemRandom().uniform(-0.2, 0.1)
             health[exchange] = {
                 "stability_score": max(0.1, stability),
-                "latency": 10 + np.random.uniform(-5, 15),
-                "error_rate": 0.001 + np.random.uniform(0, 0.005),
+                "latency": 10 + secrets.SystemRandom().uniform(-5, 15),
+                "error_rate": 0.001 + secrets.SystemRandom().uniform(0, 0.005),
             }
 
         return health
@@ -332,10 +333,10 @@ class AlertasPreditivos:
         await asyncio.sleep(0.001)
 
         return {
-            "volatility": 25 + np.random.uniform(-10, 20),
-            "liquidity": 85 + np.random.uniform(-15, 10),
-            "sentiment": 0.6 + np.random.uniform(-0.3, 0.3),
-            "volume": 1000000 + np.random.uniform(-200000, 300000),
+            "volatility": 25 + secrets.SystemRandom().uniform(-10, 20),
+            "liquidity": 85 + secrets.SystemRandom().uniform(-15, 10),
+            "sentiment": 0.6 + secrets.SystemRandom().uniform(-0.3, 0.3),
+            "volume": 1000000 + secrets.SystemRandom().uniform(-200000, 300000),
         }
 
     async def _get_resource_usage(self) -> Dict:
@@ -343,10 +344,10 @@ class AlertasPreditivos:
         await asyncio.sleep(0.001)
 
         return {
-            "memory": 70 + np.random.uniform(-20, 25),
-            "disk": 45 + np.random.uniform(-15, 30),
-            "cpu": 55 + np.random.uniform(-25, 35),
-            "network": 30 + np.random.uniform(-10, 40),
+            "memory": 70 + secrets.SystemRandom().uniform(-20, 25),
+            "disk": 45 + secrets.SystemRandom().uniform(-15, 30),
+            "cpu": 55 + secrets.SystemRandom().uniform(-25, 35),
+            "network": 30 + secrets.SystemRandom().uniform(-10, 40),
         }
 
     async def _initialize_anomaly_detector(self):
