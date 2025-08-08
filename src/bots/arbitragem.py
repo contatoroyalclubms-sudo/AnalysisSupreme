@@ -241,7 +241,7 @@ class BotArbitragem(BotBase):
     async def _obter_funding_rate(self, symbol: str, exchange: str) -> Optional[float]:
         """Obtém funding rate atual"""
         import random
-        return random.uniform(-0.02, 0.02)
+        return random.uniform(-0.02, 0.02)  # nosec B311
     
     async def _executar_funding_arbitrage(self, symbol: str, funding_rate: float):
         """Executa arbitragem de funding rate"""
