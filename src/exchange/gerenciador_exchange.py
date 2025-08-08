@@ -11,7 +11,7 @@ from datetime import datetime
 
 from ..core.configuracao import Configuracao
 from .websocket_pool import WebSocketPool
-from ..cache.redis_cache import RedisCache
+from ..core.engine.cache_intelligence import CacheIntelligence
 from ..utils.circuit_breaker import ExchangeCircuitBreakers
 from ..utils.kpis import GerenciadorKPIs
 
@@ -26,7 +26,7 @@ class GerenciadorExchange:
         self.exchange_principal = None
         
         self.websocket_pool = WebSocketPool(max_connections_per_exchange=5)
-        self.cache = RedisCache(config.get_cache_config() if hasattr(config, 'get_cache_config') else {})
+        self.cache = CacheIntelligence(config.get_cache_config() if hasattr(config, 'get_cache_config') else {})
         self.circuit_breakers = ExchangeCircuitBreakers()
         self.kpi_manager = GerenciadorKPIs()
         

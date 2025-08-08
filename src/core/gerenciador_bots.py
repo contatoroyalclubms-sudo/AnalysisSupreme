@@ -17,6 +17,8 @@ from ..bots.mean_reversion import BotMeanReversion
 from ..bots.swing import BotSwing
 from ..observabilidade.monitor import Monitor
 from ..ia.motor_ia import MotorIA
+from .engine.sinfonia_suprema import SinfoniaSuprema, get_sinfonia_suprema
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -30,10 +32,16 @@ class GerenciadorBots:
         self.bots: Dict[str, BotBase] = {}
         self.tasks: Dict[str, asyncio.Task] = {}
         self._running = False
+        
+        self.sinfonia_suprema: Optional[SinfoniaSuprema] = None
     
     async def inicializar(self):
-        """Inicializa o gerenciador e todos os bots"""
-        logger.info("Inicializando gerenciador de bots")
+        """🚀 Inicializa CRYPTOBOT SUPREMO GLOBAL - Gerenciador de Bots"""
+        logger.info("🚀 Inicializando CRYPTOBOT SUPREMO GLOBAL - Gerenciador de Bots")
+        
+        logger.info("🎼 Inicializando Sinfonia Tecnológica Suprema...")
+        self.sinfonia_suprema = await get_sinfonia_suprema()
+        logger.info("✅ Sinfonia Tecnológica Suprema inicializada")
         
         bot_classes = {
             "arbitragem": BotArbitragem,
@@ -115,56 +123,84 @@ class GerenciadorBots:
                 await asyncio.sleep(60)
     
     async def _executar_bot_loop_otimizado(self, nome: str, bot: BotBase):
-        """Loop de execução otimizado de um bot"""
-        logger.info(f"Iniciando loop otimizado do bot {nome}")
-        
-        performance_config = {
-            'arbitragem': {'max_concurrent': 3, 'batch_size': 5},
-            'scalping': {'max_concurrent': 5, 'batch_size': 10},
-            'grid': {'max_concurrent': 2, 'batch_size': 3},
-            'momentum': {'max_concurrent': 2, 'batch_size': 3},
-            'mean_reversion': {'max_concurrent': 2, 'batch_size': 3},
-            'swing': {'max_concurrent': 1, 'batch_size': 2}
-        }
-        
-        config = performance_config.get(nome, {'max_concurrent': 2, 'batch_size': 3})
-        semaphore = asyncio.Semaphore(config['max_concurrent'])
+        """🎼 SINFONIA TECNOLÓGICA - Loop de execução ultra otimizado"""
+        logger.info(f"🎼 Iniciando Sinfonia Tecnológica para bot {nome}")
         
         while self._running:
             try:
-                if hasattr(bot, 'executar_casos_paralelos'):
-                    await bot.executar_casos_paralelos(semaphore, config['batch_size'])
+                start_time = time.time() * 1000
+                
+                if self.sinfonia_suprema:
+                    result = await self.sinfonia_suprema.execute_movimento(
+                        nome, 
+                        bot.executar,
+                        {}
+                    )
+                    logger.debug(f"⚡ {nome} executado via Sinfonia Suprema")
                 else:
-                    async with semaphore:
+                    if hasattr(bot, 'executar_casos_paralelos'):
+                        semaphore = asyncio.Semaphore(3)
+                        await bot.executar_casos_paralelos(semaphore, 5)
+                    else:
                         await bot.executar()
                 
-                intervalo = self._calcular_intervalo_dinamico(nome, bot)
+                execution_time = time.time() * 1000 - start_time
+                
+                intervalo = self._calcular_intervalo_sinfonia(nome, bot, execution_time)
                 await asyncio.sleep(intervalo)
                 
             except Exception as e:
-                logger.error(f"Erro no loop otimizado do bot {nome}: {e}")
-                await asyncio.sleep(30)
+                logger.error(f"❌ Erro na Sinfonia Tecnológica do bot {nome}: {e}")
+                await asyncio.sleep(15)  # Recovery mais rápido
     
-    def _calcular_intervalo_dinamico(self, nome: str, bot: BotBase) -> float:
-        """Calcula intervalo dinâmico baseado na performance do bot"""
+    def _calcular_intervalo_sinfonia(self, nome: str, bot: BotBase, execution_time: float) -> float:
+        """🎼 MOVIMENTO IV: Finale - Cálculo de Intervalo Sinfônico"""
         base_interval = bot.get_intervalo_execucao()
         
-        if hasattr(bot, 'kpi_manager'):
-            kpis = bot.kpi_manager.kpis.get(nome, {})
-            
-            if nome == 'arbitragem' and hasattr(kpis, 'latencia_ms'):
-                if kpis.latencia_ms < 30:
-                    return base_interval * 0.8
-                elif kpis.latencia_ms > 100:
-                    return base_interval * 1.5
-                    
-            elif nome == 'scalping' and hasattr(kpis, 'latencia_ultra'):
-                if kpis.latencia_ultra < 20:
-                    return base_interval * 0.7
-                elif kpis.latencia_ultra > 50:
-                    return base_interval * 2.0
+        movimento_intervals = {
+            'arbitragem': 0.5,    # Presto - Ultra rápido
+            'scalping': 0.7,      # Allegro - Muito rápido
+            'momentum': 0.8,      # Allegro - Rápido
+            'grid': 1.0,          # Andante - Moderado
+            'mean_reversion': 1.2, # Andante - Moderado
+            'swing': 1.5          # Largo - Lento e preciso
+        }
         
-        return base_interval
+        movimento_factor = movimento_intervals.get(nome, 1.0)
+        
+        if execution_time <= 15:  # Ultra performance
+            adjustment = 0.6
+        elif execution_time <= 50:  # Boa performance
+            adjustment = 0.8
+        elif execution_time <= 100:  # Performance aceitável
+            adjustment = 1.0
+        else:  # Performance ruim
+            adjustment = 1.5
+        
+        final_interval = base_interval * movimento_factor * adjustment
+        
+        min_intervals = {
+            'arbitragem': 0.01,   # 10ms mínimo
+            'scalping': 0.02,     # 20ms mínimo
+            'grid': 0.1,          # 100ms mínimo
+            'momentum': 0.05,     # 50ms mínimo
+            'mean_reversion': 0.2, # 200ms mínimo
+            'swing': 1.0          # 1s mínimo
+        }
+        
+        max_intervals = {
+            'arbitragem': 0.5,    # 500ms máximo
+            'scalping': 1.0,      # 1s máximo
+            'grid': 5.0,          # 5s máximo
+            'momentum': 3.0,      # 3s máximo
+            'mean_reversion': 10.0, # 10s máximo
+            'swing': 60.0         # 60s máximo
+        }
+        
+        min_interval = min_intervals.get(nome, 0.1)
+        max_interval = max_intervals.get(nome, 5.0)
+        
+        return max(min_interval, min(final_interval, max_interval))
     
     async def parar_bot(self, nome_bot: str):
         """Para um bot específico"""
@@ -250,13 +286,17 @@ class GerenciadorBots:
         return metricas
     
     async def finalizar(self):
-        """Finaliza o gerenciador e todos os bots"""
-        logger.info("Finalizando gerenciador de bots")
+        """🎼 FINALE - Finaliza o CRYPTOBOT SUPREMO GLOBAL"""
+        logger.info("🎼 Executando Finale da Sinfonia Tecnológica...")
         
         await self.parar_todos()
+        
+        if self.sinfonia_suprema:
+            await self.sinfonia_suprema.finale_graceful_shutdown()
+            logger.info("✅ Sinfonia Tecnológica Suprema finalizada")
         
         for bot in self.bots.values():
             await bot.finalizar()
         
         self.bots.clear()
-        logger.info("Gerenciador finalizado")
+        logger.info("🎼 Finale executado - CRYPTOBOT SUPREMO GLOBAL finalizado com glória!")

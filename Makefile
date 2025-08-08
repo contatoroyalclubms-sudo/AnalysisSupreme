@@ -216,3 +216,37 @@ performance-report:
 	@echo "📋 Gerando relatório de performance..."
 	python scripts/test_performance.py --test=full > logs/performance_latest.txt
 	@echo "Relatório salvo em logs/performance_latest.txt"
+
+# CRYPTOBOT SUPREMO GLOBAL commands
+test-cryptobot-supremo:
+	@echo "🚀 Testando CRYPTOBOT SUPREMO GLOBAL..."
+	python scripts/test_cryptobot_supremo.py
+
+test-ultra-fast:
+	@echo "⚡ Testando Ultra Fast Executor (15ms target)..."
+	python -c "import asyncio; import sys; sys.path.insert(0, 'src'); from src.core.engine.ultra_fast_executor import UltraFastExecutor; asyncio.run(UltraFastExecutor().initialize())"
+
+test-websocket-premium:
+	@echo "🌐 Testando WebSocket Manager Premium..."
+	python -c "import asyncio; import sys; sys.path.insert(0, 'src'); from src.core.engine.websocket_manager_premium import WebSocketManagerPremium; ws = WebSocketManagerPremium(); asyncio.run(ws.initialize_premium())"
+
+test-cache-intelligence:
+	@echo "🧠 Testando Cache Intelligence..."
+	python -c "import asyncio; import sys; sys.path.insert(0, 'src'); from src.core.engine.cache_intelligence import CacheIntelligence; cache = CacheIntelligence(); asyncio.run(cache.initialize())"
+
+test-sinfonia:
+	@echo "🎼 Testando Sinfonia Tecnológica..."
+	python -c "import asyncio; import sys; sys.path.insert(0, 'src'); from src.core.engine.sinfonia_suprema import get_sinfonia_suprema; asyncio.run(get_sinfonia_suprema())"
+
+sinfonia-performance-report:
+	@echo "🎼 Gerando relatório de performance da Sinfonia..."
+	python scripts/test_cryptobot_supremo.py > logs/sinfonia_performance.txt
+	@echo "Relatório salvo em logs/sinfonia_performance.txt"
+
+test-all-supremo:
+	@echo "🎯 Testando todos os componentes SUPREMO..."
+	@make test-ultra-fast
+	@make test-websocket-premium
+	@make test-cache-intelligence
+	@make test-sinfonia
+	@make test-cryptobot-supremo
