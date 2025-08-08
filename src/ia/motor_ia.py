@@ -169,7 +169,7 @@ class GeradorSinais:
         avg_loss = sum(losses) / 14
 
         if avg_loss == 0:
-            rsi = 100
+            rsi = 100.0
         else:
             rs = avg_gain / avg_loss
             rsi = 100 - (100 / (1 + rs))
@@ -360,7 +360,7 @@ class AutoTuner:
 
         parametros_base = self._parametros_padrao(estrategia)
 
-        melhor_fitness = 0
+        melhor_fitness: float = 0.0
         melhores_parametros = parametros_base.copy()
 
         for geracao in range(geracoes):
@@ -380,7 +380,7 @@ class AutoTuner:
         parametros_base = self._parametros_padrao(estrategia)
 
         iteracoes = 30
-        melhor_score = 0
+        melhor_score = 0.0
         melhores_parametros = parametros_base.copy()
 
         for i in range(iteracoes):
@@ -389,7 +389,7 @@ class AutoTuner:
             score = self._calcular_fitness(parametros_candidatos, historico)
 
             if score > melhor_score:
-                melhor_score = score
+                melhor_score = float(score)
                 melhores_parametros = parametros_candidatos.copy()
 
         return melhores_parametros
@@ -403,7 +403,7 @@ class AutoTuner:
         alpha = 0.1
 
         q_table: Dict[str, float] = {}
-        melhor_reward = 0
+        melhor_reward: float = 0.0
         melhores_parametros = parametros_base.copy()
 
         for episodio in range(episodios):
@@ -420,12 +420,12 @@ class AutoTuner:
             q_table[estado] += alpha * (reward - q_table[estado])
 
             if reward > melhor_reward:
-                melhor_reward = reward
+                melhor_reward = float(reward)
                 melhores_parametros = parametros_acao.copy()
 
         return melhores_parametros
 
-    def _parametros_padrao(self, estrategia: str) -> dict:
+    def _parametros_padrao(self, estrategia: str) -> Dict[str, Any]:
         """Retorna parâmetros padrão para cada estratégia"""
         parametros_map = {
             "arbitragem": {
@@ -455,7 +455,8 @@ class AutoTuner:
                 "hold_days": 5,
             },
         }
-        return parametros_map.get(estrategia, {})
+        result = parametros_map.get(estrategia, {})
+        return dict(result)
 
     def _mutar_parametros(self, parametros: dict) -> dict:
         """Aplica mutação nos parâmetros"""
@@ -810,15 +811,20 @@ class MotorIA:
 
             features = self._extrair_features(ohlcv_data)
 
-            predicao_preco = await self._prever_preco(features)
-            predicao_tendencia = await self._prever_tendencia(features)
-            predicao_volatilidade = await self._prever_volatilidade(features)
-
-            confianca = self._calcular_confianca(features, symbol)
+            if features is not None:
+                predicao_preco = await self._prever_preco(features)
+                predicao_tendencia = await self._prever_tendencia(features)
+                predicao_volatilidade = await self._prever_volatilidade(features)
+                confianca = self._calcular_confianca(features)
+            else:
+                predicao_preco = 0.0
+                predicao_tendencia = "neutral"
+                predicao_volatilidade = 0.0
+                confianca = 0.0
 
             analise = {
                 "predicao_preco_percent": predicao_preco,
-                "predicao_tendencia": predicao_tendencia,
+                "predicao_tendencia": str(predicao_tendencia),
                 "predicao_volatilidade": predicao_volatilidade,
                 "confianca": confianca,
                 "recomendacao": self._gerar_recomendacao(
@@ -891,17 +897,19 @@ class MotorIA:
         rsi = 100 - (100 / (1 + rs))
         return rsi
 
-    async def _prever_preco(self, features: np.ndarray) -> float:
+    async def _prever_preco(self, features: Optional[np.ndarray]) -> float:
         """Prevê mudança percentual do preço"""
         try:
+            if features is None:
+                return 0.0
             modelo = self.modelos.get("modelo_predicao_preco")
             if not modelo or not modelo["treinado"]:
                 return 0.0
 
             if modelo["scaler"]:
-                features_scaled = modelo["scaler"].transform(features)
+                features_scaled = modelo["scaler"].transform(features.reshape(1, -1))
             else:
-                features_scaled = features
+                features_scaled = features.reshape(1, -1)
 
             predicao = modelo["regressor"].predict(features_scaled)[0]
             return float(predicao)
@@ -910,17 +918,19 @@ class MotorIA:
             logger.error(f"Erro na predição de preço: {e}")
             return 0.0
 
-    async def _prever_tendencia(self, features: np.ndarray) -> str:
+    async def _prever_tendencia(self, features: Optional[np.ndarray]) -> str:
         """Prevê direção da tendência"""
         try:
+            if features is None:
+                return "lateral"
             modelo = self.modelos.get("modelo_classificacao_tendencia")
             if not modelo or not modelo["treinado"]:
                 return "lateral"
 
             if modelo["scaler"]:
-                features_scaled = modelo["scaler"].transform(features)
+                features_scaled = modelo["scaler"].transform(features.reshape(1, -1))
             else:
-                features_scaled = features
+                features_scaled = features.reshape(1, -1)
 
             predicao = modelo["classifier"].predict(features_scaled)[0]
 
@@ -931,17 +941,19 @@ class MotorIA:
             logger.error(f"Erro na predição de tendência: {e}")
             return "lateral"
 
-    async def _prever_volatilidade(self, features: np.ndarray) -> float:
+    async def _prever_volatilidade(self, features: Optional[np.ndarray]) -> float:
         """Prevê volatilidade"""
         try:
+            if features is None:
+                return 0.02
             modelo = self.modelos.get("modelo_volatilidade")
             if not modelo or not modelo["treinado"]:
                 return 0.02
 
             if modelo["scaler"]:
-                features_scaled = modelo["scaler"].transform(features)
+                features_scaled = modelo["scaler"].transform(features.reshape(1, -1))
             else:
-                features_scaled = features
+                features_scaled = features.reshape(1, -1)
 
             predicao = modelo["regressor"].predict(features_scaled)[0]
             return max(0.001, float(predicao))
@@ -950,7 +962,7 @@ class MotorIA:
             logger.error(f"Erro na predição de volatilidade: {e}")
             return 0.02
 
-    def _calcular_confianca(self, features: np.ndarray, symbol: str) -> float:
+    def _calcular_confianca(self, features: Optional[np.ndarray], symbol: str = "") -> float:
         """Calcula confiança da predição"""
         try:
             if features is None:

@@ -8,7 +8,7 @@ import asyncio
 import time
 import json
 import logging
-from typing import Dict, List, Optional, Any, Callable
+from typing import Dict, List, Optional, Any, Union, Callable
 from dataclasses import dataclass, field
 from collections import defaultdict, deque
 from datetime import datetime, timedelta
@@ -77,13 +77,13 @@ class SignalProcessorUltra:
         self, symbol: str, historical_data: List, current_data: Dict
     ) -> Optional[MarketSignal]:
         """Gera sinal supremo com IA"""
-        import random
+        import secrets
 
-        if random.random() > 0.8:  # 20% chance de sinal  # nosec B311
+        if secrets.SystemRandom().random() > 0.8:  # 20% chance de sinal  # nosec B311
             return MarketSignal(
                 symbol=symbol,
-                action=random.choice(["BUY", "SELL"]),  # nosec B311
-                confidence=random.uniform(0.7, 0.95),  # nosec B311
+                action=secrets.SystemRandom().choice(["BUY", "SELL"]),  # nosec B311
+                confidence=secrets.SystemRandom().uniform(0.7, 0.95),  # nosec B311
                 price=float(current_data.get("c", 45000)),
                 quantity=0.001,
                 stop_loss=0.0,
@@ -201,22 +201,24 @@ class CryptoBotOrchestrator:
 
     def __init__(self, config: BotConfig):
         self.config = config
-        self.active_bots = {}
-        self.market_data_cache = {}
-        self.performance_metrics = defaultdict(deque)
+        self.active_bots: Dict[str, Any] = {}
+        self.market_data_cache: Dict[str, Any] = {}
+        self.performance_metrics: Dict[str, Any] = defaultdict(deque)
         self.risk_manager = RiskManagerSupreme()
         self.signal_processor = SignalProcessorUltra()
         self.execution_engine = ExecutionEngineQuantum()
 
-        self.session_pool = {}
-        self.ws_connections = {}
+        self.session_pool: Dict[str, Any] = {}
+        self.ws_connections: Dict[str, Any] = {}
 
         self.total_pnl = 0.0
         self.daily_trades = 0
         self.success_rate = 0.0
         self.is_running = False
 
-    async def initialize_supreme_system(self):
+    async def initialize_supreme_system(
+        self, configuracao: Optional[Dict[str, Any]] = None
+    ):
         """🚀 Inicialização do Sistema Supremo"""
         logger.info("🚀 Inicializando CryptoBot Supremo Global...")
 
