@@ -68,7 +68,9 @@ class Configuracao:
                 with open(self.config_path, "r", encoding="utf-8") as f:
                     self._config = json.load(f)
             else:
-                logger.warning(f"Arquivo de configuração não encontrado: {self.config_path}")
+                logger.warning(
+                    f"Arquivo de configuração não encontrado: {self.config_path}"
+                )
                 self._config = self._configuracao_padrao()
 
             self._aplicar_env_vars()
@@ -80,12 +82,21 @@ class Configuracao:
     def _configuracao_padrao(self) -> Dict[str, Any]:
         """Retorna configuração padrão"""
         return {
-            "geral": {"paper_mode": True, "max_concurrent_bots": 6, "risk_limit_percent": 2.0},
-            "exchanges": {"binance": {"api_key": "", "api_secret": "", "sandbox": True}},
+            "geral": {
+                "paper_mode": True,
+                "max_concurrent_bots": 6,
+                "risk_limit_percent": 2.0,
+            },
+            "exchanges": {
+                "binance": {"api_key": "", "api_secret": "", "sandbox": True}
+            },
             "bots": {
                 "arbitragem": {
                     "ativo": True,
-                    "parametros": {"min_profit_percent": 0.5, "max_position_size": 1000},
+                    "parametros": {
+                        "min_profit_percent": 0.5,
+                        "max_position_size": 1000,
+                    },
                     "casos_uso": {
                         1: {"tipo": "simples", "exchanges": ["binance", "coinbase"]},
                         2: {"tipo": "triangular", "exchange": "binance"},

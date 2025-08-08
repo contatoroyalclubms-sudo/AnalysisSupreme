@@ -78,7 +78,9 @@ class TestExchangeCoverage:
 
         for order_type in order_types:
             for side in sides:
-                order = await gerenciador.create_order("BTC/USDT", order_type, side, 0.01, 50000)
+                order = await gerenciador.create_order(
+                    "BTC/USDT", order_type, side, 0.01, 50000
+                )
                 assert order is not None
                 assert order["symbol"] == "BTC/USDT"
                 assert order["side"] == side
@@ -139,12 +141,23 @@ class TestExchangeCoverage:
             mock_exchange = Mock()
             mock_exchange.load_markets = AsyncMock()
             mock_exchange.fetch_ticker = AsyncMock(
-                return_value={"symbol": "BTC/USDT", "last": 50000, "bid": 49999, "ask": 50001, "volume": 1000}
+                return_value={
+                    "symbol": "BTC/USDT",
+                    "last": 50000,
+                    "bid": 49999,
+                    "ask": 50001,
+                    "volume": 1000,
+                }
             )
             mock_exchange.fetch_order_book = AsyncMock(
-                return_value={"bids": [[49999, 1.0], [49998, 2.0]], "asks": [[50001, 1.0], [50002, 2.0]]}
+                return_value={
+                    "bids": [[49999, 1.0], [49998, 2.0]],
+                    "asks": [[50001, 1.0], [50002, 2.0]],
+                }
             )
-            mock_exchange.fetch_ohlcv = AsyncMock(return_value=[[1640995200000, 50000, 50100, 49900, 50050, 1000]])
+            mock_exchange.fetch_ohlcv = AsyncMock(
+                return_value=[[1640995200000, 50000, 50100, 49900, 50050, 1000]]
+            )
             mock_exchange.create_order = AsyncMock(
                 return_value={
                     "id": "test_order_123",
@@ -182,7 +195,9 @@ class TestExchangeCoverage:
 
         exchanges = ["binance", "bybit", "okx"]
         for exchange in exchanges:
-            mock_config.get_exchange_config.return_value = Mock(nome=exchange, api_key="test", api_secret="test", sandbox=True)
+            mock_config.get_exchange_config.return_value = Mock(
+                nome=exchange, api_key="test", api_secret="test", sandbox=True
+            )
             gerenciador = GerenciadorExchange(mock_config)
             assert gerenciador is not None
 

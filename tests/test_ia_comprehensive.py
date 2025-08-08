@@ -7,7 +7,13 @@ from unittest.mock import Mock, AsyncMock, patch
 import numpy as np
 from datetime import datetime
 
-from src.ia.motor_ia import MotorIA, GeradorSinais, AutoTuner, SentimentAnalyzer, AprendizadoContinuo
+from src.ia.motor_ia import (
+    MotorIA,
+    GeradorSinais,
+    AutoTuner,
+    SentimentAnalyzer,
+    AprendizadoContinuo,
+)
 from src.core.configuracao import Configuracao
 from src.models.trade import Trade
 
@@ -18,7 +24,9 @@ class TestGeradorSinaisAbrangente:
     @pytest.fixture
     def mock_config(self):
         config = Mock(spec=Configuracao)
-        config.get_ia_config.return_value = Mock(modelo_path="models/", indicadores_ativos=True, ml_habilitado=True)
+        config.get_ia_config.return_value = Mock(
+            modelo_path="models/", indicadores_ativos=True, ml_habilitado=True
+        )
         return config
 
     def test_inicializacao_gerador_sinais(self, mock_config):
@@ -88,7 +96,10 @@ class TestGeradorSinaisAbrangente:
 
         dados_market = {
             "symbol": "BTC/USDT",
-            "ohlcv": [[i, 50000 + i * 10, 50100 + i * 10, 49900 + i * 10, 50000 + i * 10, 100] for i in range(20)],
+            "ohlcv": [
+                [i, 50000 + i * 10, 50100 + i * 10, 49900 + i * 10, 50000 + i * 10, 100]
+                for i in range(20)
+            ],
             "orderbook": {"bids": [[49999, 1.0]], "asks": [[50001, 1.0]]},
             "ticker": {"last": 50000, "volume": 1000},
         }
@@ -108,7 +119,9 @@ class TestAutoTunerAbrangente:
     @pytest.fixture
     def mock_config(self):
         config = Mock(spec=Configuracao)
-        config.get_ia_config.return_value = Mock(otimizacao_ativa=True, algoritmo_genetico=True, otimizacao_bayesiana=True)
+        config.get_ia_config.return_value = Mock(
+            otimizacao_ativa=True, algoritmo_genetico=True, otimizacao_bayesiana=True
+        )
         return config
 
     def test_inicializacao_auto_tuner(self, mock_config):
@@ -242,7 +255,9 @@ class TestSentimentAnalyzerAbrangente:
     @pytest.fixture
     def mock_config(self):
         config = Mock(spec=Configuracao)
-        config.get_ia_config.return_value = Mock(sentiment_ativo=True, fontes_sentiment=["twitter", "reddit", "news"])
+        config.get_ia_config.return_value = Mock(
+            sentiment_ativo=True, fontes_sentiment=["twitter", "reddit", "news"]
+        )
         return config
 
     def test_inicializacao_sentiment_analyzer(self, mock_config):
@@ -254,7 +269,10 @@ class TestSentimentAnalyzerAbrangente:
     @patch("requests.get")
     def test_analisar_sentimento_mock(self, mock_get, mock_config):
         """Testa análise de sentimento com mock"""
-        mock_get.return_value.json.return_value = {"sentiment": "positive", "score": 0.7}
+        mock_get.return_value.json.return_value = {
+            "sentiment": "positive",
+            "score": 0.7,
+        }
         mock_get.return_value.status_code = 200
 
         analyzer = SentimentAnalyzer()
@@ -268,9 +286,17 @@ class TestSentimentAnalyzerAbrangente:
         """Testa processamento de texto para sentimento"""
         analyzer = SentimentAnalyzer()
 
-        textos_positivos = ["Bitcoin is going to the moon!", "Great bullish momentum", "Excellent buying opportunity"]
+        textos_positivos = [
+            "Bitcoin is going to the moon!",
+            "Great bullish momentum",
+            "Excellent buying opportunity",
+        ]
 
-        textos_negativos = ["Bitcoin crash incoming", "Bearish market conditions", "Sell everything now"]
+        textos_negativos = [
+            "Bitcoin crash incoming",
+            "Bearish market conditions",
+            "Sell everything now",
+        ]
 
         score_positivo = analyzer._processar_textos(textos_positivos)
         score_negativo = analyzer._processar_textos(textos_negativos)
@@ -283,7 +309,11 @@ class TestSentimentAnalyzerAbrangente:
         """Testa cache de sentimento"""
         analyzer = SentimentAnalyzer()
 
-        analyzer.cache_sentiment["BTC"] = {"score": 0.5, "timestamp": datetime.now(), "fonte": "twitter"}
+        analyzer.cache_sentiment["BTC"] = {
+            "score": 0.5,
+            "timestamp": datetime.now(),
+            "fonte": "twitter",
+        }
 
         score = analyzer._obter_cache_sentiment("BTC")
 
@@ -296,7 +326,9 @@ class TestAprendizadoContinuoAbrangente:
     @pytest.fixture
     def mock_config(self):
         config = Mock(spec=Configuracao)
-        config.get_ia_config.return_value = Mock(rl_ativo=True, modelo_path="models/rl/", update_frequency=100)
+        config.get_ia_config.return_value = Mock(
+            rl_ativo=True, modelo_path="models/rl/", update_frequency=100
+        )
         return config
 
     def test_inicializacao_aprendizado_continuo(self, mock_config):
@@ -417,8 +449,18 @@ class TestAprendizadoContinuoAbrangente:
         aprendizado = AprendizadoContinuo()
 
         experiencias = [
-            {"state": [0.1, 0.2, 0.3], "action": 1, "reward": 0.5, "next_state": [0.2, 0.3, 0.4]},
-            {"state": [0.2, 0.3, 0.4], "action": 0, "reward": -0.2, "next_state": [0.1, 0.2, 0.3]},
+            {
+                "state": [0.1, 0.2, 0.3],
+                "action": 1,
+                "reward": 0.5,
+                "next_state": [0.2, 0.3, 0.4],
+            },
+            {
+                "state": [0.2, 0.3, 0.4],
+                "action": 0,
+                "reward": -0.2,
+                "next_state": [0.1, 0.2, 0.3],
+            },
         ]
 
         resultado = aprendizado._atualizar_politica(experiencias)
@@ -434,7 +476,11 @@ class TestMotorIAIntegracao:
     def mock_config(self):
         config = Mock(spec=Configuracao)
         config.get_ia_config.return_value = Mock(
-            modelo_path="models/", ia_habilitada=True, auto_tuning=True, sentiment_analysis=True, aprendizado_continuo=True
+            modelo_path="models/",
+            ia_habilitada=True,
+            auto_tuning=True,
+            sentiment_analysis=True,
+            aprendizado_continuo=True,
         )
         return config
 
@@ -463,7 +509,9 @@ class TestMotorIAIntegracao:
                 "ticker": {"last": 50000},
             }
 
-            with patch.object(motor.sentiment_analyzer, "analisar_sentimento", return_value=0.3):
+            with patch.object(
+                motor.sentiment_analyzer, "analisar_sentimento", return_value=0.3
+            ):
                 resultado = await motor.analisar_mercado(dados_market)
 
                 assert resultado is not None

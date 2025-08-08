@@ -7,7 +7,14 @@ from unittest.mock import Mock, AsyncMock, patch
 import numpy as np
 from datetime import datetime
 
-from src.ia.motor_ia import MotorIA, GeradorSinais, AutoTuner, SentimentAnalyzer, AprendizadoContinuo, Sinal
+from src.ia.motor_ia import (
+    MotorIA,
+    GeradorSinais,
+    AutoTuner,
+    SentimentAnalyzer,
+    AprendizadoContinuo,
+    Sinal,
+)
 
 
 class TestGeradorSinais:
@@ -178,7 +185,10 @@ class TestSentimentAnalyzer:
         analyzer = SentimentAnalyzer()
 
         noticias_mock = [
-            {"title": "Bitcoin adoption increases globally", "content": "Positive news..."},
+            {
+                "title": "Bitcoin adoption increases globally",
+                "content": "Positive news...",
+            },
             {"title": "Regulatory concerns for crypto", "content": "Negative news..."},
             {"title": "New crypto innovations", "content": "Positive developments..."},
         ]
@@ -234,7 +244,12 @@ class TestAprendizadoContinuo:
             "symbol": "BTC/USDT",
             "action": "buy",
             "price": 50000,
-            "market_conditions": {"volatility": 0.02, "volume": 1000, "rsi": 65, "macd": 0.5},
+            "market_conditions": {
+                "volatility": 0.02,
+                "volume": 1000,
+                "rsi": 65,
+                "macd": 0.5,
+            },
         }
 
         features = aprendizado._extrair_features(trade)
@@ -245,7 +260,11 @@ class TestAprendizadoContinuo:
         """Testa cálculo de reward"""
         aprendizado = AprendizadoContinuo()
 
-        trade_resultado = {"pnl": 100, "duration": 300, "max_drawdown": 0.01}  # 5 minutos
+        trade_resultado = {
+            "pnl": 100,
+            "duration": 300,
+            "max_drawdown": 0.01,
+        }  # 5 minutos
 
         reward = aprendizado._calcular_reward(trade_resultado)
         assert isinstance(reward, float)
@@ -275,7 +294,11 @@ class TestMotorIA:
     @pytest.fixture
     def mock_config(self):
         config = Mock()
-        config.get_config_ia.return_value = {"modelo_path": "models/", "training_enabled": True, "retrain_interval": 24}
+        config.get_config_ia.return_value = {
+            "modelo_path": "models/",
+            "training_enabled": True,
+            "retrain_interval": 24,
+        }
         return config
 
     @pytest.mark.asyncio
@@ -322,7 +345,10 @@ class TestMotorIA:
 
         estrategia = "momentum"
         historico = {
-            "trades": [{"pnl": 100, "parametros": {"stop_loss": 0.02}}, {"pnl": -50, "parametros": {"stop_loss": 0.01}}]
+            "trades": [
+                {"pnl": 100, "parametros": {"stop_loss": 0.02}},
+                {"pnl": -50, "parametros": {"stop_loss": 0.01}},
+            ]
         }
 
         parametros_otimizados = await motor.otimizar_estrategia(estrategia, historico)
@@ -335,7 +361,9 @@ class TestMotorIA:
         motor = MotorIA(mock_config)
         await motor.inicializar()
 
-        logs_trades = [{"symbol": "BTC/USDT", "action": "buy", "result": "win", "pnl": 100}]
+        logs_trades = [
+            {"symbol": "BTC/USDT", "action": "buy", "result": "win", "pnl": 100}
+        ]
 
         metricas = {"win_rate": 0.6, "avg_pnl": 50}
 

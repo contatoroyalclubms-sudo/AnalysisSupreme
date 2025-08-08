@@ -9,6 +9,7 @@ import time
 import json
 import hashlib
 import secrets
+import os
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
 from datetime import datetime, timedelta
@@ -46,7 +47,9 @@ class MFASystem:
         await self._setup_biometric_system()
         await self._initialize_totp_system()
 
-    async def authenticate_user(self, user_id: str, credentials: Dict) -> AuthenticationResult:
+    async def authenticate_user(
+        self, user_id: str, credentials: Dict
+    ) -> AuthenticationResult:
         """Autentica usuário com múltiplos fatores"""
         auth_methods = []
         risk_score = await self._calculate_initial_risk(user_id, credentials)
@@ -58,8 +61,8 @@ class MFASystem:
                 user_id=user_id,
                 auth_methods_used=[],
                 risk_score=1.0,
-                session_token="",
-                expires_at="",
+                session_token=None,
+                expires_at=None,
                 additional_verification_required=False,
             )
 
@@ -77,7 +80,9 @@ class MFASystem:
                     return self._failed_auth_result(user_id, auth_methods, risk_score)
 
             elif method == "biometric":
-                biometric_ok = await self._verify_biometric(user_id, credentials.get("biometric_data"))
+                biometric_ok = await self._verify_biometric(
+                    user_id, credentials.get("biometric_data")
+                )
                 if biometric_ok:
                     auth_methods.append("biometric")
                     risk_score *= 0.2
@@ -97,15 +102,17 @@ class MFASystem:
             additional_verification_required=risk_score > 0.3,
         )
 
-    def _failed_auth_result(self, user_id: str, auth_methods: List[str], risk_score: float) -> AuthenticationResult:
+    def _failed_auth_result(
+        self, user_id: str, auth_methods: List[str], risk_score: float
+    ) -> AuthenticationResult:
         """Retorna resultado de autenticação falhada"""
         return AuthenticationResult(
             success=False,
             user_id=user_id,
             auth_methods_used=auth_methods,
             risk_score=risk_score,
-            session_token="",
-            expires_at="",
+            session_token=None,
+            expires_at=None,
             additional_verification_required=False,
         )
 
@@ -114,7 +121,9 @@ class MFASystem:
         await asyncio.sleep(0.002)
         return 0.3
 
-    async def _determine_required_methods(self, user_id: str, risk_score: float) -> List[str]:
+    async def _determine_required_methods(
+        self, user_id: str, risk_score: float
+    ) -> List[str]:
         """Determina métodos de autenticação necessários"""
         await asyncio.sleep(0.001)
         return ["totp"] if risk_score < 0.5 else ["totp", "biometric"]
@@ -122,7 +131,7 @@ class MFASystem:
     async def _verify_password(self, user_id: str, password: str) -> bool:
         """Verifica senha do usuário"""
         await asyncio.sleep(0.001)
-        return password == "test_password"
+        return password == os.getenv("TEST_PASSWORD", "secure_test_password")
 
     async def _verify_totp(self, user_id: str, totp_code: str) -> bool:
         """Verifica código TOTP"""
@@ -134,7 +143,9 @@ class MFASystem:
         await asyncio.sleep(0.003)
         return biometric_data == "valid_biometric"
 
-    async def _create_session(self, user_id: str, auth_methods: List[str], risk_score: float) -> str:
+    async def _create_session(
+        self, user_id: str, auth_methods: List[str], risk_score: float
+    ) -> str:
         """Cria sessão de usuário"""
         await asyncio.sleep(0.001)
         return secrets.token_urlsafe(32)

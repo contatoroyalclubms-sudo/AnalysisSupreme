@@ -12,7 +12,14 @@ from src.core.configuracao import Configuracao
 from src.core.gerenciador_bots import GerenciadorBots
 from src.exchange.gerenciador_exchange import GerenciadorExchange
 from src.observabilidade.monitor import Monitor
-from src.ia.motor_ia import MotorIA, GeradorSinais, AutoTuner, SentimentAnalyzer, AprendizadoContinuo, Sinal
+from src.ia.motor_ia import (
+    MotorIA,
+    GeradorSinais,
+    AutoTuner,
+    SentimentAnalyzer,
+    AprendizadoContinuo,
+    Sinal,
+)
 from src.utils.kpis import GerenciadorKPIs
 from src.utils.metricas import CalculadorMetricas
 from src.utils.logger import configurar_logger
@@ -43,7 +50,9 @@ class TestCoverageBoost:
             "2": {"tipo": "teste2"},
             "3": {"tipo": "teste3"},
         }
-        config.get_exchange_config.return_value = Mock(nome="binance", api_key="test", api_secret="test", sandbox=True)
+        config.get_exchange_config.return_value = Mock(
+            nome="binance", api_key="test", api_secret="test", sandbox=True
+        )
         config.ia_config = Mock()
         config.ia_config.modelo_path = "/tmp/test_models"
         config.ia_config.habilitado = True
@@ -61,7 +70,9 @@ class TestCoverageBoost:
     @pytest.fixture
     def mock_motor_ia(self):
         motor = Mock(spec=MotorIA)
-        motor.analisar_mercado = AsyncMock(return_value={"sinal": "comprar", "confidence": 0.8, "preco_entrada": 50000})
+        motor.analisar_mercado = AsyncMock(
+            return_value={"sinal": "comprar", "confidence": 0.8, "preco_entrada": 50000}
+        )
         return motor
 
     def test_configuracao_comprehensive(self):
@@ -81,11 +92,20 @@ class TestCoverageBoost:
         for exchange in ["binance", "bybit", "okx"]:
             config.get_exchange_config(exchange)
 
-        for bot in ["arbitragem", "grid", "momentum", "scalping", "mean_reversion", "swing"]:
+        for bot in [
+            "arbitragem",
+            "grid",
+            "momentum",
+            "scalping",
+            "mean_reversion",
+            "swing",
+        ]:
             config.get_bot_config(bot)
 
     @pytest.mark.asyncio
-    async def test_gerenciador_bots_comprehensive(self, mock_config, mock_monitor, mock_motor_ia):
+    async def test_gerenciador_bots_comprehensive(
+        self, mock_config, mock_monitor, mock_motor_ia
+    ):
         """Testa gerenciador de bots de forma abrangente"""
         gerenciador = GerenciadorBots(mock_config, mock_monitor, mock_motor_ia)
 
@@ -174,7 +194,11 @@ class TestCoverageBoost:
                 ]
             )
 
-        dados_market = {"ohlcv": ohlcv_data, "volume": 60000, "timestamp": 1640995320000}
+        dados_market = {
+            "ohlcv": ohlcv_data,
+            "volume": 60000,
+            "timestamp": 1640995320000,
+        }
 
         sinal = gerador.analisar_mercado(dados_market)
         assert isinstance(sinal, Sinal)
@@ -182,7 +206,11 @@ class TestCoverageBoost:
         assert 0.0 <= sinal.confidence <= 1.0
 
         tuner = AutoTuner()
-        historico = {"precos": [50000, 50100, 49900, 50200], "volumes": [1000, 1100, 1200, 1300], "timestamps": [1, 2, 3, 4]}
+        historico = {
+            "precos": [50000, 50100, 49900, 50200],
+            "volumes": [1000, 1100, 1200, 1300],
+            "timestamps": [1, 2, 3, 4],
+        }
 
         parametros = tuner.otimizar_parametros("arbitragem", historico)
         assert isinstance(parametros, dict)
@@ -193,7 +221,10 @@ class TestCoverageBoost:
         assert -1.0 <= sentiment <= 1.0
 
         aprendizado = AprendizadoContinuo()
-        logs_trades = [{"pnl": 100, "win": True, "symbol": "BTC/USDT"}, {"pnl": -50, "win": False, "symbol": "ETH/USDT"}]
+        logs_trades = [
+            {"pnl": 100, "win": True, "symbol": "BTC/USDT"},
+            {"pnl": -50, "win": False, "symbol": "ETH/USDT"},
+        ]
         metricas = {"win_rate": 0.6, "sharpe_ratio": 1.2}
 
         aprendizado.treinar_modelo(logs_trades, metricas)
@@ -218,8 +249,13 @@ class TestCoverageBoost:
         dados_treinamento = {"features": [[1, 2, 3], [4, 5, 6]], "targets": [0, 1]}
         await motor.treinar_modelos(dados_treinamento)
 
-        historico_trades = [{"pnl": 100, "symbol": "BTC/USDT"}, {"pnl": -50, "symbol": "ETH/USDT"}]
-        otimizacoes = await motor.otimizar_parametros_bot("arbitragem", historico_trades)
+        historico_trades = [
+            {"pnl": 100, "symbol": "BTC/USDT"},
+            {"pnl": -50, "symbol": "ETH/USDT"},
+        ]
+        otimizacoes = await motor.otimizar_parametros_bot(
+            "arbitragem", historico_trades
+        )
         assert isinstance(otimizacoes, dict)
 
         await motor.finalizar()
@@ -250,13 +286,45 @@ class TestCoverageBoost:
         calc = CalculadorMetricas()
 
         trades_positivos = [
-            Trade("1", "arbitragem", "BTC/USDT", "buy", 0.01, 50000, datetime.now(), 1, pnl=100),
-            Trade("2", "grid", "ETH/USDT", "sell", 0.1, 3000, datetime.now(), 2, pnl=50),
+            Trade(
+                "1",
+                "arbitragem",
+                "BTC/USDT",
+                "buy",
+                0.01,
+                50000,
+                datetime.now(),
+                1,
+                pnl=100,
+            ),
+            Trade(
+                "2", "grid", "ETH/USDT", "sell", 0.1, 3000, datetime.now(), 2, pnl=50
+            ),
         ]
 
         trades_negativos = [
-            Trade("3", "momentum", "BTC/USDT", "sell", 0.01, 49000, datetime.now(), 1, pnl=-100),
-            Trade("4", "scalping", "ETH/USDT", "buy", 0.1, 3100, datetime.now(), 3, pnl=-50),
+            Trade(
+                "3",
+                "momentum",
+                "BTC/USDT",
+                "sell",
+                0.01,
+                49000,
+                datetime.now(),
+                1,
+                pnl=-100,
+            ),
+            Trade(
+                "4",
+                "scalping",
+                "ETH/USDT",
+                "buy",
+                0.1,
+                3100,
+                datetime.now(),
+                3,
+                pnl=-50,
+            ),
         ]
 
         trades_mistos = trades_positivos + trades_negativos
@@ -280,7 +348,9 @@ class TestCoverageBoost:
         assert isinstance(drawdown, (int, float))
 
     @pytest.mark.asyncio
-    async def test_all_bots_comprehensive(self, mock_config, mock_monitor, mock_motor_ia):
+    async def test_all_bots_comprehensive(
+        self, mock_config, mock_monitor, mock_motor_ia
+    ):
         """Testa todos os bots de forma abrangente"""
         bots = [
             BotArbitragem(mock_config, mock_monitor, mock_motor_ia),
@@ -379,7 +449,9 @@ class TestCoverageBoost:
         assert sinal_comprar.confidence == 0.8
         assert isinstance(sinal_comprar.timestamp, datetime)
 
-        sinal_vender = Sinal("vender", 0.9, preco_entrada=50000, stop_loss=49000, take_profit=51000)
+        sinal_vender = Sinal(
+            "vender", 0.9, preco_entrada=50000, stop_loss=49000, take_profit=51000
+        )
         assert sinal_vender.acao == "vender"
         assert sinal_vender.confidence == 0.9
         assert sinal_vender.preco_entrada == 50000

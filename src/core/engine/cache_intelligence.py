@@ -93,7 +93,9 @@ class CacheIntelligence:
 
         logger.info("✅ Cache Intelligence inicializado")
 
-    async def get_intelligent(self, key: str, data_type: str = "general") -> Optional[Any]:
+    async def get_intelligent(
+        self, key: str, data_type: str = "general"
+    ) -> Optional[Any]:
         """Obtém dados com inteligência multi-layer"""
         start_time = time.time() * 1000
 
@@ -130,7 +132,9 @@ class CacheIntelligence:
 
         data_size = self._calculate_size(data)
 
-        compressed_data, compression_ratio = await self._compress_if_needed(data, data_size)
+        compressed_data, compression_ratio = await self._compress_if_needed(
+            data, data_size
+        )
 
         best_layer = await self._determine_best_layer(key, data_type)
 
@@ -163,7 +167,9 @@ class CacheIntelligence:
         if len(access_history) < 2:
             return "L2"
 
-        recent_accesses = [a for a in access_history if (time.time() * 1000 - a) < 60000]  # Último minuto
+        recent_accesses = [
+            a for a in access_history if (time.time() * 1000 - a) < 60000
+        ]  # Último minuto
         access_frequency = len(recent_accesses)
 
         if access_frequency > 10:
@@ -187,7 +193,9 @@ class CacheIntelligence:
                 del current_cache[key]
                 target_cache[key] = entry
 
-                logger.debug(f"⬆️  Promovido {key} de {current_layer} para {target_layer}")
+                logger.debug(
+                    f"⬆️  Promovido {key} de {current_layer} para {target_layer}"
+                )
 
     async def _compress_if_needed(self, data: Any, size: int) -> Tuple[Any, float]:
         """Comprime dados se necessário"""
@@ -260,7 +268,9 @@ class CacheIntelligence:
         ]:
             for key, entry in cache_layer.items():
                 removal_score = (
-                    entry.access_frequency * 0.4 + entry.prediction_score * 0.3 + (1.0 - entry.age_ms / entry.ttl_ms) * 0.3
+                    entry.access_frequency * 0.4
+                    + entry.prediction_score * 0.3
+                    + (1.0 - entry.age_ms / entry.ttl_ms) * 0.3
                 )
 
                 all_entries.append((removal_score, key, layer_name, entry))
@@ -278,7 +288,9 @@ class CacheIntelligence:
             await self._remove_entry(key, cache_layer)
             freed_memory += entry.size_bytes
 
-        logger.info(f"✅ Limpeza concluída: {freed_memory / 1024 / 1024:.1f}MB liberados")
+        logger.info(
+            f"✅ Limpeza concluída: {freed_memory / 1024 / 1024:.1f}MB liberados"
+        )
 
     async def _remove_entry(self, key: str, cache_layer: Dict):
         """Remove entrada do cache"""
@@ -320,11 +332,15 @@ class CacheIntelligence:
             if hit_rate > 80:
                 for data_type in self.ttl_config:
                     current_ttl = self.ttl_config[data_type][layer_name.lower()]
-                    self.ttl_config[data_type][layer_name.lower()] = min(current_ttl * 1.1, current_ttl * 2)
+                    self.ttl_config[data_type][layer_name.lower()] = min(
+                        current_ttl * 1.1, current_ttl * 2
+                    )
             elif hit_rate < 30:
                 for data_type in self.ttl_config:
                     current_ttl = self.ttl_config[data_type][layer_name.lower()]
-                    self.ttl_config[data_type][layer_name.lower()] = max(current_ttl * 0.9, current_ttl * 0.5)
+                    self.ttl_config[data_type][layer_name.lower()] = max(
+                        current_ttl * 0.9, current_ttl * 0.5
+                    )
 
     async def _cleanup_expired(self):
         """Limpa entradas expiradas"""
@@ -375,7 +391,9 @@ class CacheIntelligence:
             try:
                 await asyncio.sleep(30)  # A cada 30s
 
-                memory_usage_pct = (self.current_memory_bytes / self.max_memory_bytes) * 100
+                memory_usage_pct = (
+                    self.current_memory_bytes / self.max_memory_bytes
+                ) * 100
 
                 if memory_usage_pct > 80:
                     logger.warning(f"⚠️  Uso de memória alto: {memory_usage_pct:.1f}%")
@@ -386,7 +404,12 @@ class CacheIntelligence:
 
     def get_intelligence_stats(self) -> Dict[str, Any]:
         """Estatísticas do cache inteligente"""
-        total_entries = len(self.l1_cache) + len(self.l2_cache) + len(self.l3_cache) + len(self.l4_cache)
+        total_entries = (
+            len(self.l1_cache)
+            + len(self.l2_cache)
+            + len(self.l3_cache)
+            + len(self.l4_cache)
+        )
 
         memory_usage_pct = (self.current_memory_bytes / self.max_memory_bytes) * 100
 

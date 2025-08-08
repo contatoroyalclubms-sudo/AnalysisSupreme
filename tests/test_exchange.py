@@ -39,12 +39,20 @@ class TestGerenciadorExchange:
             mock_exchange = Mock()
             mock_exchange.load_markets = AsyncMock()
             mock_exchange.fetch_ticker = AsyncMock(
-                return_value={"symbol": "BTC/USDT", "last": 50000, "bid": 49999, "ask": 50001}
+                return_value={
+                    "symbol": "BTC/USDT",
+                    "last": 50000,
+                    "bid": 49999,
+                    "ask": 50001,
+                }
             )
             mock_binance.return_value = mock_exchange
 
             await gerenciador.inicializar()
-            assert "binance" in gerenciador.exchanges or gerenciador.exchange_principal is not None
+            assert (
+                "binance" in gerenciador.exchanges
+                or gerenciador.exchange_principal is not None
+            )
 
     @pytest.mark.asyncio
     async def test_get_ticker(self, mock_config):
@@ -83,7 +91,9 @@ class TestGerenciadorExchange:
         gerenciador = GerenciadorExchange(mock_config)
         await gerenciador.inicializar()
 
-        resultado = await gerenciador.create_order("BTC/USDT", "limit", "buy", 0.01, 50000)
+        resultado = await gerenciador.create_order(
+            "BTC/USDT", "limit", "buy", 0.01, 50000
+        )
 
         assert resultado is not None
         assert resultado["status"] == "closed"
@@ -98,7 +108,9 @@ class TestGerenciadorExchange:
 
         ticker = {"bid": 49999, "ask": 50001}
 
-        spread = ((ticker["ask"] - ticker["bid"]) / ((ticker["ask"] + ticker["bid"]) / 2)) * 100
+        spread = (
+            (ticker["ask"] - ticker["bid"]) / ((ticker["ask"] + ticker["bid"]) / 2)
+        ) * 100
         expected_spread = ((50001 - 49999) / 50000) * 100  # ~0.004%
 
         assert abs(spread - expected_spread) < 0.001
@@ -133,7 +145,9 @@ class TestGerenciadorExchange:
     async def test_exchange_simulada(self, mock_config):
         """Testa exchange simulada"""
         mock_config.paper_mode = True
-        mock_config.get_exchange_config.return_value = None  # Força uso da exchange simulada
+        mock_config.get_exchange_config.return_value = (
+            None  # Força uso da exchange simulada
+        )
 
         gerenciador = GerenciadorExchange(mock_config)
         await gerenciador.inicializar()

@@ -112,7 +112,9 @@ class GerenciadorBots:
 
         tasks = []
         for nome, bot in self.bots.items():
-            task = asyncio.create_task(self._executar_bot_loop_otimizado(nome, bot), name=f"bot_{nome}")
+            task = asyncio.create_task(
+                self._executar_bot_loop_otimizado(nome, bot), name=f"bot_{nome}"
+            )
             self.tasks[nome] = task
             tasks.append(task)
 
@@ -147,7 +149,9 @@ class GerenciadorBots:
                 start_time = time.time() * 1000
 
                 if self.sinfonia_suprema:
-                    result = await self.sinfonia_suprema.execute_movimento(nome, bot.executar, {})
+                    result = await self.sinfonia_suprema.execute_movimento(
+                        nome, bot.executar, {}
+                    )
                     logger.debug(f"⚡ {nome} executado via Sinfonia Suprema")
                 else:
                     if hasattr(bot, "executar_casos_paralelos"):
@@ -165,7 +169,9 @@ class GerenciadorBots:
                 logger.error(f"❌ Erro na Sinfonia Tecnológica do bot {nome}: {e}")
                 await asyncio.sleep(15)  # Recovery mais rápido
 
-    def _calcular_intervalo_sinfonia(self, nome: str, bot: BotBase, execution_time: float) -> float:
+    def _calcular_intervalo_sinfonia(
+        self, nome: str, bot: BotBase, execution_time: float
+    ) -> float:
         """🎼 MOVIMENTO IV: Finale - Cálculo de Intervalo Sinfônico"""
         base_interval = bot.get_intervalo_execucao()
 
@@ -314,4 +320,6 @@ class GerenciadorBots:
             await bot.finalizar()
 
         self.bots.clear()
-        logger.info("🎼 Finale executado - CRYPTOBOT SUPREMO GLOBAL finalizado com glória!")
+        logger.info(
+            "🎼 Finale executado - CRYPTOBOT SUPREMO GLOBAL finalizado com glória!"
+        )

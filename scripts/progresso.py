@@ -90,12 +90,20 @@ def gerar_progresso_json():
         "pendencias": pendencias,
         "proximo_passo": proximo_passo,
         "status": {
-            "bots_implementados": len([b for b in bots if os.path.exists(f"src/bots/{b}.py")]),
+            "bots_implementados": len(
+                [b for b in bots if os.path.exists(f"src/bots/{b}.py")]
+            ),
             "total_bots": 6,
             "scripts_criados": len(
                 [
                     s
-                    for s in ["setup_caso.py", "executar.py", "validar.py", "relatorio_geral.py", "auditoria.py"]
+                    for s in [
+                        "setup_caso.py",
+                        "executar.py",
+                        "validar.py",
+                        "relatorio_geral.py",
+                        "auditoria.py",
+                    ]
                     if os.path.exists(f"scripts/{s}")
                 ]
             ),

@@ -73,7 +73,13 @@ class TestMonitor:
         monitor = Monitor(mock_config)
         await monitor.inicializar()
 
-        alerta = {"tipo": "latencia_alta", "bot": "arbitragem", "valor": 150, "threshold": 50, "severidade": "high"}
+        alerta = {
+            "tipo": "latencia_alta",
+            "bot": "arbitragem",
+            "valor": 150,
+            "threshold": 50,
+            "severidade": "high",
+        }
 
         await monitor.gerar_alerta(alerta)
         assert len(monitor.alertas) == 1
@@ -107,9 +113,19 @@ class TestMonitor:
         monitor = Monitor(mock_config)
         await monitor.inicializar()
 
-        monitor.trades.append({"bot": "momentum", "pnl": 150, "symbol": "BTC/USDT", "timestamp": datetime.now()})
+        monitor.trades.append(
+            {
+                "bot": "momentum",
+                "pnl": 150,
+                "symbol": "BTC/USDT",
+                "timestamp": datetime.now(),
+            }
+        )
 
-        monitor.metricas["momentum"] = {"breakout_precisao": [0.65, 0.70, 0.68], "stop_eficiencia": [0.80, 0.85, 0.82]}
+        monitor.metricas["momentum"] = {
+            "breakout_precisao": [0.65, 0.70, 0.68],
+            "stop_eficiencia": [0.80, 0.85, 0.82],
+        }
 
         relatorio = await monitor.gerar_relatorio_bot("momentum")
         assert relatorio is not None
@@ -133,7 +149,12 @@ class TestMonitor:
         )
 
         monitor.alertas.append(
-            {"tipo": "performance_baixa", "bot": "momentum", "severidade": "medium", "timestamp": datetime.now()}
+            {
+                "tipo": "performance_baixa",
+                "bot": "momentum",
+                "severidade": "medium",
+                "timestamp": datetime.now(),
+            }
         )
 
         relatorio = await monitor.gerar_relatorio_completo()
@@ -150,7 +171,9 @@ class TestMonitor:
         monitor = Monitor(mock_config)
         await monitor.inicializar()
 
-        monitor.metricas["arbitragem"] = {"latencia_ms": [150, 160, 155]}  # Acima do threshold de 50ms
+        monitor.metricas["arbitragem"] = {
+            "latencia_ms": [150, 160, 155]
+        }  # Acima do threshold de 50ms
 
         await monitor.verificar_alertas_sistema()
 
@@ -163,7 +186,10 @@ class TestMonitor:
         monitor = Monitor(mock_config)
         await monitor.inicializar()
 
-        monitor.metricas["scalping"] = {"throughput_ops": [120, 115, 125], "latencia_ms": [25, 30, 28]}
+        monitor.metricas["scalping"] = {
+            "throughput_ops": [120, 115, 125],
+            "latencia_ms": [25, 30, 28],
+        }
 
         metricas_prometheus = await monitor.exportar_metricas_prometheus()
         assert metricas_prometheus is not None

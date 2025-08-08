@@ -37,14 +37,19 @@ async def executar_caso(caso: str):
     print(f"📊 Bot: {bot_name}")
     print(f"📊 Caso de uso: {caso_uso}")
     print(f"📊 Par: {par}")
-    print(f"📊 Modo: {'Paper Trading' if caso_config.get('paper_mode', True) else 'Live Trading'}")
+    print(
+        f"📊 Modo: {'Paper Trading' if caso_config.get('paper_mode', True) else 'Live Trading'}"
+    )
     print(f"📊 Objetivo: {caso_config.get('objetivo', 'N/A')}")
     print(f"📊 Latência alvo: {caso_config.get('latencia_alvo', '120ms')}")
 
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        handlers=[logging.FileHandler(f"logs/execucao_{caso}.log"), logging.StreamHandler()],
+        handlers=[
+            logging.FileHandler(f"logs/execucao_{caso}.log"),
+            logging.StreamHandler(),
+        ],
     )
 
     try:
@@ -94,7 +99,9 @@ async def executar_caso(caso: str):
 
 def main():
     parser = argparse.ArgumentParser(description="Executar caso de uso específico")
-    parser.add_argument("--caso", required=True, help="Nome do caso (ex: arbitragem_alta_vol_btcusdt)")
+    parser.add_argument(
+        "--caso", required=True, help="Nome do caso (ex: arbitragem_alta_vol_btcusdt)"
+    )
 
     args = parser.parse_args()
 

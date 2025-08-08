@@ -79,7 +79,9 @@ class WebSocketManagerPremium:
         context.check_hostname = False
         context.verify_mode = ssl.CERT_NONE
 
-        context.set_ciphers("ECDHE+AESGCM:ECDHE+CHACHA20:DHE+AESGCM:DHE+CHACHA20:!aNULL:!MD5:!DSS")
+        context.set_ciphers(
+            "ECDHE+AESGCM:ECDHE+CHACHA20:DHE+AESGCM:DHE+CHACHA20:!aNULL:!MD5:!DSS"
+        )
         context.options |= ssl.OP_NO_SSLv2
         context.options |= ssl.OP_NO_SSLv3
         context.options |= ssl.OP_NO_TLSv1
@@ -107,8 +109,14 @@ class WebSocketManagerPremium:
                 "wss://stream.binance.com:443/ws/btcusdt@depth5@100ms",
                 "wss://stream.binance.com:443/ws/btcusdt@trade",
             ],
-            "bybit": ["wss://stream.bybit.com/v5/public/spot", "wss://stream-testnet.bybit.com/v5/public/spot"],
-            "okx": ["wss://ws.okx.com:8443/ws/v5/public", "wss://wsaws.okx.com:8443/ws/v5/public"],
+            "bybit": [
+                "wss://stream.bybit.com/v5/public/spot",
+                "wss://stream-testnet.bybit.com/v5/public/spot",
+            ],
+            "okx": [
+                "wss://ws.okx.com:8443/ws/v5/public",
+                "wss://wsaws.okx.com:8443/ws/v5/public",
+            ],
         }
 
         for exchange, urls in premium_urls.items():
@@ -116,7 +124,9 @@ class WebSocketManagerPremium:
 
         asyncio.create_task(self._health_monitor())
 
-        logger.info(f"✅ WebSocket Manager Premium inicializado com {self._total_connections()} conexões")
+        logger.info(
+            f"✅ WebSocket Manager Premium inicializado com {self._total_connections()} conexões"
+        )
 
     async def _create_premium_connections(self, exchange: str, urls: List[str]):
         """Cria conexões premium para uma exchange"""
@@ -133,7 +143,10 @@ class WebSocketManagerPremium:
                     self.connections[exchange].append(connection)
                     self.connection_weights[exchange][i] = 1.0
 
-                    asyncio.create_task(self._premium_message_loop(connection), name=f"premium_loop_{exchange}_{i}")
+                    asyncio.create_task(
+                        self._premium_message_loop(connection),
+                        name=f"premium_loop_{exchange}_{i}",
+                    )
 
                     logger.info(f"✅ Conexão premium criada: {exchange} #{i}")
 
@@ -143,7 +156,11 @@ class WebSocketManagerPremium:
     async def _connect_premium(self, connection: PremiumConnection):
         """Conecta com otimizações premium"""
         try:
-            extra_headers = {"User-Agent": "AnalysisSupreme-Premium/1.0", "Connection": "Upgrade", "Upgrade": "websocket"}
+            extra_headers = {
+                "User-Agent": "AnalysisSupreme-Premium/1.0",
+                "Connection": "Upgrade",
+                "Upgrade": "websocket",
+            }
 
             connection.websocket = await websockets.connect(
                 connection.url,
@@ -168,7 +185,9 @@ class WebSocketManagerPremium:
         """Loop premium de mensagens com latência mínima"""
         while connection.connected:
             try:
-                message = await asyncio.wait_for(connection.websocket.recv(), timeout=0.1)  # 100ms timeout
+                message = await asyncio.wait_for(
+                    connection.websocket.recv(), timeout=0.1
+                )  # 100ms timeout
 
                 receive_time = time.time() * 1000
 
@@ -195,7 +214,9 @@ class WebSocketManagerPremium:
 
                 await asyncio.sleep(0.001)  # 1ms recovery
 
-    async def _process_premium_message(self, connection: PremiumConnection, message: str, receive_time: float):
+    async def _process_premium_message(
+        self, connection: PremiumConnection, message: str, receive_time: float
+    ):
         """Processamento premium de mensagem"""
         try:
             data = json.loads(message)
@@ -209,7 +230,11 @@ class WebSocketManagerPremium:
                     connection.latency_samples = connection.latency_samples[-100:]
 
             cache_key = self._generate_cache_key(connection.exchange, data)
-            self.ultra_cache[cache_key] = {"data": data, "timestamp": receive_time, "latency": connection.avg_latency_ms}
+            self.ultra_cache[cache_key] = {
+                "data": data,
+                "timestamp": receive_time,
+                "latency": connection.avg_latency_ms,
+            }
 
             if connection.exchange in self.message_handlers:
                 for handler in self.message_handlers[connection.exchange]:
@@ -269,7 +294,9 @@ class WebSocketManagerPremium:
                             self.connection_weights[exchange][i] = health / 100
                         else:
                             self.connection_weights[exchange][i] = 0.1
-                            logger.warning(f"⚠️  Conexão {exchange} #{i} com baixa saúde: {health:.1f}")
+                            logger.warning(
+                                f"⚠️  Conexão {exchange} #{i} com baixa saúde: {health:.1f}"
+                            )
 
                         total_latency += conn.avg_latency_ms
 
@@ -291,12 +318,18 @@ class WebSocketManagerPremium:
         self.message_handlers[exchange].append(handler)
         logger.info(f"✅ Handler premium registrado para {exchange}")
 
-    async def get_ultra_fast_data(self, exchange: str, data_type: str) -> Optional[Dict]:
+    async def get_ultra_fast_data(
+        self, exchange: str, data_type: str
+    ) -> Optional[Dict]:
         """Obtém dados com latência ultra baixa"""
         current_time = time.time() * 1000
 
         for key, cached in self.ultra_cache.items():
-            if key.startswith(f"{exchange}_") and data_type in key and current_time - cached["timestamp"] <= self.cache_ttl_ms:
+            if (
+                key.startswith(f"{exchange}_")
+                and data_type in key
+                and current_time - cached["timestamp"] <= self.cache_ttl_ms
+            ):
                 return cached["data"]
 
         return None
@@ -340,7 +373,11 @@ class WebSocketManagerPremium:
         return {
             "total_connections": total_connections,
             "healthy_connections": healthy_connections,
-            "health_rate_pct": (healthy_connections / total_connections * 100) if total_connections > 0 else 0,
+            "health_rate_pct": (
+                (healthy_connections / total_connections * 100)
+                if total_connections > 0
+                else 0
+            ),
             "avg_latency_ms": round(avg_latency, 2),
             "total_messages": self.total_messages,
             "total_reconnections": self.total_reconnections,

@@ -46,7 +46,11 @@ async def main():
 
             circuit_states = stats["circuit_breakers"]
             for exchange, state in circuit_states.items():
-                status_emoji = "🟢" if state["state"] == "closed" else "🔴" if state["state"] == "open" else "🟡"
+                status_emoji = (
+                    "🟢"
+                    if state["state"] == "closed"
+                    else "🔴" if state["state"] == "open" else "🟡"
+                )
                 print(f"{status_emoji} {exchange}: {state['state']}")
 
             await asyncio.sleep(5)

@@ -50,7 +50,9 @@ class CalculadorMetricas:
 
         recovery_factor = total_pnl / abs(max_drawdown) if max_drawdown != 0 else 0
 
-        expectancy = (win_rate * avg_winning_trade) + ((1 - win_rate) * avg_losing_trade)
+        expectancy = (win_rate * avg_winning_trade) + (
+            (1 - win_rate) * avg_losing_trade
+        )
 
         return {
             "total_trades": total_trades,
@@ -78,7 +80,9 @@ class CalculadorMetricas:
             "periodo_analise": {
                 "inicio": min(t.timestamp for t in trades),
                 "fim": max(t.timestamp for t in trades),
-                "duracao_dias": (max(t.timestamp for t in trades) - min(t.timestamp for t in trades)).days,
+                "duracao_dias": (
+                    max(t.timestamp for t in trades) - min(t.timestamp for t in trades)
+                ).days,
             },
         }
 
@@ -152,7 +156,9 @@ class CalculadorMetricas:
 
         return max_drawdown, max_drawdown_percent
 
-    def _calcular_sharpe_ratio(self, trades: List[Trade], risk_free_rate: float = 0.02) -> float:
+    def _calcular_sharpe_ratio(
+        self, trades: List[Trade], risk_free_rate: float = 0.02
+    ) -> float:
         """Calcula Sharpe ratio"""
         if len(trades) < 2:
             return 0.0
@@ -169,7 +175,9 @@ class CalculadorMetricas:
 
         return sharpe * np.sqrt(365)
 
-    def _calcular_sortino_ratio(self, trades: List[Trade], risk_free_rate: float = 0.02) -> float:
+    def _calcular_sortino_ratio(
+        self, trades: List[Trade], risk_free_rate: float = 0.02
+    ) -> float:
         """Calcula Sortino ratio"""
         if len(trades) < 2:
             return 0.0
@@ -191,13 +199,17 @@ class CalculadorMetricas:
 
         return sortino * np.sqrt(365)
 
-    def _calcular_calmar_ratio(self, trades: List[Trade], max_drawdown_percent: float) -> float:
+    def _calcular_calmar_ratio(
+        self, trades: List[Trade], max_drawdown_percent: float
+    ) -> float:
         """Calcula Calmar ratio"""
         if not trades or max_drawdown_percent == 0:
             return 0.0
 
         total_pnl = sum(t.pnl for t in trades)
-        periodo_dias = (max(t.timestamp for t in trades) - min(t.timestamp for t in trades)).days
+        periodo_dias = (
+            max(t.timestamp for t in trades) - min(t.timestamp for t in trades)
+        ).days
 
         if periodo_dias == 0:
             return 0.0
@@ -206,7 +218,9 @@ class CalculadorMetricas:
 
         return retorno_anualizado / max_drawdown_percent
 
-    def calcular_metricas_periodo(self, trades: List[Trade], periodo_dias: int) -> Dict[str, Any]:
+    def calcular_metricas_periodo(
+        self, trades: List[Trade], periodo_dias: int
+    ) -> Dict[str, Any]:
         """Calcula métricas para um período específico"""
         if not trades:
             return self._metricas_vazias()
@@ -216,7 +230,9 @@ class CalculadorMetricas:
 
         return self.calcular_metricas_finais(trades_periodo)
 
-    def calcular_metricas_por_symbol(self, trades: List[Trade]) -> Dict[str, Dict[str, Any]]:
+    def calcular_metricas_por_symbol(
+        self, trades: List[Trade]
+    ) -> Dict[str, Dict[str, Any]]:
         """Calcula métricas agrupadas por símbolo"""
         if not trades:
             return {}
@@ -233,7 +249,9 @@ class CalculadorMetricas:
 
         return metricas_por_symbol
 
-    def calcular_correlacao_bots(self, trades_por_bot: Dict[str, List[Trade]]) -> Dict[str, Dict[str, float]]:
+    def calcular_correlacao_bots(
+        self, trades_por_bot: Dict[str, List[Trade]]
+    ) -> Dict[str, Dict[str, float]]:
         """Calcula correlação entre performance dos bots"""
         if len(trades_por_bot) < 2:
             return {}
@@ -262,7 +280,9 @@ class CalculadorMetricas:
                 if i == j:
                     correlacoes[bot1][bot2] = 1.0
                 else:
-                    dias_comuns = set(bot_returns[bot1].keys()) & set(bot_returns[bot2].keys())
+                    dias_comuns = set(bot_returns[bot1].keys()) & set(
+                        bot_returns[bot2].keys()
+                    )
 
                     if len(dias_comuns) < 2:
                         correlacoes[bot1][bot2] = 0.0
@@ -271,7 +291,9 @@ class CalculadorMetricas:
                         returns2 = [bot_returns[bot2][dia] for dia in dias_comuns]
 
                         correlacao = np.corrcoef(returns1, returns2)[0, 1]
-                        correlacoes[bot1][bot2] = correlacao if not np.isnan(correlacao) else 0.0
+                        correlacoes[bot1][bot2] = (
+                            correlacao if not np.isnan(correlacao) else 0.0
+                        )
 
         return correlacoes
 
@@ -285,7 +307,11 @@ class CalculadorMetricas:
         win_rate = winning_trades / total_trades if total_trades > 0 else 0.0
         pnl_total = sum(t.pnl for t in trades)
 
-        return {"total_trades": total_trades, "win_rate": win_rate, "pnl_total": pnl_total}
+        return {
+            "total_trades": total_trades,
+            "win_rate": win_rate,
+            "pnl_total": pnl_total,
+        }
 
     def calcular_sharpe_ratio(self, returns: List[float]) -> float:
         """Calcula Sharpe ratio simplificado"""

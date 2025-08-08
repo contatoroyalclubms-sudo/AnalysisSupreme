@@ -100,7 +100,9 @@ class TestGerenciadorExchange:
     @pytest.fixture
     def mock_config(self):
         config = Mock(spec=Configuracao)
-        config.get_exchange_config.return_value = Mock(api_key="test_key", api_secret="test_secret", sandbox=True)
+        config.get_exchange_config.return_value = Mock(
+            api_key="test_key", api_secret="test_secret", sandbox=True
+        )
         return config
 
     def test_inicializacao(self, mock_config):

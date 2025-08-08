@@ -25,14 +25,22 @@ class TestBotCoverage:
         config.paper_mode = True
         config.get_bot_config.return_value = Mock()
         config.get_bot_config.return_value.ativo = True
-        config.get_bot_config.return_value.parametros = {"spread_min": 0.1, "volume_min": 1000}
+        config.get_bot_config.return_value.parametros = {
+            "spread_min": 0.1,
+            "volume_min": 1000,
+        }
         config.get_bot_config.return_value.casos_uso = {
             1: {"tipo": "alta_volatilidade", "spread_min": 0.2},
             2: {"tipo": "baixa_volatilidade", "spread_min": 0.1},
             3: {"tipo": "lateral", "spread_min": 0.15},
         }
-        config.get_exchange_config.return_value = Mock(nome="binance", api_key="test", api_secret="test", sandbox=True)
-        config.get_cache_config.return_value = {"l1_max_size_mb": 512, "redis_url": "redis://localhost:6379"}
+        config.get_exchange_config.return_value = Mock(
+            nome="binance", api_key="test", api_secret="test", sandbox=True
+        )
+        config.get_cache_config.return_value = {
+            "l1_max_size_mb": 512,
+            "redis_url": "redis://localhost:6379",
+        }
         return config
 
     @pytest.fixture
@@ -46,11 +54,15 @@ class TestBotCoverage:
     @pytest.fixture
     def mock_motor_ia(self):
         motor = Mock()
-        motor.analisar_mercado = AsyncMock(return_value={"sinal": "comprar", "confidence": 0.8, "preco_entrada": 50000})
+        motor.analisar_mercado = AsyncMock(
+            return_value={"sinal": "comprar", "confidence": 0.8, "preco_entrada": 50000}
+        )
         return motor
 
     @pytest.mark.asyncio
-    async def test_arbitragem_comprehensive(self, mock_config, mock_monitor, mock_motor_ia):
+    async def test_arbitragem_comprehensive(
+        self, mock_config, mock_monitor, mock_motor_ia
+    ):
         """Testa bot de arbitragem de forma abrangente"""
         bot = BotArbitragem(mock_config, mock_monitor, mock_motor_ia)
 
@@ -98,14 +110,18 @@ class TestBotCoverage:
         assert bot.get_intervalo_execucao() > 0
 
         with patch.object(bot.exchange_manager, "get_ohlcv") as mock_ohlcv:
-            mock_ohlcv.return_value = [[1640995200000, 50000, 50100, 49900, 50050, 1000]]
+            mock_ohlcv.return_value = [
+                [1640995200000, 50000, 50100, 49900, 50050, 1000]
+            ]
             analise = await bot.analisar_mercado("BTC/USDT")
             assert isinstance(analise, dict)
 
         await bot.finalizar()
 
     @pytest.mark.asyncio
-    async def test_momentum_comprehensive(self, mock_config, mock_monitor, mock_motor_ia):
+    async def test_momentum_comprehensive(
+        self, mock_config, mock_monitor, mock_motor_ia
+    ):
         """Testa bot de momentum de forma abrangente"""
         bot = BotMomentum(mock_config, mock_monitor, mock_motor_ia)
 
@@ -117,7 +133,16 @@ class TestBotCoverage:
         ohlcv_data = []
         for i in range(50):
             price = 50000 + (i * 10)
-            ohlcv_data.append([1640995200000 + i * 60000, price, price + 100, price - 50, price + 50, 1000])
+            ohlcv_data.append(
+                [
+                    1640995200000 + i * 60000,
+                    price,
+                    price + 100,
+                    price - 50,
+                    price + 50,
+                    1000,
+                ]
+            )
 
         analise_tecnica = bot._analisar_tecnico(ohlcv_data)
         assert isinstance(analise_tecnica, dict)
@@ -127,7 +152,9 @@ class TestBotCoverage:
         await bot.finalizar()
 
     @pytest.mark.asyncio
-    async def test_scalping_comprehensive(self, mock_config, mock_monitor, mock_motor_ia):
+    async def test_scalping_comprehensive(
+        self, mock_config, mock_monitor, mock_motor_ia
+    ):
         """Testa bot de scalping de forma abrangente"""
         bot = BotScalping(mock_config, mock_monitor, mock_motor_ia)
 
@@ -145,7 +172,9 @@ class TestBotCoverage:
         await bot.finalizar()
 
     @pytest.mark.asyncio
-    async def test_mean_reversion_comprehensive(self, mock_config, mock_monitor, mock_motor_ia):
+    async def test_mean_reversion_comprehensive(
+        self, mock_config, mock_monitor, mock_motor_ia
+    ):
         """Testa bot de mean reversion de forma abrangente"""
         bot = BotMeanReversion(mock_config, mock_monitor, mock_motor_ia)
 
@@ -155,7 +184,10 @@ class TestBotCoverage:
             await bot.executar_caso_uso(caso_uso)
 
         with patch.object(bot.exchange_manager, "get_orderbook") as mock_orderbook:
-            mock_orderbook.return_value = {"bids": [[49999, 1.0], [49998, 2.0]], "asks": [[50001, 1.0], [50002, 2.0]]}
+            mock_orderbook.return_value = {
+                "bids": [[49999, 1.0], [49998, 2.0]],
+                "asks": [[50001, 1.0], [50002, 2.0]],
+            }
             analise = await bot.analisar_mercado("BTC/USDT")
             assert "orderbook" in analise
 
@@ -176,7 +208,16 @@ class TestBotCoverage:
         ohlcv_data = []
         for i in range(100):
             price = 50000 + (i * 5)
-            ohlcv_data.append([1640995200000 + i * 3600000, price, price + 200, price - 100, price + 100, 1000])  # Hourly data
+            ohlcv_data.append(
+                [
+                    1640995200000 + i * 3600000,
+                    price,
+                    price + 200,
+                    price - 100,
+                    price + 100,
+                    1000,
+                ]
+            )  # Hourly data
 
         analise_tecnica = bot._analisar_tecnico(ohlcv_data)
         assert isinstance(analise_tecnica, dict)
@@ -185,7 +226,9 @@ class TestBotCoverage:
         await bot.finalizar()
 
     @pytest.mark.asyncio
-    async def test_all_bots_error_handling(self, mock_config, mock_monitor, mock_motor_ia):
+    async def test_all_bots_error_handling(
+        self, mock_config, mock_monitor, mock_motor_ia
+    ):
         """Testa tratamento de erros em todos os bots"""
         bots = [
             BotArbitragem(mock_config, mock_monitor, mock_motor_ia),
@@ -211,7 +254,9 @@ class TestBotCoverage:
 
             await bot.finalizar()
 
-    def test_bot_configuration_edge_cases(self, mock_config, mock_monitor, mock_motor_ia):
+    def test_bot_configuration_edge_cases(
+        self, mock_config, mock_monitor, mock_motor_ia
+    ):
         """Testa casos extremos de configuração dos bots"""
         mock_config.get_bot_config.return_value = None
 
@@ -228,7 +273,9 @@ class TestBotCoverage:
         assert params == {}
 
     @pytest.mark.asyncio
-    async def test_bot_technical_analysis_edge_cases(self, mock_config, mock_monitor, mock_motor_ia):
+    async def test_bot_technical_analysis_edge_cases(
+        self, mock_config, mock_monitor, mock_motor_ia
+    ):
         """Testa casos extremos da análise técnica"""
         bot = BotArbitragem(mock_config, mock_monitor, mock_motor_ia)
         await bot.inicializar()

@@ -63,7 +63,9 @@ class BotGrid(BotBase):
         preco_max = preco_atual * (1 + range_percent)
 
         grid_id = f"grid_fixo_{symbol}_{datetime.now().strftime('%H%M%S')}"
-        grid = await self._criar_grid(grid_id, symbol, preco_min, preco_max, grid_size, "fixo")
+        grid = await self._criar_grid(
+            grid_id, symbol, preco_min, preco_max, grid_size, "fixo"
+        )
 
         if grid:
             self.grids_ativas[grid_id] = grid
@@ -91,7 +93,9 @@ class BotGrid(BotBase):
         preco_max = preco_atual * (1 + range_percent)
 
         grid_id = f"grid_dinamico_{symbol}_{datetime.now().strftime('%H%M%S')}"
-        grid = await self._criar_grid(grid_id, symbol, preco_min, preco_max, grid_size, "dinamico")
+        grid = await self._criar_grid(
+            grid_id, symbol, preco_min, preco_max, grid_size, "dinamico"
+        )
 
         if grid:
             self.grids_ativas[grid_id] = grid
@@ -114,7 +118,9 @@ class BotGrid(BotBase):
         stop_loss_price = preco_atual * (1 - stop_percent)
 
         grid_id = f"grid_stop_{symbol}_{datetime.now().strftime('%H%M%S')}"
-        grid = await self._criar_grid(grid_id, symbol, stop_loss_price, preco_atual * 1.05, grid_size, "stop_loss")
+        grid = await self._criar_grid(
+            grid_id, symbol, stop_loss_price, preco_atual * 1.05, grid_size, "stop_loss"
+        )
 
         if grid:
             grid["stop_loss"] = stop_loss_price
@@ -122,7 +128,13 @@ class BotGrid(BotBase):
             await self._executar_grid(grid_id)
 
     async def _criar_grid(
-        self, grid_id: str, symbol: str, preco_min: float, preco_max: float, grid_size: int, tipo: str
+        self,
+        grid_id: str,
+        symbol: str,
+        preco_min: float,
+        preco_max: float,
+        grid_size: int,
+        tipo: str,
     ) -> Optional[Dict]:
         """Cria estrutura do grid"""
         try:
@@ -146,7 +158,9 @@ class BotGrid(BotBase):
             }
 
             self.logger.info(
-                f"Grid criado: {grid_id} - {symbol} " f"Range: {preco_min:.4f} - {preco_max:.4f} " f"Níveis: {grid_size}"
+                f"Grid criado: {grid_id} - {symbol} "
+                f"Range: {preco_min:.4f} - {preco_max:.4f} "
+                f"Níveis: {grid_size}"
             )
 
             return grid
@@ -176,7 +190,11 @@ class BotGrid(BotBase):
         for nivel in grid["niveis"]:
             if nivel < preco_atual and nivel not in grid["ordens_buy"]:
                 trade = await self.executar_trade(
-                    symbol, "buy", grid["amount_per_level"], nivel, caso_uso=self._get_caso_uso_from_tipo(grid["tipo"])
+                    symbol,
+                    "buy",
+                    grid["amount_per_level"],
+                    nivel,
+                    caso_uso=self._get_caso_uso_from_tipo(grid["tipo"]),
                 )
                 if trade:
                     grid["ordens_buy"][nivel] = trade.id
@@ -184,7 +202,11 @@ class BotGrid(BotBase):
         for nivel in grid["niveis"]:
             if nivel > preco_atual and nivel not in grid["ordens_sell"]:
                 trade = await self.executar_trade(
-                    symbol, "sell", grid["amount_per_level"], nivel, caso_uso=self._get_caso_uso_from_tipo(grid["tipo"])
+                    symbol,
+                    "sell",
+                    grid["amount_per_level"],
+                    nivel,
+                    caso_uso=self._get_caso_uso_from_tipo(grid["tipo"]),
                 )
                 if trade:
                     grid["ordens_sell"][nivel] = trade.id
@@ -207,12 +229,16 @@ class BotGrid(BotBase):
 
         if random.random() < 0.1:  # 10% chance de execução  # nosec B311
             if grid["ordens_buy"]:
-                nivel_executado = random.choice(list(grid["ordens_buy"].keys()))  # nosec B311
+                nivel_executado = random.choice(
+                    list(grid["ordens_buy"].keys())
+                )  # nosec B311
                 del grid["ordens_buy"][nivel_executado]
                 self.logger.info(f"Ordem buy executada no nível {nivel_executado}")
 
             if grid["ordens_sell"]:
-                nivel_executado = random.choice(list(grid["ordens_sell"].keys()))  # nosec B311
+                nivel_executado = random.choice(
+                    list(grid["ordens_sell"].keys())
+                )  # nosec B311
                 del grid["ordens_sell"][nivel_executado]
                 self.logger.info(f"Ordem sell executada no nível {nivel_executado}")
 
@@ -224,7 +250,10 @@ class BotGrid(BotBase):
                 return 0.05  # Volatilidade padrão
 
             closes = [candle[4] for candle in ohlcv]
-            returns = [(closes[i] - closes[i - 1]) / closes[i - 1] for i in range(1, len(closes))]
+            returns = [
+                (closes[i] - closes[i - 1]) / closes[i - 1]
+                for i in range(1, len(closes))
+            ]
 
             mean_return = sum(returns) / len(returns)
             variance = sum((r - mean_return) ** 2 for r in returns) / len(returns)
@@ -255,7 +284,9 @@ class BotGrid(BotBase):
 
         del self.grids_ativas[grid_id]
 
-    async def executar_casos_paralelos(self, semaphore: asyncio.Semaphore, batch_size: int):
+    async def executar_casos_paralelos(
+        self, semaphore: asyncio.Semaphore, batch_size: int
+    ):
         """Executa casos de uso em paralelo com semáforo"""
         async with semaphore:
             tasks = []

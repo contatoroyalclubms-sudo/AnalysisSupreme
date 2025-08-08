@@ -63,7 +63,9 @@ class BenchmarkCompetitivo:
 
         comparison = {}
         for competitor, targets in self.competitors.items():
-            comparison[competitor] = await self._calculate_competitive_advantage(our_performance, targets, competitor)
+            comparison[competitor] = await self._calculate_competitive_advantage(
+                our_performance, targets, competitor
+            )
 
         world_ranking = await self._calculate_world_ranking(comparison)
         competitive_summary = await self._generate_competitive_summary(comparison)
@@ -118,19 +120,43 @@ class BenchmarkCompetitivo:
 
         return min(operations, 15000)
 
-    async def _calculate_competitive_advantage(self, our_perf: Dict, competitor_perf: Dict, competitor_name: str) -> Dict:
+    async def _calculate_competitive_advantage(
+        self, our_perf: Dict, competitor_perf: Dict, competitor_name: str
+    ) -> Dict:
         """Calcula vantagem competitiva"""
-        latency_advantage = (competitor_perf["target_latency"] - our_perf["latency"]) / competitor_perf["target_latency"] * 100
-        throughput_advantage = (
-            (our_perf["throughput"] - competitor_perf["target_throughput"]) / competitor_perf["target_throughput"] * 100
+        latency_advantage = (
+            (competitor_perf["target_latency"] - our_perf["latency"])
+            / competitor_perf["target_latency"]
+            * 100
         )
-        uptime_advantage = (our_perf["uptime"] - competitor_perf["uptime"]) / competitor_perf["uptime"] * 100
-        ai_advantage = (our_perf["ai_accuracy"] - competitor_perf["ai_accuracy"]) / competitor_perf["ai_accuracy"] * 100
+        throughput_advantage = (
+            (our_perf["throughput"] - competitor_perf["target_throughput"])
+            / competitor_perf["target_throughput"]
+            * 100
+        )
+        uptime_advantage = (
+            (our_perf["uptime"] - competitor_perf["uptime"])
+            / competitor_perf["uptime"]
+            * 100
+        )
+        ai_advantage = (
+            (our_perf["ai_accuracy"] - competitor_perf["ai_accuracy"])
+            / competitor_perf["ai_accuracy"]
+            * 100
+        )
         security_advantage = (
-            (our_perf["security_score"] - competitor_perf["security_score"]) / competitor_perf["security_score"] * 100
+            (our_perf["security_score"] - competitor_perf["security_score"])
+            / competitor_perf["security_score"]
+            * 100
         )
 
-        overall_score = (latency_advantage + throughput_advantage + uptime_advantage + ai_advantage + security_advantage) / 5
+        overall_score = (
+            latency_advantage
+            + throughput_advantage
+            + uptime_advantage
+            + ai_advantage
+            + security_advantage
+        ) / 5
 
         return {
             "latency_advantage_pct": latency_advantage,
@@ -160,7 +186,9 @@ class BenchmarkCompetitivo:
 
     async def _calculate_world_ranking(self, competitive_analysis: Dict) -> Dict:
         """Calcula ranking mundial"""
-        competitors_beaten = sum(1 for analysis in competitive_analysis.values() if analysis["we_dominate"])
+        competitors_beaten = sum(
+            1 for analysis in competitive_analysis.values() if analysis["we_dominate"]
+        )
         total_competitors = len(competitive_analysis)
 
         ranking_position = total_competitors - competitors_beaten + 1
@@ -170,7 +198,11 @@ class BenchmarkCompetitivo:
             "total_competitors": total_competitors + 1,
             "competitors_beaten": competitors_beaten,
             "dominance_percentage": (competitors_beaten / total_competitors) * 100,
-            "status": "LÍDER_MUNDIAL" if ranking_position == 1 else f"POSIÇÃO_{ranking_position}",
+            "status": (
+                "LÍDER_MUNDIAL"
+                if ranking_position == 1
+                else f"POSIÇÃO_{ranking_position}"
+            ),
         }
 
     async def _generate_competitive_summary(self, competitive_analysis: Dict) -> Dict:
@@ -204,7 +236,10 @@ class BenchmarkCompetitivo:
 
     async def _calculate_dominance_score(self, competitive_analysis: Dict) -> float:
         """Calcula score de dominância geral"""
-        total_advantage = sum(analysis["overall_advantage_pct"] for analysis in competitive_analysis.values())
+        total_advantage = sum(
+            analysis["overall_advantage_pct"]
+            for analysis in competitive_analysis.values()
+        )
         return total_advantage / len(competitive_analysis)
 
     async def _print_results(self, result: Dict):
@@ -213,14 +248,20 @@ class BenchmarkCompetitivo:
         print("=" * 60)
 
         ranking = result["world_ranking"]
-        print(f"\n🌍 RANKING MUNDIAL: POSIÇÃO #{ranking['position']} de {ranking['total_competitors']}")
-        print(f"📊 DOMINÂNCIA: {ranking['dominance_percentage']:.1f}% dos concorrentes superados")
+        print(
+            f"\n🌍 RANKING MUNDIAL: POSIÇÃO #{ranking['position']} de {ranking['total_competitors']}"
+        )
+        print(
+            f"📊 DOMINÂNCIA: {ranking['dominance_percentage']:.1f}% dos concorrentes superados"
+        )
         print(f"🎯 STATUS: {ranking['status']}")
 
         print(f"\n📈 VANTAGENS COMPETITIVAS:")
         for competitor, analysis in result["competitive_analysis"].items():
             status = "✅ DOMINAMOS" if analysis["we_dominate"] else "❌ Atrás"
-            print(f"  • {competitor.upper()}: {status} ({analysis['overall_advantage_pct']:+.1f}%)")
+            print(
+                f"  • {competitor.upper()}: {status} ({analysis['overall_advantage_pct']:+.1f}%)"
+            )
 
         dominance_score = result["dominance_score"]
         print(f"\n🏅 SCORE DE DOMINÂNCIA GERAL: {dominance_score:.1f}%")
@@ -255,7 +296,9 @@ async def main():
     print(f"\n🎯 RESUMO EXECUTIVO:")
     print(f"  • Posição Mundial: #{result['world_ranking']['position']}")
     print(f"  • Dominância: {result['dominance_score']:.1f}%")
-    print(f"  • Tecnologias Únicas: {len(result['competitive_summary']['unique_technologies'])}")
+    print(
+        f"  • Tecnologias Únicas: {len(result['competitive_summary']['unique_technologies'])}"
+    )
     print(f"  • Status: {result['world_ranking']['status']}")
 
 

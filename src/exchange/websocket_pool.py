@@ -30,7 +30,9 @@ class WebSocketConnection:
     async def connect(self):
         """Conecta ao WebSocket"""
         try:
-            self.websocket = await websockets.connect(self.url, ping_interval=20, ping_timeout=10, close_timeout=10)
+            self.websocket = await websockets.connect(
+                self.url, ping_interval=20, ping_timeout=10, close_timeout=10
+            )
             self.connected = True
             self.reconnect_attempts = 0
             self.last_heartbeat = time.time()
@@ -51,7 +53,9 @@ class WebSocketConnection:
                     data = json.loads(message)
                     await self.on_message(self.exchange, data)
                 except json.JSONDecodeError:
-                    logger.warning(f"Mensagem JSON inválida de {self.exchange}: {message}")
+                    logger.warning(
+                        f"Mensagem JSON inválida de {self.exchange}: {message}"
+                    )
                 except Exception as e:
                     logger.error(f"Erro ao processar mensagem de {self.exchange}: {e}")
 
@@ -67,13 +71,17 @@ class WebSocketConnection:
     async def _reconnect(self):
         """Reconecta automaticamente"""
         if self.reconnect_attempts >= self.max_reconnect_attempts:
-            logger.error(f"Máximo de tentativas de reconexão atingido para {self.exchange}")
+            logger.error(
+                f"Máximo de tentativas de reconexão atingido para {self.exchange}"
+            )
             return
 
         self.reconnect_attempts += 1
         wait_time = min(2**self.reconnect_attempts, 60)
 
-        logger.info(f"Tentando reconectar {self.exchange} em {wait_time}s (tentativa {self.reconnect_attempts})")
+        logger.info(
+            f"Tentando reconectar {self.exchange} em {wait_time}s (tentativa {self.reconnect_attempts})"
+        )
         await asyncio.sleep(wait_time)
         await self.connect()
 
@@ -133,7 +141,9 @@ class WebSocketPool:
             self.connections[exchange].append(connection)
             logger.info(f"Conexão WebSocket adicionada: {exchange}")
 
-    async def get_cached_data(self, exchange: str, symbol: str = None) -> Optional[dict]:
+    async def get_cached_data(
+        self, exchange: str, symbol: str = None
+    ) -> Optional[dict]:
         """Obtém dados do cache se ainda válidos"""
         cache_key = f"{exchange}_{symbol or 'general'}"
 

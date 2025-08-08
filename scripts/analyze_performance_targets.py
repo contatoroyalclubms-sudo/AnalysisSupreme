@@ -54,7 +54,13 @@ class PerformanceAnalyzer:
                 "ai_accuracy": 65.0,
                 "status": "institucional",
             },
-            "bybit": {"execution_ms": 8.0, "throughput": 3000, "uptime": 99.2, "ai_accuracy": 72.0, "status": "competitivo"},
+            "bybit": {
+                "execution_ms": 8.0,
+                "throughput": 3000,
+                "uptime": 99.2,
+                "ai_accuracy": 72.0,
+                "status": "competitivo",
+            },
         }
 
     async def analyze_current_vs_world_class(self) -> Dict:
@@ -69,7 +75,9 @@ class PerformanceAnalyzer:
 
         print("\n🌍 COMPETIDORES GLOBAIS:")
         for exchange, data in self.world_class_competitors.items():
-            print(f"  • {exchange.upper()}: {data['execution_ms']}ms execution ({data['status']})")
+            print(
+                f"  • {exchange.upper()}: {data['execution_ms']}ms execution ({data['status']})"
+            )
 
         competitive_analysis = await self._analyze_competitive_position()
         improvement_opportunities = await self._identify_improvement_opportunities()
@@ -82,7 +90,9 @@ class PerformanceAnalyzer:
             "competitive_analysis": competitive_analysis,
             "improvement_opportunities": improvement_opportunities,
             "world_class_advantages": world_class_advantages,
-            "overall_assessment": await self._generate_overall_assessment(competitive_analysis),
+            "overall_assessment": await self._generate_overall_assessment(
+                competitive_analysis
+            ),
         }
 
         await self._print_analysis_results(result)
@@ -94,13 +104,32 @@ class PerformanceAnalyzer:
 
         for competitor, data in self.world_class_competitors.items():
             execution_advantage = (
-                (data["execution_ms"] - self.current_targets["execution_speed_ms"]) / data["execution_ms"] * 100
+                (data["execution_ms"] - self.current_targets["execution_speed_ms"])
+                / data["execution_ms"]
+                * 100
             )
-            throughput_advantage = (self.current_targets["throughput_ops_sec"] - data["throughput"]) / data["throughput"] * 100
-            uptime_advantage = (self.current_targets["uptime_percentage"] - data["uptime"]) / data["uptime"] * 100
-            ai_advantage = (self.current_targets["ai_accuracy"] - data["ai_accuracy"]) / data["ai_accuracy"] * 100
+            throughput_advantage = (
+                (self.current_targets["throughput_ops_sec"] - data["throughput"])
+                / data["throughput"]
+                * 100
+            )
+            uptime_advantage = (
+                (self.current_targets["uptime_percentage"] - data["uptime"])
+                / data["uptime"]
+                * 100
+            )
+            ai_advantage = (
+                (self.current_targets["ai_accuracy"] - data["ai_accuracy"])
+                / data["ai_accuracy"]
+                * 100
+            )
 
-            overall_advantage = (execution_advantage + throughput_advantage + uptime_advantage + ai_advantage) / 4
+            overall_advantage = (
+                execution_advantage
+                + throughput_advantage
+                + uptime_advantage
+                + ai_advantage
+            ) / 4
 
             analysis[competitor] = {
                 "execution_advantage_pct": execution_advantage,
@@ -201,11 +230,17 @@ class PerformanceAnalyzer:
 
     async def _generate_overall_assessment(self, competitive_analysis: Dict) -> Dict:
         """Gera avaliação geral"""
-        competitors_beaten = sum(1 for analysis in competitive_analysis.values() if analysis["we_are_better"])
+        competitors_beaten = sum(
+            1 for analysis in competitive_analysis.values() if analysis["we_are_better"]
+        )
         total_competitors = len(competitive_analysis)
 
         avg_advantage = (
-            sum(analysis["overall_advantage_pct"] for analysis in competitive_analysis.values()) / total_competitors
+            sum(
+                analysis["overall_advantage_pct"]
+                for analysis in competitive_analysis.values()
+            )
+            / total_competitors
         )
 
         return {
@@ -233,13 +268,17 @@ class PerformanceAnalyzer:
         assessment = result["overall_assessment"]
         print(f"\n🏆 AVALIAÇÃO GERAL:")
         print(f"  • Ranking Mundial: #{assessment['world_ranking']}")
-        print(f"  • Concorrentes Superados: {assessment['competitors_beaten']}/{assessment['total_competitors']}")
+        print(
+            f"  • Concorrentes Superados: {assessment['competitors_beaten']}/{assessment['total_competitors']}"
+        )
         print(f"  • Dominância: {assessment['dominance_percentage']:.1f}%")
         print(f"  • Vantagem Média: {assessment['average_advantage']:+.1f}%")
         print(f"  • Status: {assessment['assessment']}")
 
         if assessment["dominance_percentage"] == 100:
-            print(f"\n🎉 PARABÉNS! SOMOS OFICIALMENTE O MELHOR SISTEMA DE TRADING DO MUNDO! 🌍👑")
+            print(
+                f"\n🎉 PARABÉNS! SOMOS OFICIALMENTE O MELHOR SISTEMA DE TRADING DO MUNDO! 🌍👑"
+            )
 
     def _get_metric_unit(self, metric: str) -> str:
         """Retorna unidade da métrica"""

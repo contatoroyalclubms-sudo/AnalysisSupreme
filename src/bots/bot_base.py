@@ -136,7 +136,12 @@ class BotBase(ABC):
         return rsi
 
     async def executar_trade(
-        self, symbol: str, side: str, amount: float, price: Optional[float] = None, caso_uso: int = 1
+        self,
+        symbol: str,
+        side: str,
+        amount: float,
+        price: Optional[float] = None,
+        caso_uso: int = 1,
     ) -> Optional[Trade]:
         """Executa um trade"""
         try:
@@ -159,10 +164,14 @@ class BotBase(ABC):
                 )
 
                 self.trades.append(trade)
-                self.logger.info(f"Trade paper executado: {side} {amount} {symbol} @ {price}")
+                self.logger.info(
+                    f"Trade paper executado: {side} {amount} {symbol} @ {price}"
+                )
 
             else:
-                order = await self.exchange_manager.create_order(symbol, "market", side, amount, price)
+                order = await self.exchange_manager.create_order(
+                    symbol, "market", side, amount, price
+                )
 
                 if order:
                     trade = Trade(
@@ -177,7 +186,9 @@ class BotBase(ABC):
                     )
 
                     self.trades.append(trade)
-                    self.logger.info(f"Trade real executado: {side} {amount} {symbol} @ {order['price']}")
+                    self.logger.info(
+                        f"Trade real executado: {side} {amount} {symbol} @ {order['price']}"
+                    )
                 else:
                     self.logger.error("Falha ao executar trade real")
                     return None
@@ -204,7 +215,11 @@ class BotBase(ABC):
         else:
             casos_uso = {1: {}, 2: {}, 3: {}}
 
-        parametros = getattr(self.bot_config, "parametros", {}).copy() if hasattr(self.bot_config, "parametros") else {}
+        parametros = (
+            getattr(self.bot_config, "parametros", {}).copy()
+            if hasattr(self.bot_config, "parametros")
+            else {}
+        )
         if caso_uso in casos_uso:
             parametros.update(casos_uso[caso_uso])
 

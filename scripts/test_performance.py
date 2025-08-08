@@ -20,9 +20,21 @@ from src.performance.benchmark import PerformanceBenchmark
 
 async def main():
     parser = argparse.ArgumentParser(description="Teste de performance AnalysisSupreme")
-    parser.add_argument("--test", choices=["latency", "throughput", "bots", "full"], default="full", help="Tipo de teste")
-    parser.add_argument("--duration", type=int, default=60, help="Duração do teste em segundos")
-    parser.add_argument("--iterations", type=int, default=100, help="Número de iterações para teste de latência")
+    parser.add_argument(
+        "--test",
+        choices=["latency", "throughput", "bots", "full"],
+        default="full",
+        help="Tipo de teste",
+    )
+    parser.add_argument(
+        "--duration", type=int, default=60, help="Duração do teste em segundos"
+    )
+    parser.add_argument(
+        "--iterations",
+        type=int,
+        default=100,
+        help="Número de iterações para teste de latência",
+    )
 
     args = parser.parse_args()
 
@@ -108,7 +120,9 @@ def print_full_results(results):
         print(f"\nLatência média ticker: {ticker_stats.get('mean', 0):.2f}ms")
 
     if "throughput_benchmark" in results:
-        throughput = results["throughput_benchmark"]["operations_per_second"].get("ticker", 0)
+        throughput = results["throughput_benchmark"]["operations_per_second"].get(
+            "ticker", 0
+        )
         print(f"Throughput ticker: {throughput:.1f} ops/s")
 
     cache_stats = results["current_stats"]["exchange"]["cache"]

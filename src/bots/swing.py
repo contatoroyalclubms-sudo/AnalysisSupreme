@@ -64,11 +64,17 @@ class BotSwing(BotBase):
             try:
                 niveis = await self._identificar_suporte_resistencia(symbol, levels)
                 if niveis:
-                    await self._verificar_proximidade_niveis(symbol, niveis, proximity_percent)
+                    await self._verificar_proximidade_niveis(
+                        symbol, niveis, proximity_percent
+                    )
             except Exception as e:
-                self.logger.error(f"Erro no swing suporte/resistência para {symbol}: {e}")
+                self.logger.error(
+                    f"Erro no swing suporte/resistência para {symbol}: {e}"
+                )
 
-    async def _identificar_suporte_resistencia(self, symbol: str, levels: int) -> Optional[Dict]:
+    async def _identificar_suporte_resistencia(
+        self, symbol: str, levels: int
+    ) -> Optional[Dict]:
         """Identifica níveis de suporte e resistência"""
         try:
             ohlcv = await self.exchange_manager.get_ohlcv(symbol, "1h", 200)
@@ -97,31 +103,58 @@ class BotSwing(BotBase):
             self.logger.error(f"Erro ao identificar suporte/resistência: {e}")
             return None
 
-    def _encontrar_pivots(self, prices: List[float], tipo: str, window: int) -> List[Dict]:
+    def _encontrar_pivots(
+        self, prices: List[float], tipo: str, window: int
+    ) -> List[Dict]:
         """Encontra pontos de pivot"""
         pivots = []
 
         for i in range(window, len(prices) - window):
             if tipo == "high":
-                if all(prices[i] >= prices[j] for j in range(i - window, i + window + 1) if j != i):
+                if all(
+                    prices[i] >= prices[j]
+                    for j in range(i - window, i + window + 1)
+                    if j != i
+                ):
                     if prices[i] == max(prices[i - window : i + window + 1]):
                         pivots.append(
-                            {"index": i, "price": prices[i], "strength": self._calcular_forca_pivot(prices, i, window)}
+                            {
+                                "index": i,
+                                "price": prices[i],
+                                "strength": self._calcular_forca_pivot(
+                                    prices, i, window
+                                ),
+                            }
                         )
             else:  # low
-                if all(prices[i] <= prices[j] for j in range(i - window, i + window + 1) if j != i):
+                if all(
+                    prices[i] <= prices[j]
+                    for j in range(i - window, i + window + 1)
+                    if j != i
+                ):
                     if prices[i] == min(prices[i - window : i + window + 1]):
                         pivots.append(
-                            {"index": i, "price": prices[i], "strength": self._calcular_forca_pivot(prices, i, window)}
+                            {
+                                "index": i,
+                                "price": prices[i],
+                                "strength": self._calcular_forca_pivot(
+                                    prices, i, window
+                                ),
+                            }
                         )
 
         pivots.sort(key=lambda x: x["strength"], reverse=True)
         return pivots[:10]  # Top 10 pivots
 
-    def _calcular_forca_pivot(self, prices: List[float], index: int, window: int) -> float:
+    def _calcular_forca_pivot(
+        self, prices: List[float], index: int, window: int
+    ) -> float:
         """Calcula força do pivot baseada na diferença com vizinhos"""
         pivot_price = prices[index]
-        neighbors = prices[max(0, index - window) : index] + prices[index + 1 : min(len(prices), index + window + 1)]
+        neighbors = (
+            prices[max(0, index - window) : index]
+            + prices[index + 1 : min(len(prices), index + window + 1)]
+        )
 
         if not neighbors:
             return 0
@@ -142,19 +175,30 @@ class BotSwing(BotBase):
             for nivel in niveis:
                 if abs(pivot["price"] - nivel["price"]) / nivel["price"] <= tolerance:
                     total_strength = nivel["strength"] + pivot["strength"]
-                    nivel["price"] = (nivel["price"] * nivel["strength"] + pivot["price"] * pivot["strength"]) / total_strength
+                    nivel["price"] = (
+                        nivel["price"] * nivel["strength"]
+                        + pivot["price"] * pivot["strength"]
+                    ) / total_strength
                     nivel["strength"] = total_strength
                     nivel["touches"] += 1
                     agrupado = True
                     break
 
             if not agrupado and len(niveis) < max_levels:
-                niveis.append({"price": pivot["price"], "strength": pivot["strength"], "touches": 1})
+                niveis.append(
+                    {
+                        "price": pivot["price"],
+                        "strength": pivot["strength"],
+                        "touches": 1,
+                    }
+                )
 
         niveis.sort(key=lambda x: x["strength"], reverse=True)
         return niveis[:max_levels]
 
-    async def _verificar_proximidade_niveis(self, symbol: str, niveis: Dict, proximity_percent: float):
+    async def _verificar_proximidade_niveis(
+        self, symbol: str, niveis: Dict, proximity_percent: float
+    ):
         """Verifica proximidade do preço atual aos níveis"""
         preco_atual = niveis["preco_atual"]
 
@@ -168,7 +212,10 @@ class BotSwing(BotBase):
                         "nivel_resistencia": resistencia["price"],
                         "preco_atual": preco_atual,
                         "forca_nivel": resistencia["strength"],
-                        "target_suporte": min([s["price"] for s in niveis["suportes"]], default=preco_atual * 0.95),
+                        "target_suporte": min(
+                            [s["price"] for s in niveis["suportes"]],
+                            default=preco_atual * 0.95,
+                        ),
                     }
                     await self._executar_swing_trade(symbol, sinal, 1)
 
@@ -182,7 +229,10 @@ class BotSwing(BotBase):
                         "nivel_suporte": suporte["price"],
                         "preco_atual": preco_atual,
                         "forca_nivel": suporte["strength"],
-                        "target_resistencia": max([r["price"] for r in niveis["resistencias"]], default=preco_atual * 1.05),
+                        "target_resistencia": max(
+                            [r["price"] for r in niveis["resistencias"]],
+                            default=preco_atual * 1.05,
+                        ),
                     }
                     await self._executar_swing_trade(symbol, sinal, 1)
 
@@ -193,13 +243,17 @@ class BotSwing(BotBase):
 
         for symbol in symbols:
             try:
-                pattern_signal = await self._detectar_candlestick_patterns(symbol, patterns)
+                pattern_signal = await self._detectar_candlestick_patterns(
+                    symbol, patterns
+                )
                 if pattern_signal:
                     await self._executar_swing_trade(symbol, pattern_signal, 2)
             except Exception as e:
                 self.logger.error(f"Erro no swing candlestick para {symbol}: {e}")
 
-    async def _detectar_candlestick_patterns(self, symbol: str, patterns: List[str]) -> Optional[Dict]:
+    async def _detectar_candlestick_patterns(
+        self, symbol: str, patterns: List[str]
+    ) -> Optional[Dict]:
         """Detecta padrões de candlestick"""
         try:
             ohlcv = await self.exchange_manager.get_ohlcv(symbol, "1h", 50)
@@ -274,7 +328,12 @@ class BotSwing(BotBase):
             else:
                 direcao = "neutro"  # Doji clássico
 
-            return {"forca": 1 - body_percent, "direcao": direcao, "upper_shadow": upper_shadow, "lower_shadow": lower_shadow}
+            return {
+                "forca": 1 - body_percent,
+                "direcao": direcao,
+                "upper_shadow": upper_shadow,
+                "lower_shadow": lower_shadow,
+            }
 
         return None
 
@@ -294,7 +353,11 @@ class BotSwing(BotBase):
         lower_shadow = min(open_price, close) - low
         upper_shadow = high - max(open_price, close)
 
-        if lower_shadow > body * 2 and upper_shadow < body * 0.5 and body / total_range < 0.3:
+        if (
+            lower_shadow > body * 2
+            and upper_shadow < body * 0.5
+            and body / total_range < 0.3
+        ):
 
             return {
                 "forca": lower_shadow / total_range,
@@ -323,7 +386,11 @@ class BotSwing(BotBase):
         ):  # Fecha acima da abertura anterior
 
             engulfing_size = (close2 - open2) / (open1 - close1)
-            return {"direcao": "alta", "forca": min(2.0, engulfing_size), "tipo": "bullish_engulfing"}
+            return {
+                "direcao": "alta",
+                "forca": min(2.0, engulfing_size),
+                "tipo": "bullish_engulfing",
+            }
 
         elif (
             close1 > open1  # Candle anterior bullish
@@ -333,7 +400,11 @@ class BotSwing(BotBase):
         ):  # Fecha abaixo da abertura anterior
 
             engulfing_size = (open2 - close2) / (close1 - open1)
-            return {"direcao": "baixa", "forca": min(2.0, engulfing_size), "tipo": "bearish_engulfing"}
+            return {
+                "direcao": "baixa",
+                "forca": min(2.0, engulfing_size),
+                "tipo": "bearish_engulfing",
+            }
 
         return None
 
@@ -344,13 +415,17 @@ class BotSwing(BotBase):
 
         for symbol in symbols:
             try:
-                fib_analysis = await self._analisar_fibonacci(symbol, retracement_levels)
+                fib_analysis = await self._analisar_fibonacci(
+                    symbol, retracement_levels
+                )
                 if fib_analysis:
                     await self._executar_swing_trade(symbol, fib_analysis, 3)
             except Exception as e:
                 self.logger.error(f"Erro no swing fibonacci para {symbol}: {e}")
 
-    async def _analisar_fibonacci(self, symbol: str, levels: List[float]) -> Optional[Dict]:
+    async def _analisar_fibonacci(
+        self, symbol: str, levels: List[float]
+    ) -> Optional[Dict]:
         """Analisa níveis de retração de Fibonacci"""
         try:
             ohlcv = await self.exchange_manager.get_ohlcv(symbol, "1h", 100)
@@ -450,7 +525,9 @@ class BotSwing(BotBase):
 
             elif "candlestick" in tipo:
                 target_percent = 0.06  # 6% target
-                target_price = trade.price * (1 + target_percent if trade.side == "buy" else 1 - target_percent)
+                target_price = trade.price * (
+                    1 + target_percent if trade.side == "buy" else 1 - target_percent
+                )
                 stop_percent = 0.03  # 3% stop
 
             elif "fibonacci" in tipo:
@@ -475,13 +552,16 @@ class BotSwing(BotBase):
                 stop_price = trade.price * (1 + stop_percent)
 
             self.logger.info(
-                f"Targets swing definidos para {trade.symbol}: " f"Target: {target_price:.4f}, Stop: {stop_price:.4f}"
+                f"Targets swing definidos para {trade.symbol}: "
+                f"Target: {target_price:.4f}, Stop: {stop_price:.4f}"
             )
 
         except Exception as e:
             self.logger.error(f"Erro ao definir targets swing: {e}")
 
-    async def executar_casos_paralelos(self, semaphore: asyncio.Semaphore, batch_size: int):
+    async def executar_casos_paralelos(
+        self, semaphore: asyncio.Semaphore, batch_size: int
+    ):
         """Executa casos de uso em paralelo com semáforo"""
         async with semaphore:
             tasks = []

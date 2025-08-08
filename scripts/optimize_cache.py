@@ -18,7 +18,9 @@ async def main():
     print("=" * 40)
 
     config = Configuracao()
-    cache = RedisCache(config.get_cache_config() if hasattr(config, "get_cache_config") else {})
+    cache = RedisCache(
+        config.get_cache_config() if hasattr(config, "get_cache_config") else {}
+    )
 
     await cache.initialize()
 

@@ -34,10 +34,21 @@ class Monitor:
         logger.info("Inicializando sistema de monitoramento")
 
         self.metricas = {
-            "sistema": {"inicio": datetime.now(), "uptime": 0, "total_trades": 0, "pnl_total": 0.0, "bots_ativos": 0},
+            "sistema": {
+                "inicio": datetime.now(),
+                "uptime": 0,
+                "total_trades": 0,
+                "pnl_total": 0.0,
+                "bots_ativos": 0,
+            },
             "por_bot": {},
             "alertas": [],
-            "performance": {"win_rate_global": 0.0, "profit_factor": 0.0, "sharpe_ratio": 0.0, "max_drawdown": 0.0},
+            "performance": {
+                "win_rate_global": 0.0,
+                "profit_factor": 0.0,
+                "sharpe_ratio": 0.0,
+                "max_drawdown": 0.0,
+            },
         }
 
         if self.obs_config.metricas_ativas:
@@ -51,15 +62,23 @@ class Monitor:
             from prometheus_client import start_http_server, Counter, Gauge, Histogram
 
             self.prometheus_metrics = {
-                "trades_total": Counter("trades_total", "Total de trades executados", ["bot", "symbol", "side"]),
+                "trades_total": Counter(
+                    "trades_total",
+                    "Total de trades executados",
+                    ["bot", "symbol", "side"],
+                ),
                 "pnl_total": Gauge("pnl_total", "PnL total", ["bot"]),
                 "win_rate": Gauge("win_rate", "Taxa de vitória", ["bot"]),
                 "active_bots": Gauge("active_bots", "Número de bots ativos"),
-                "trade_duration": Histogram("trade_duration_seconds", "Duração dos trades", ["bot"]),
+                "trade_duration": Histogram(
+                    "trade_duration_seconds", "Duração dos trades", ["bot"]
+                ),
             }
 
             start_http_server(self.obs_config.prometheus_port)
-            logger.info(f"Servidor Prometheus iniciado na porta {self.obs_config.prometheus_port}")
+            logger.info(
+                f"Servidor Prometheus iniciado na porta {self.obs_config.prometheus_port}"
+            )
 
         except ImportError:
             logger.warning("Prometheus client não disponível")
@@ -101,26 +120,36 @@ class Monitor:
                 bot_metrics["trades_vencedores"] += 1
 
             if bot_metrics["total_trades"] > 0:
-                bot_metrics["win_rate"] = bot_metrics["trades_vencedores"] / bot_metrics["total_trades"]
+                bot_metrics["win_rate"] = (
+                    bot_metrics["trades_vencedores"] / bot_metrics["total_trades"]
+                )
 
         self.metricas["sistema"]["total_trades"] += 1
         self.metricas["sistema"]["pnl_total"] += trade.pnl
 
         if hasattr(self, "prometheus_metrics"):
-            self.prometheus_metrics["trades_total"].labels(bot=bot_name, symbol=trade.symbol, side=trade.side).inc()
+            self.prometheus_metrics["trades_total"].labels(
+                bot=bot_name, symbol=trade.symbol, side=trade.side
+            ).inc()
 
-            self.prometheus_metrics["pnl_total"].labels(bot=bot_name).set(self.metricas["por_bot"][bot_name]["pnl_total"])
+            self.prometheus_metrics["pnl_total"].labels(bot=bot_name).set(
+                self.metricas["por_bot"][bot_name]["pnl_total"]
+            )
 
         await self._verificar_alertas(trade)
 
-        logger.info(f"Trade registrado: {bot_name} - {trade.symbol} - PnL: {trade.pnl:.4f}")
+        logger.info(
+            f"Trade registrado: {bot_name} - {trade.symbol} - PnL: {trade.pnl:.4f}"
+        )
 
     async def _verificar_alertas(self, trade: Trade):
         """Verifica condições de alerta"""
         try:
             if trade.pnl < -100:  # Perda maior que $100
                 await self._criar_alerta(
-                    "PERDA_SIGNIFICATIVA", f"Trade com perda de ${trade.pnl:.2f} no bot {trade.bot}", "high"
+                    "PERDA_SIGNIFICATIVA",
+                    f"Trade com perda de ${trade.pnl:.2f} no bot {trade.bot}",
+                    "high",
                 )
 
             bot_metrics = self.metricas["por_bot"].get(trade.bot, {})
@@ -129,13 +158,19 @@ class Monitor:
                 tempo_inativo = (datetime.now() - ultima_atividade).total_seconds()
                 if tempo_inativo > 3600:  # 1 hora inativo
                     await self._criar_alerta(
-                        "BOT_INATIVO", f"Bot {trade.bot} inativo há {tempo_inativo/3600:.1f} horas", "medium"
+                        "BOT_INATIVO",
+                        f"Bot {trade.bot} inativo há {tempo_inativo/3600:.1f} horas",
+                        "medium",
                     )
 
             if bot_metrics.get("total_trades", 0) > 20:
                 win_rate = bot_metrics.get("win_rate", 0)
                 if win_rate < 0.3:  # Win rate menor que 30%
-                    await self._criar_alerta("WIN_RATE_BAIXO", f"Bot {trade.bot} com win rate de {win_rate:.1%}", "medium")
+                    await self._criar_alerta(
+                        "WIN_RATE_BAIXO",
+                        f"Bot {trade.bot} com win rate de {win_rate:.1%}",
+                        "medium",
+                    )
 
         except Exception as e:
             logger.error(f"Erro ao verificar alertas: {e}")
@@ -177,13 +212,21 @@ class Monitor:
         """Atualiza métricas do sistema"""
         try:
             inicio = self.metricas["sistema"]["inicio"]
-            self.metricas["sistema"]["uptime"] = (datetime.now() - inicio).total_seconds()
+            self.metricas["sistema"]["uptime"] = (
+                datetime.now() - inicio
+            ).total_seconds()
             self.metricas["sistema"]["bots_ativos"] = len(
-                [bot for bot, metrics in self.metricas["por_bot"].items() if metrics["status"] == "ativo"]
+                [
+                    bot
+                    for bot, metrics in self.metricas["por_bot"].items()
+                    if metrics["status"] == "ativo"
+                ]
             )
 
             if hasattr(self, "prometheus_metrics"):
-                self.prometheus_metrics["active_bots"].set(self.metricas["sistema"]["bots_ativos"])
+                self.prometheus_metrics["active_bots"].set(
+                    self.metricas["sistema"]["bots_ativos"]
+                )
 
         except Exception as e:
             logger.error(f"Erro ao atualizar métricas do sistema: {e}")
@@ -208,7 +251,9 @@ class Monitor:
             returns = [t.pnl for t in todos_trades]
             if len(returns) > 1:
                 mean_return = sum(returns) / len(returns)
-                std_return = (sum((r - mean_return) ** 2 for r in returns) / len(returns)) ** 0.5
+                std_return = (
+                    sum((r - mean_return) ** 2 for r in returns) / len(returns)
+                ) ** 0.5
                 sharpe_ratio = mean_return / std_return if std_return > 0 else 0
             else:
                 sharpe_ratio = 0
@@ -241,16 +286,27 @@ class Monitor:
         """Verifica saúde geral do sistema"""
         try:
             if self.metricas["sistema"]["bots_ativos"] == 0:
-                await self._criar_alerta("NENHUM_BOT_ATIVO", "Nenhum bot está ativo no sistema", "high")
+                await self._criar_alerta(
+                    "NENHUM_BOT_ATIVO", "Nenhum bot está ativo no sistema", "high"
+                )
 
             performance = self.metricas["performance"]
-            if performance["win_rate_global"] < 0.4 and self.metricas["sistema"]["total_trades"] > 50:
+            if (
+                performance["win_rate_global"] < 0.4
+                and self.metricas["sistema"]["total_trades"] > 50
+            ):
                 await self._criar_alerta(
-                    "PERFORMANCE_BAIXA", f"Win rate global baixo: {performance['win_rate_global']:.1%}", "medium"
+                    "PERFORMANCE_BAIXA",
+                    f"Win rate global baixo: {performance['win_rate_global']:.1%}",
+                    "medium",
                 )
 
             if performance["max_drawdown"] > 0.2:  # 20% drawdown
-                await self._criar_alerta("DRAWDOWN_ALTO", f"Drawdown máximo alto: {performance['max_drawdown']:.1%}", "high")
+                await self._criar_alerta(
+                    "DRAWDOWN_ALTO",
+                    f"Drawdown máximo alto: {performance['max_drawdown']:.1%}",
+                    "high",
+                )
 
         except Exception as e:
             logger.error(f"Erro ao verificar saúde do sistema: {e}")
@@ -285,7 +341,9 @@ class Monitor:
                 "sistema": self.metricas["sistema"].copy(),
                 "performance": self.metricas["performance"].copy(),
                 "bots": {},
-                "alertas_ativos": [a for a in self.alertas if not a.get("resolvido", False)],
+                "alertas_ativos": [
+                    a for a in self.alertas if not a.get("resolvido", False)
+                ],
                 "resumo": {},
             }
 
@@ -294,7 +352,13 @@ class Monitor:
 
                 relatorio["bots"][bot_name] = {
                     "metricas": metrics.copy(),
-                    "trades_recentes": len([t for t in trades_bot if (datetime.now() - t.timestamp).total_seconds() < 3600]),
+                    "trades_recentes": len(
+                        [
+                            t
+                            for t in trades_bot
+                            if (datetime.now() - t.timestamp).total_seconds() < 3600
+                        ]
+                    ),
                     "melhor_trade": max([t.pnl for t in trades_bot], default=0),
                     "pior_trade": min([t.pnl for t in trades_bot], default=0),
                 }
@@ -318,7 +382,9 @@ class Monitor:
                         if (datetime.now() - t.timestamp).total_seconds() < 3600
                     ]
                 ),
-                "alertas_ativos": len([a for a in self.alertas if not a.get("resolvido", False)]),
+                "alertas_ativos": len(
+                    [a for a in self.alertas if not a.get("resolvido", False)]
+                ),
             }
 
             return relatorio

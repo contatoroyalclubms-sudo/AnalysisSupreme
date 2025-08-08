@@ -14,7 +14,12 @@ from datetime import datetime
 def executar_comando(comando: str, descricao: str = "") -> tuple:
     """Executa comando e retorna resultado"""
     try:
-        resultado = subprocess.run(comando.split(), capture_output=True, text=True, cwd=Path(__file__).parent.parent)
+        resultado = subprocess.run(
+            comando.split(),
+            capture_output=True,
+            text=True,
+            cwd=Path(__file__).parent.parent,
+        )
         return resultado.returncode == 0, resultado.stdout, resultado.stderr
     except Exception as e:
         return False, "", str(e)
@@ -35,7 +40,9 @@ def auditoria_pre_implementacao():
     arquivos_py = list(Path(".").rglob("*.py"))
     print(f"✅ Arquivos Python encontrados: {len(arquivos_py)}")
 
-    sucesso, stdout, stderr = executar_comando("pytest --collect-only", "Pytest Collect")
+    sucesso, stdout, stderr = executar_comando(
+        "pytest --collect-only", "Pytest Collect"
+    )
     if sucesso:
         linhas = stdout.count("test session starts")
         print(f"✅ Pytest collect: sessão iniciada")
@@ -88,7 +95,11 @@ def auditoria_kpis():
         "grid": ["range_eficiencia", "grid_adaptabilidade", "lucro_lateral"],
         "momentum": ["breakout_precisao", "false_signal_rate", "stop_eficiencia"],
         "scalping": ["throughput_ops", "latencia_ultra", "fee_optimization"],
-        "mean_reversion": ["reversao_timing", "oversold_detection", "rsi_effectiveness"],
+        "mean_reversion": [
+            "reversao_timing",
+            "oversold_detection",
+            "rsi_effectiveness",
+        ],
         "swing": ["trend_capture", "hold_time_optimal", "pattern_recognition"],
     }
 
@@ -117,12 +128,25 @@ def auditoria_estrutura():
     print("=" * 50)
 
     estrutura_esperada = {
-        "src/bots": ["arbitragem.py", "grid.py", "momentum.py", "scalping.py", "mean_reversion.py", "swing.py"],
+        "src/bots": [
+            "arbitragem.py",
+            "grid.py",
+            "momentum.py",
+            "scalping.py",
+            "mean_reversion.py",
+            "swing.py",
+        ],
         "src/core": ["configuracao.py", "gerenciador_bots.py"],
         "src/ia": ["motor_ia.py"],
         "src/observabilidade": ["monitor.py"],
         "src/utils": ["kpis.py", "logger.py", "metricas.py"],
-        "scripts": ["setup_caso.py", "executar.py", "validar.py", "relatorio_geral.py", "auditoria.py"],
+        "scripts": [
+            "setup_caso.py",
+            "executar.py",
+            "validar.py",
+            "relatorio_geral.py",
+            "auditoria.py",
+        ],
         "tests": ["test_bots.py"],
         ".": ["Makefile", "setup.py", "requirements.txt", "main.py"],
     }
@@ -160,10 +184,14 @@ def gerar_relatorio_auditoria():
     os.makedirs("logs/auditorias", exist_ok=True)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-    with open(f"logs/auditorias/auditoria_{timestamp}.json", "w", encoding="utf-8") as f:
+    with open(
+        f"logs/auditorias/auditoria_{timestamp}.json", "w", encoding="utf-8"
+    ) as f:
         json.dump(relatorio, f, indent=2, ensure_ascii=False)
 
-    print(f"📄 Relatório de auditoria salvo: logs/auditorias/auditoria_{timestamp}.json")
+    print(
+        f"📄 Relatório de auditoria salvo: logs/auditorias/auditoria_{timestamp}.json"
+    )
 
 
 def main():

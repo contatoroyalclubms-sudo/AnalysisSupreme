@@ -24,16 +24,33 @@ class TestBotArbitragem:
     def mock_config(self):
         config = Mock(spec=Configuracao)
         config.get_bot_config.return_value = Mock(
-            ativo=True, parametros={"spread_minimo": 0.3, "volume_minimo": 100, "timeout_execucao": 5}
+            ativo=True,
+            parametros={
+                "spread_minimo": 0.3,
+                "volume_minimo": 100,
+                "timeout_execucao": 5,
+            },
         )
         return config
 
     @pytest.fixture
     def mock_exchange(self):
         exchange = AsyncMock()
-        exchange.get_ticker.return_value = {"symbol": "BTC/USDT", "bid": 49999, "ask": 50001, "last": 50000}
-        exchange.get_orderbook.return_value = {"bids": [[49999, 1.0], [49998, 0.5]], "asks": [[50001, 1.0], [50002, 0.5]]}
-        exchange.create_order.return_value = {"id": "order_123", "status": "closed", "filled": 0.01}
+        exchange.get_ticker.return_value = {
+            "symbol": "BTC/USDT",
+            "bid": 49999,
+            "ask": 50001,
+            "last": 50000,
+        }
+        exchange.get_orderbook.return_value = {
+            "bids": [[49999, 1.0], [49998, 0.5]],
+            "asks": [[50001, 1.0], [50002, 0.5]],
+        }
+        exchange.create_order.return_value = {
+            "id": "order_123",
+            "status": "closed",
+            "filled": 0.01,
+        }
         return exchange
 
     @pytest.fixture
@@ -45,7 +62,9 @@ class TestBotArbitragem:
         return Mock()
 
     @pytest.mark.asyncio
-    async def test_inicializacao_bot(self, mock_config, mock_exchange, mock_monitor, mock_kpis):
+    async def test_inicializacao_bot(
+        self, mock_config, mock_exchange, mock_monitor, mock_kpis
+    ):
         """Testa inicialização do bot de arbitragem"""
         bot = BotArbitragem(mock_config, mock_monitor, mock_exchange)
 
@@ -56,11 +75,17 @@ class TestBotArbitragem:
         assert hasattr(bot, "kpi_manager")
 
     @pytest.mark.asyncio
-    async def test_executar_caso_uso_1(self, mock_config, mock_exchange, mock_monitor, mock_kpis):
+    async def test_executar_caso_uso_1(
+        self, mock_config, mock_exchange, mock_monitor, mock_kpis
+    ):
         """Testa execução do caso de uso 1 - alta volatilidade"""
         with patch("src.bots.bot_base.GerenciadorExchange") as mock_exchange_class:
             mock_exchange_instance = AsyncMock()
-            mock_exchange_instance.get_ticker.return_value = {"bid": 49999, "ask": 50001, "last": 50000}
+            mock_exchange_instance.get_ticker.return_value = {
+                "bid": 49999,
+                "ask": 50001,
+                "last": 50000,
+            }
             mock_exchange_instance.inicializar = AsyncMock()
             mock_exchange_class.return_value = mock_exchange_instance
 
@@ -73,11 +98,17 @@ class TestBotArbitragem:
                 mock_monitor.registrar_trade.assert_called()
 
     @pytest.mark.asyncio
-    async def test_executar_caso_uso_2(self, mock_config, mock_exchange, mock_monitor, mock_kpis):
+    async def test_executar_caso_uso_2(
+        self, mock_config, mock_exchange, mock_monitor, mock_kpis
+    ):
         """Testa execução do caso de uso 2 - baixa volatilidade"""
         with patch("src.bots.bot_base.GerenciadorExchange") as mock_exchange_class:
             mock_exchange_instance = AsyncMock()
-            mock_exchange_instance.get_ticker.return_value = {"bid": 49999, "ask": 50001, "last": 50000}
+            mock_exchange_instance.get_ticker.return_value = {
+                "bid": 49999,
+                "ask": 50001,
+                "last": 50000,
+            }
             mock_exchange_instance.inicializar = AsyncMock()
             mock_exchange_class.return_value = mock_exchange_instance
 
@@ -88,11 +119,17 @@ class TestBotArbitragem:
             mock_exchange_instance.get_ticker.assert_called()
 
     @pytest.mark.asyncio
-    async def test_executar_caso_uso_3(self, mock_config, mock_exchange, mock_monitor, mock_kpis):
+    async def test_executar_caso_uso_3(
+        self, mock_config, mock_exchange, mock_monitor, mock_kpis
+    ):
         """Testa execução do caso de uso 3 - mercado lateral"""
         with patch("src.bots.bot_base.GerenciadorExchange") as mock_exchange_class:
             mock_exchange_instance = AsyncMock()
-            mock_exchange_instance.get_ticker.return_value = {"bid": 49999, "ask": 50001, "last": 50000}
+            mock_exchange_instance.get_ticker.return_value = {
+                "bid": 49999,
+                "ask": 50001,
+                "last": 50000,
+            }
             mock_exchange_instance.inicializar = AsyncMock()
             mock_exchange_class.return_value = mock_exchange_instance
 
@@ -103,23 +140,38 @@ class TestBotArbitragem:
             mock_exchange_instance.get_ticker.assert_called()
 
     @pytest.mark.asyncio
-    async def test_detectar_arbitragem(self, mock_config, mock_exchange, mock_monitor, mock_kpis):
+    async def test_detectar_arbitragem(
+        self, mock_config, mock_exchange, mock_monitor, mock_kpis
+    ):
         """Testa detecção de oportunidades de arbitragem"""
         bot = BotArbitragem(mock_config, mock_monitor, mock_exchange)
 
-        mock_exchange.get_ticker.return_value = {"symbol": "BTC/USDT", "bid": 49900, "ask": 50100, "last": 50000}
+        mock_exchange.get_ticker.return_value = {
+            "symbol": "BTC/USDT",
+            "bid": 49900,
+            "ask": 50100,
+            "last": 50000,
+        }
 
-        resultado = await bot._detectar_arbitragem_simples("BTC/USDT", "binance", "coinbase", 0.005)
+        resultado = await bot._detectar_arbitragem_simples(
+            "BTC/USDT", "binance", "coinbase", 0.005
+        )
 
         if resultado:
             assert "profit_percent" in resultado
 
     @pytest.mark.asyncio
-    async def test_executar_arbitragem(self, mock_config, mock_exchange, mock_monitor, mock_kpis):
+    async def test_executar_arbitragem(
+        self, mock_config, mock_exchange, mock_monitor, mock_kpis
+    ):
         """Testa execução de arbitragem"""
         with patch("src.bots.bot_base.GerenciadorExchange") as mock_exchange_class:
             mock_exchange_instance = AsyncMock()
-            mock_exchange_instance.create_order.return_value = {"id": "test_order_123", "price": 50000, "status": "closed"}
+            mock_exchange_instance.create_order.return_value = {
+                "id": "test_order_123",
+                "price": 50000,
+                "status": "closed",
+            }
             mock_exchange_class.return_value = mock_exchange_instance
 
             bot = BotArbitragem(mock_config, mock_monitor, mock_exchange)
@@ -152,7 +204,8 @@ class TestBotGrid:
     def mock_config(self):
         config = Mock(spec=Configuracao)
         config.get_bot_config.return_value = Mock(
-            ativo=True, parametros={"grid_levels": 10, "range_percent": 5.0, "order_size": 0.01}
+            ativo=True,
+            parametros={"grid_levels": 10, "range_percent": 5.0, "order_size": 0.01},
         )
         return config
 
@@ -205,7 +258,12 @@ class TestBotMomentum:
     def mock_config(self):
         config = Mock(spec=Configuracao)
         config.get_bot_config.return_value = Mock(
-            ativo=True, parametros={"breakout_threshold": 1.02, "stop_loss": 0.02, "take_profit": 0.04}
+            ativo=True,
+            parametros={
+                "breakout_threshold": 1.02,
+                "stop_loss": 0.02,
+                "take_profit": 0.04,
+            },
         )
         return config
 
@@ -250,7 +308,12 @@ class TestBotScalping:
     def mock_config(self):
         config = Mock(spec=Configuracao)
         config.get_bot_config.return_value = Mock(
-            ativo=True, parametros={"spread_target": 0.1, "quick_profit": 0.05, "max_hold_time": 60}
+            ativo=True,
+            parametros={
+                "spread_target": 0.1,
+                "quick_profit": 0.05,
+                "max_hold_time": 60,
+            },
         )
         return config
 
@@ -261,7 +324,10 @@ class TestBotScalping:
         monitor = AsyncMock()
         kpis = Mock()
 
-        exchange.get_orderbook.return_value = {"bids": [[49999, 1.0]], "asks": [[50001, 1.0]]}
+        exchange.get_orderbook.return_value = {
+            "bids": [[49999, 1.0]],
+            "asks": [[50001, 1.0]],
+        }
         exchange.create_order.return_value = {"id": "order_123", "status": "closed"}
 
         bot = BotScalping(mock_config, monitor, exchange)
@@ -275,7 +341,10 @@ class TestBotScalping:
         monitor = AsyncMock()
         kpis = Mock()
 
-        exchange.get_orderbook.return_value = {"bids": [[49999, 1.0]], "asks": [[50001, 1.0]]}
+        exchange.get_orderbook.return_value = {
+            "bids": [[49999, 1.0]],
+            "asks": [[50001, 1.0]],
+        }
         exchange.get_ticker.return_value = {"symbol": "BTC/USDT", "last": 50000}
 
         bot = BotScalping(mock_config, monitor, exchange)
@@ -292,7 +361,8 @@ class TestBotMeanReversion:
     def mock_config(self):
         config = Mock(spec=Configuracao)
         config.get_bot_config.return_value = Mock(
-            ativo=True, parametros={"rsi_oversold": 30, "rsi_overbought": 70, "mean_period": 20}
+            ativo=True,
+            parametros={"rsi_oversold": 30, "rsi_overbought": 70, "mean_period": 20},
         )
         return config
 
@@ -320,7 +390,8 @@ class TestBotMeanReversion:
         kpis = Mock()
 
         exchange.get_ohlcv.return_value = [
-            [i, 50000 - i * 10, 50100 - i * 10, 49900 - i * 10, 50000 - i * 10, 100] for i in range(20)
+            [i, 50000 - i * 10, 50100 - i * 10, 49900 - i * 10, 50000 - i * 10, 100]
+            for i in range(20)
         ]
 
         bot = BotMeanReversion(mock_config, monitor, exchange)
@@ -334,7 +405,9 @@ class TestBotMeanReversion:
         monitor = AsyncMock()
         kpis = Mock()
 
-        exchange.get_ohlcv.return_value = [[i, 50000, 50100, 49900, 50000, 100] for i in range(20)]
+        exchange.get_ohlcv.return_value = [
+            [i, 50000, 50100, 49900, 50000, 100] for i in range(20)
+        ]
 
         bot = BotMeanReversion(mock_config, monitor, exchange)
 
@@ -350,7 +423,12 @@ class TestBotSwing:
     def mock_config(self):
         config = Mock(spec=Configuracao)
         config.get_bot_config.return_value = Mock(
-            ativo=True, parametros={"trend_period": 50, "swing_threshold": 0.05, "hold_time_min": 3600}
+            ativo=True,
+            parametros={
+                "trend_period": 50,
+                "swing_threshold": 0.05,
+                "hold_time_min": 3600,
+            },
         )
         return config
 
@@ -362,7 +440,8 @@ class TestBotSwing:
         kpis = Mock()
 
         exchange.get_ohlcv.return_value = [
-            [i, 50000 + i * 50, 50100 + i * 50, 49900 + i * 50, 50000 + i * 50, 100] for i in range(50)
+            [i, 50000 + i * 50, 50100 + i * 50, 49900 + i * 50, 50000 + i * 50, 100]
+            for i in range(50)
         ]
 
         bot = BotSwing(mock_config, monitor, exchange)
@@ -389,7 +468,9 @@ class TestBotSwing:
         monitor = AsyncMock()
         kpis = Mock()
 
-        exchange.get_ohlcv.return_value = [[i, 50000, 50100, 49900, 50000, 100] for i in range(50)]
+        exchange.get_ohlcv.return_value = [
+            [i, 50000, 50100, 49900, 50000, 100] for i in range(50)
+        ]
 
         bot = BotSwing(mock_config, monitor, exchange)
 
@@ -412,7 +493,10 @@ class TestIntegracaoBots:
         config.get_bot_config.return_value = Mock(ativo=True, parametros={})
         exchange.get_ticker.return_value = {"symbol": "BTC/USDT", "last": 50000}
         exchange.get_ohlcv.return_value = [[1, 50000, 50100, 49900, 50000, 100]]
-        exchange.get_orderbook.return_value = {"bids": [[49999, 1.0]], "asks": [[50001, 1.0]]}
+        exchange.get_orderbook.return_value = {
+            "bids": [[49999, 1.0]],
+            "asks": [[50001, 1.0]],
+        }
 
         bots = [
             BotArbitragem(config, monitor, exchange),
@@ -453,4 +537,11 @@ class TestIntegracaoBots:
 
         for bot in bots:
             assert hasattr(bot, "nome")
-            assert bot.nome in ["arbitragem", "grid", "momentum", "scalping", "mean_reversion", "swing"]
+            assert bot.nome in [
+                "arbitragem",
+                "grid",
+                "momentum",
+                "scalping",
+                "mean_reversion",
+                "swing",
+            ]

@@ -44,7 +44,9 @@ class AuditoriaSuprema:
         await self._initialize_risk_assessor()
         await self._setup_audit_encryption()
 
-    async def log_audit_event(self, event_type: str, user_id: str, action: str, resource: str, details: Dict) -> str:
+    async def log_audit_event(
+        self, event_type: str, user_id: str, action: str, resource: str, details: Dict
+    ) -> str:
         """Registra evento de auditoria"""
         event_id = str(uuid.uuid4())
         timestamp = datetime.utcnow().isoformat()
@@ -92,8 +94,12 @@ class AuditoriaSuprema:
             "api_security": api_security,
             "data_protection": data_protection,
             "regulatory_compliance": regulatory_compliance,
-            "overall_compliance_score": await self._calculate_compliance_score(filtered_events),
-            "recommendations": await self._generate_compliance_recommendations(filtered_events),
+            "overall_compliance_score": await self._calculate_compliance_score(
+                filtered_events
+            ),
+            "recommendations": await self._generate_compliance_recommendations(
+                filtered_events
+            ),
         }
 
         await self._sign_report(report)
@@ -113,9 +119,13 @@ class AuditoriaSuprema:
             "related_events": len(related_events),
             "timeline": timeline,
             "impact_assessment": impact_assessment,
-            "root_cause_analysis": await self._perform_root_cause_analysis(related_events),
+            "root_cause_analysis": await self._perform_root_cause_analysis(
+                related_events
+            ),
             "remediation_steps": await self._generate_remediation_steps(related_events),
-            "prevention_measures": await self._suggest_prevention_measures(related_events),
+            "prevention_measures": await self._suggest_prevention_measures(
+                related_events
+            ),
         }
 
     async def _audit_all_trades(self, events: List[Dict]) -> Dict:
@@ -125,7 +135,9 @@ class AuditoriaSuprema:
         trade_events = [e for e in events if e.get("event_type") == "TRADE"]
 
         total_trades = len(trade_events)
-        successful_trades = len([e for e in trade_events if e.get("details", {}).get("status") == "success"])
+        successful_trades = len(
+            [e for e in trade_events if e.get("details", {}).get("status") == "success"]
+        )
         total_volume = sum(e.get("details", {}).get("volume", 0) for e in trade_events)
 
         suspicious_trades = await self._identify_suspicious_trades(trade_events)
@@ -144,7 +156,9 @@ class AuditoriaSuprema:
         """Verifica limites de risco"""
         await asyncio.sleep(0.003)
 
-        risk_events = [e for e in events if e.get("event_type") in ["TRADE", "POSITION_CHANGE"]]
+        risk_events = [
+            e for e in events if e.get("event_type") in ["TRADE", "POSITION_CHANGE"]
+        ]
 
         violations = []
         for event in risk_events:
@@ -163,8 +177,13 @@ class AuditoriaSuprema:
             "total_risk_events": len(risk_events),
             "violations": violations,
             "violation_rate": len(violations) / max(len(risk_events), 1),
-            "max_risk_score": max((e.get("details", {}).get("risk_score", 0) for e in risk_events), default=0),
-            "compliance_status": "COMPLIANT" if len(violations) == 0 else "VIOLATIONS_DETECTED",
+            "max_risk_score": max(
+                (e.get("details", {}).get("risk_score", 0) for e in risk_events),
+                default=0,
+            ),
+            "compliance_status": (
+                "COMPLIANT" if len(violations) == 0 else "VIOLATIONS_DETECTED"
+            ),
         }
 
     async def _audit_api_usage(self, events: List[Dict]) -> Dict:
@@ -174,7 +193,9 @@ class AuditoriaSuprema:
         api_events = [e for e in events if e.get("event_type") == "API_CALL"]
 
         unique_users = set(e.get("user_id") for e in api_events)
-        failed_calls = [e for e in api_events if e.get("details", {}).get("status") == "failed"]
+        failed_calls = [
+            e for e in api_events if e.get("details", {}).get("status") == "failed"
+        ]
 
         rate_limit_violations = await self._check_rate_limits(api_events)
         unauthorized_attempts = await self._check_unauthorized_access(api_events)
@@ -193,9 +214,16 @@ class AuditoriaSuprema:
         """Audita manipulação de dados"""
         await asyncio.sleep(0.003)
 
-        data_events = [e for e in events if e.get("event_type") in ["DATA_ACCESS", "DATA_EXPORT", "DATA_MODIFICATION"]]
+        data_events = [
+            e
+            for e in events
+            if e.get("event_type")
+            in ["DATA_ACCESS", "DATA_EXPORT", "DATA_MODIFICATION"]
+        ]
 
-        sensitive_data_access = [e for e in data_events if e.get("details", {}).get("sensitive", False)]
+        sensitive_data_access = [
+            e for e in data_events if e.get("details", {}).get("sensitive", False)
+        ]
         encryption_compliance = await self._check_encryption_compliance(data_events)
 
         return {
@@ -219,20 +247,37 @@ class AuditoriaSuprema:
             "reporting_requirements": await self._check_reporting_compliance(events),
         }
 
-        overall_compliance = all(check["compliant"] for check in regulatory_checks.values())
+        overall_compliance = all(
+            check["compliant"] for check in regulatory_checks.values()
+        )
 
         return {
             "regulatory_checks": regulatory_checks,
             "overall_compliance": overall_compliance,
-            "compliance_score": sum(check["score"] for check in regulatory_checks.values()) / len(regulatory_checks),
-            "violations": [name for name, check in regulatory_checks.items() if not check["compliant"]],
+            "compliance_score": sum(
+                check["score"] for check in regulatory_checks.values()
+            )
+            / len(regulatory_checks),
+            "violations": [
+                name
+                for name, check in regulatory_checks.items()
+                if not check["compliant"]
+            ],
         }
 
-    async def _assess_risk_level(self, event_type: str, action: str, details: Dict) -> str:
+    async def _assess_risk_level(
+        self, event_type: str, action: str, details: Dict
+    ) -> str:
         """Avalia nível de risco do evento"""
         await asyncio.sleep(0.001)
 
-        risk_factors = {"TRADE": 0.3, "API_CALL": 0.1, "DATA_ACCESS": 0.2, "SYSTEM_CHANGE": 0.8, "USER_LOGIN": 0.1}
+        risk_factors = {
+            "TRADE": 0.3,
+            "API_CALL": 0.1,
+            "DATA_ACCESS": 0.2,
+            "SYSTEM_CHANGE": 0.8,
+            "USER_LOGIN": 0.1,
+        }
 
         base_risk = risk_factors.get(event_type, 0.2)
 
@@ -252,7 +297,9 @@ class AuditoriaSuprema:
         else:
             return "LOW"
 
-    async def _check_compliance(self, event_type: str, action: str, details: Dict) -> str:
+    async def _check_compliance(
+        self, event_type: str, action: str, details: Dict
+    ) -> str:
         """Verifica compliance do evento"""
         await asyncio.sleep(0.001)
 
@@ -287,7 +334,9 @@ class AuditoriaSuprema:
         """Dispara alerta de segurança"""
         await asyncio.sleep(0.001)
 
-    async def _filter_events_by_date(self, start_date: str, end_date: str) -> List[Dict]:
+    async def _filter_events_by_date(
+        self, start_date: str, end_date: str
+    ) -> List[Dict]:
         """Filtra eventos por data"""
         await asyncio.sleep(0.002)
 
@@ -297,12 +346,20 @@ class AuditoriaSuprema:
         """Calcula score de compliance"""
         await asyncio.sleep(0.002)
 
-        compliant_events = len([e for e in events if e.get("compliance_status", "").startswith("COMPLIANT")])
+        compliant_events = len(
+            [
+                e
+                for e in events
+                if e.get("compliance_status", "").startswith("COMPLIANT")
+            ]
+        )
         total_events = len(events)
 
         return compliant_events / max(total_events, 1)
 
-    async def _generate_compliance_recommendations(self, events: List[Dict]) -> List[str]:
+    async def _generate_compliance_recommendations(
+        self, events: List[Dict]
+    ) -> List[str]:
         """Gera recomendações de compliance"""
         return [
             "Implementar autenticação multi-fator para todas as operações",
@@ -317,7 +374,9 @@ class AuditoriaSuprema:
         await asyncio.sleep(0.001)
 
         report_json = json.dumps(report, sort_keys=True)
-        signature = hashlib.sha256((report_json + self.encryption_key).encode()).hexdigest()
+        signature = hashlib.sha256(
+            (report_json + self.encryption_key).encode()
+        ).hexdigest()
         report["digital_signature"] = signature
 
     async def _load_compliance_rules(self):
@@ -327,9 +386,19 @@ class AuditoriaSuprema:
         self.compliance_rules = {
             "TRADE": {
                 "max_amount": {"field": "amount", "operator": "<=", "value": 1000000},
-                "authorized_user": {"field": "user_authorized", "operator": "==", "value": True},
+                "authorized_user": {
+                    "field": "user_authorized",
+                    "operator": "==",
+                    "value": True,
+                },
             },
-            "API_CALL": {"rate_limit": {"field": "calls_per_minute", "operator": "<=", "value": 100}},
+            "API_CALL": {
+                "rate_limit": {
+                    "field": "calls_per_minute",
+                    "operator": "<=",
+                    "value": 100,
+                }
+            },
         }
 
     async def _initialize_risk_assessor(self):
@@ -436,7 +505,10 @@ class AuditoriaSuprema:
     async def _build_incident_timeline(self, events: List[Dict]) -> List[Dict]:
         """Constrói timeline do incidente"""
         await asyncio.sleep(0.002)
-        return [{"timestamp": e.get("timestamp"), "event": e.get("event_type")} for e in events]
+        return [
+            {"timestamp": e.get("timestamp"), "event": e.get("event_type")}
+            for e in events
+        ]
 
     async def _assess_incident_impact(self, events: List[Dict]) -> Dict:
         """Avalia impacto do incidente"""
@@ -446,7 +518,10 @@ class AuditoriaSuprema:
     async def _perform_root_cause_analysis(self, events: List[Dict]) -> Dict:
         """Realiza análise de causa raiz"""
         await asyncio.sleep(0.003)
-        return {"root_cause": "configuration_error", "contributing_factors": ["human_error"]}
+        return {
+            "root_cause": "configuration_error",
+            "contributing_factors": ["human_error"],
+        }
 
     async def _generate_remediation_steps(self, events: List[Dict]) -> List[str]:
         """Gera passos de remediação"""

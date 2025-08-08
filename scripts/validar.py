@@ -36,8 +36,16 @@ def validar_caso(caso: str):
         "sistema_ativo": relatorio.get("sistema", {}).get("bots_ativos", 0) > 0,
         "trades_executados": relatorio.get("sistema", {}).get("total_trades", 0) >= 0,
         "bot_presente": bot_name in relatorio.get("bots", {}),
-        "sem_alertas_criticos": len([a for a in relatorio.get("alertas_ativos", []) if a.get("severidade") == "high"]) == 0,
-        "metricas_validas": relatorio.get("performance", {}).get("win_rate_global", 0) >= 0,
+        "sem_alertas_criticos": len(
+            [
+                a
+                for a in relatorio.get("alertas_ativos", [])
+                if a.get("severidade") == "high"
+            ]
+        )
+        == 0,
+        "metricas_validas": relatorio.get("performance", {}).get("win_rate_global", 0)
+        >= 0,
         "configuracao_carregada": caso_config.get("bot") == bot_name,
         "modo_paper": caso_config.get("paper_mode", True) == True,
     }
@@ -49,7 +57,10 @@ def validar_caso(caso: str):
                 "bot_ativo": bot_data.get("metricas", {}).get("status") == "ativo",
                 "trades_bot": bot_data.get("metricas", {}).get("total_trades", 0) >= 0,
                 "pnl_calculado": "pnl_total" in bot_data.get("metricas", {}),
-                "caso_uso_executado": bot_data.get("metricas", {}).get("ultimo_caso_uso") is not None,
+                "caso_uso_executado": bot_data.get("metricas", {}).get(
+                    "ultimo_caso_uso"
+                )
+                is not None,
             }
         )
 
@@ -67,7 +78,9 @@ def validar_caso(caso: str):
         print(f"{status} {validacao.replace('_', ' ').title()}")
 
     print("-" * 40)
-    print(f"📊 Score: {validacoes_passou}/{total_validacoes} ({(validacoes_passou/total_validacoes)*100:.1f}%)")
+    print(
+        f"📊 Score: {validacoes_passou}/{total_validacoes} ({(validacoes_passou/total_validacoes)*100:.1f}%)"
+    )
 
     if bot_name in relatorio.get("bots", {}):
         bot_metrics = relatorio["bots"][bot_name]["metricas"]
@@ -102,7 +115,9 @@ def validar_caso(caso: str):
 
 def main():
     parser = argparse.ArgumentParser(description="Validar caso de uso específico")
-    parser.add_argument("--caso", required=True, help="Nome do caso (ex: arbitragem_alta_vol_btcusdt)")
+    parser.add_argument(
+        "--caso", required=True, help="Nome do caso (ex: arbitragem_alta_vol_btcusdt)"
+    )
 
     args = parser.parse_args()
 

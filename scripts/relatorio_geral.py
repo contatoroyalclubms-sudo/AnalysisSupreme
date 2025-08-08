@@ -81,7 +81,14 @@ def verificar_estrutura():
 
 def verificar_bots():
     """Verifica status dos bots"""
-    bots_esperados = ["arbitragem", "grid", "momentum", "scalping", "mean_reversion", "swing"]
+    bots_esperados = [
+        "arbitragem",
+        "grid",
+        "momentum",
+        "scalping",
+        "mean_reversion",
+        "swing",
+    ]
 
     total_casos = 0
     bots_implementados = 0
@@ -95,7 +102,11 @@ def verificar_bots():
             try:
                 with open(bot_file, "r", encoding="utf-8") as f:
                     content = f.read()
-                    casos = content.count("caso_uso == 1") + content.count("caso_uso == 2") + content.count("caso_uso == 3")
+                    casos = (
+                        content.count("caso_uso == 1")
+                        + content.count("caso_uso == 2")
+                        + content.count("caso_uso == 3")
+                    )
                     print(f"   📋 {casos} casos de uso implementados")
                     total_casos += casos
             except Exception:
@@ -207,7 +218,14 @@ def verificar_scripts():
 def gerar_relatorio_final_json():
     """Gera relatório final em JSON"""
     try:
-        bots_esperados = ["arbitragem", "grid", "momentum", "scalping", "mean_reversion", "swing"]
+        bots_esperados = [
+            "arbitragem",
+            "grid",
+            "momentum",
+            "scalping",
+            "mean_reversion",
+            "swing",
+        ]
         bots_implementados = []
         total_casos_uso = 0
 
@@ -219,7 +237,9 @@ def gerar_relatorio_final_json():
                     with open(bot_file, "r", encoding="utf-8") as f:
                         content = f.read()
                         casos = (
-                            content.count("caso_uso == 1") + content.count("caso_uso == 2") + content.count("caso_uso == 3")
+                            content.count("caso_uso == 1")
+                            + content.count("caso_uso == 2")
+                            + content.count("caso_uso == 3")
                         )
                         total_casos_uso += casos
                 except Exception:
@@ -278,7 +298,11 @@ def gerar_relatorio_final_json():
                 "logging_estruturado": True,
             },
             "qualidade": {
-                "pronto_producao": (len(bots_implementados) == 6 and total_casos_uso >= 18 and all(funcionalidades.values())),
+                "pronto_producao": (
+                    len(bots_implementados) == 6
+                    and total_casos_uso >= 18
+                    and all(funcionalidades.values())
+                ),
                 "cobertura_esperada": "≥80%",
                 "modo_padrao": "paper_trading",
                 "ci_cd_verde": True,
@@ -287,14 +311,23 @@ def gerar_relatorio_final_json():
             "casos_uso": {
                 "formato": "[BOT] - [REGIME] - [PAR]",
                 "scripts_disponiveis": ["setup_caso.py", "executar.py", "validar.py"],
-                "regimes_suportados": ["alta_vol", "baixa_vol", "lateral", "breakout", "continuacao", "volume"],
+                "regimes_suportados": [
+                    "alta_vol",
+                    "baixa_vol",
+                    "lateral",
+                    "breakout",
+                    "continuacao",
+                    "volume",
+                ],
             },
         }
 
         os.makedirs("logs/relatorios", exist_ok=True)
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-        with open(f"logs/relatorios/relatorio_{timestamp}.json", "w", encoding="utf-8") as f:
+        with open(
+            f"logs/relatorios/relatorio_{timestamp}.json", "w", encoding="utf-8"
+        ) as f:
             json.dump(relatorio, f, indent=2, ensure_ascii=False)
 
         with open("logs/RELATORIO_FINAL.json", "w", encoding="utf-8") as f:
@@ -303,12 +336,22 @@ def gerar_relatorio_final_json():
         print("📄 Relatório final salvo em: logs/RELATORIO_FINAL.json")
 
         print("\n🎯 RESUMO EXECUTIVO:")
-        print(f"   Bots: {len(bots_implementados)}/6 ({(len(bots_implementados)/6)*100:.0f}%)")
-        print(f"   Casos de uso: {total_casos_uso}/18 ({(total_casos_uso/18)*100:.0f}%)")
+        print(
+            f"   Bots: {len(bots_implementados)}/6 ({(len(bots_implementados)/6)*100:.0f}%)"
+        )
+        print(
+            f"   Casos de uso: {total_casos_uso}/18 ({(total_casos_uso/18)*100:.0f}%)"
+        )
         print(f"   IA: {'✅' if relatorio['funcionalidades']['ia_avancada'] else '❌'}")
-        print(f"   Observabilidade: {'✅' if relatorio['funcionalidades']['observabilidade'] else '❌'}")
-        print(f"   Scripts de casos de uso: {'✅' if relatorio['funcionalidades']['scripts_casos_uso'] else '❌'}")
-        print(f"   Pronto para produção: {'✅' if relatorio['qualidade']['pronto_producao'] else '❌'}")
+        print(
+            f"   Observabilidade: {'✅' if relatorio['funcionalidades']['observabilidade'] else '❌'}"
+        )
+        print(
+            f"   Scripts de casos de uso: {'✅' if relatorio['funcionalidades']['scripts_casos_uso'] else '❌'}"
+        )
+        print(
+            f"   Pronto para produção: {'✅' if relatorio['qualidade']['pronto_producao'] else '❌'}"
+        )
 
         if relatorio["qualidade"]["pronto_producao"]:
             print("\n🚀 SISTEMA COMPLETO E PRONTO PARA PRODUÇÃO!")

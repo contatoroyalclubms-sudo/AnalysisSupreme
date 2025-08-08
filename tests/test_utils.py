@@ -494,7 +494,14 @@ class TestGerenciadorKPIs:
         gerenciador.kpis["arbitragem"].latencia_ms = 45.0
         gerenciador.kpis["scalping"].latencia_ultra = 25.0
 
-        for bot in ["arbitragem", "grid", "momentum", "scalping", "mean_reversion", "swing"]:
+        for bot in [
+            "arbitragem",
+            "grid",
+            "momentum",
+            "scalping",
+            "mean_reversion",
+            "swing",
+        ]:
             targets = gerenciador.verificar_targets(bot)
             assert isinstance(targets, dict)
             assert len(targets) > 0

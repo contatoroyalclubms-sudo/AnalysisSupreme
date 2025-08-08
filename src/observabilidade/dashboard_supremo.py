@@ -74,7 +74,9 @@ class DashboardSupremo:
             "ai_metrics": asdict(ai_metrics),
             "risk_metrics": asdict(risk_metrics),
             "system_health": system_health,
-            "alerts": await self._generate_alerts(performance, ai_metrics, risk_metrics),
+            "alerts": await self._generate_alerts(
+                performance, ai_metrics, risk_metrics
+            ),
         }
 
         self.metrics_history.append(current_metrics)
@@ -106,7 +108,9 @@ class DashboardSupremo:
             "competitive_scores": competitive_scores,
             "world_ranking": world_ranking,
             "advantages": await self._identify_competitive_advantages(),
-            "market_position": "LÍDER_MUNDIAL" if world_ranking == 1 else f"POSIÇÃO_{world_ranking}",
+            "market_position": (
+                "LÍDER_MUNDIAL" if world_ranking == 1 else f"POSIÇÃO_{world_ranking}"
+            ),
         }
 
     async def generate_executive_summary(self) -> Dict:
@@ -193,7 +197,10 @@ class DashboardSupremo:
         }
 
     async def _generate_alerts(
-        self, performance: PerformanceMetrics, ai_metrics: AIMetrics, risk_metrics: RiskMetrics
+        self,
+        performance: PerformanceMetrics,
+        ai_metrics: AIMetrics,
+        risk_metrics: RiskMetrics,
     ) -> List[Dict]:
         """Gera alertas baseados em thresholds"""
         alerts = []
@@ -222,7 +229,10 @@ class DashboardSupremo:
                 }
             )
 
-        if ai_metrics.prediction_accuracy < self.alert_thresholds["prediction_accuracy"]:
+        if (
+            ai_metrics.prediction_accuracy
+            < self.alert_thresholds["prediction_accuracy"]
+        ):
             alerts.append(
                 {
                     "type": "AI_PERFORMANCE",
@@ -252,17 +262,33 @@ class DashboardSupremo:
         """Obtém nossa performance atual"""
         await asyncio.sleep(0.001)
 
-        return {"latency": 0.8, "throughput": 15000, "uptime": 99.99, "accuracy": 95.2, "profit_margin": 0.15}
+        return {
+            "latency": 0.8,
+            "throughput": 15000,
+            "uptime": 99.99,
+            "accuracy": 95.2,
+            "profit_margin": 0.15,
+        }
 
-    async def _calculate_competitive_score(self, our_perf: Dict, competitor_perf: Dict) -> Dict:
+    async def _calculate_competitive_score(
+        self, our_perf: Dict, competitor_perf: Dict
+    ) -> Dict:
         """Calcula score competitivo"""
         await asyncio.sleep(0.001)
 
-        latency_advantage = (competitor_perf["latency"] - our_perf["latency"]) / competitor_perf["latency"]
-        throughput_advantage = (our_perf["throughput"] - competitor_perf["throughput"]) / competitor_perf["throughput"]
-        uptime_advantage = (our_perf["uptime"] - competitor_perf["uptime"]) / competitor_perf["uptime"]
+        latency_advantage = (
+            competitor_perf["latency"] - our_perf["latency"]
+        ) / competitor_perf["latency"]
+        throughput_advantage = (
+            our_perf["throughput"] - competitor_perf["throughput"]
+        ) / competitor_perf["throughput"]
+        uptime_advantage = (
+            our_perf["uptime"] - competitor_perf["uptime"]
+        ) / competitor_perf["uptime"]
 
-        overall_score = (latency_advantage + throughput_advantage + uptime_advantage) / 3
+        overall_score = (
+            latency_advantage + throughput_advantage + uptime_advantage
+        ) / 3
 
         return {
             "latency_advantage": latency_advantage,
@@ -276,7 +302,9 @@ class DashboardSupremo:
         """Calcula ranking mundial"""
         await asyncio.sleep(0.001)
 
-        better_than_count = sum(1 for score in competitive_scores.values() if score["we_are_better"])
+        better_than_count = sum(
+            1 for score in competitive_scores.values() if score["we_are_better"]
+        )
         total_competitors = len(competitive_scores)
 
         return total_competitors - better_than_count + 1

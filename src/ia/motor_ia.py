@@ -21,7 +21,12 @@ class Sinal:
     """Representa um sinal de trading gerado pela IA"""
 
     def __init__(
-        self, acao: str, confidence: float, preco_entrada: float = None, stop_loss: float = None, take_profit: float = None
+        self,
+        acao: str,
+        confidence: float,
+        preco_entrada: float = None,
+        stop_loss: float = None,
+        take_profit: float = None,
     ):
         self.acao = acao  # 'comprar', 'vender', 'parar'
         self.confidence = confidence  # 0.0 a 1.0
@@ -66,7 +71,9 @@ class GeradorSinais:
 
         scores = self._calcular_todos_indicadores(ohlcv)
 
-        score_final = sum(scores[ind] * peso for ind, peso in self.pesos.items() if ind in scores)
+        score_final = sum(
+            scores[ind] * peso for ind, peso in self.pesos.items() if ind in scores
+        )
 
         if score_final > 0.6:
             acao = "comprar"
@@ -420,12 +427,32 @@ class AutoTuner:
     def _parametros_padrao(self, estrategia: str) -> dict:
         """Retorna parâmetros padrão para cada estratégia"""
         parametros_map = {
-            "arbitragem": {"spread_minimo": 0.3, "timeout_execucao": 50, "volume_minimo": 1000},
+            "arbitragem": {
+                "spread_minimo": 0.3,
+                "timeout_execucao": 50,
+                "volume_minimo": 1000,
+            },
             "grid": {"num_grids": 10, "espacamento_pct": 0.5, "take_profit_pct": 1.0},
-            "momentum": {"breakout_threshold": 1.002, "volume_confirmacao": 1.5, "stop_loss_pct": 2.0},
-            "scalping": {"spread_target": 0.1, "hold_time_max": 30, "profit_target": 0.2},
-            "mean_reversion": {"rsi_oversold": 30, "rsi_overbought": 70, "reversion_threshold": 2.0},
-            "swing": {"trend_strength": 0.6, "fibonacci_levels": [0.382, 0.618], "hold_days": 5},
+            "momentum": {
+                "breakout_threshold": 1.002,
+                "volume_confirmacao": 1.5,
+                "stop_loss_pct": 2.0,
+            },
+            "scalping": {
+                "spread_target": 0.1,
+                "hold_time_max": 30,
+                "profit_target": 0.2,
+            },
+            "mean_reversion": {
+                "rsi_oversold": 30,
+                "rsi_overbought": 70,
+                "reversion_threshold": 2.0,
+            },
+            "swing": {
+                "trend_strength": 0.6,
+                "fibonacci_levels": [0.382, 0.618],
+                "hold_days": 5,
+            },
         }
         return parametros_map.get(estrategia, {})
 
@@ -544,7 +571,9 @@ class AprendizadoContinuo:
         self.historico_aprendizado = {}
         self.politicas = {}
 
-    async def treinar_modelo(self, bot_name: str, logs_trades: List[Dict], metricas: Dict):
+    async def treinar_modelo(
+        self, bot_name: str, logs_trades: List[Dict], metricas: Dict
+    ):
         """
         Reinforcement Learning dos resultados
         Melhora política de decisões automaticamente
@@ -571,7 +600,9 @@ class AprendizadoContinuo:
                     "melhoria": self._calcular_melhoria(bot_name, metricas),
                 }
 
-                logger.info(f"Modelo {bot_name} atualizado com {len(logs_trades)} trades")
+                logger.info(
+                    f"Modelo {bot_name} atualizado com {len(logs_trades)} trades"
+                )
 
         except Exception as e:
             logger.error(f"Erro no treinamento contínuo: {e}")
@@ -606,12 +637,19 @@ class AprendizadoContinuo:
 
     async def _treinar_rl(self, modelo, estados, acoes, recompensas):
         """Executa treinamento RL"""
-        nova_politica = {"decisao_threshold": 0.6, "risk_adjustment": 0.8, "confidence_boost": 1.1}
+        nova_politica = {
+            "decisao_threshold": 0.6,
+            "risk_adjustment": 0.8,
+            "confidence_boost": 1.1,
+        }
         return nova_politica
 
     def _validar_politica(self, politica, bot_name: str) -> bool:
         """Valida se nova política é melhor que a anterior"""
-        return 0.5 <= politica.get("decisao_threshold", 0) <= 0.9 and 0.5 <= politica.get("risk_adjustment", 0) <= 1.2
+        return (
+            0.5 <= politica.get("decisao_threshold", 0) <= 0.9
+            and 0.5 <= politica.get("risk_adjustment", 0) <= 1.2
+        )
 
     def _calcular_melhoria(self, bot_name: str, metricas: Dict) -> float:
         """Calcula melhoria em relação ao histórico"""
@@ -656,7 +694,11 @@ class MotorIA:
     async def _carregar_modelos(self):
         """Carrega modelos salvos"""
         try:
-            modelo_files = ["modelo_predicao_preco.pkl", "modelo_classificacao_tendencia.pkl", "modelo_volatilidade.pkl"]
+            modelo_files = [
+                "modelo_predicao_preco.pkl",
+                "modelo_classificacao_tendencia.pkl",
+                "modelo_volatilidade.pkl",
+            ]
 
             for modelo_file in modelo_files:
                 modelo_path = os.path.join(self.ia_config.modelo_path, modelo_file)
@@ -711,16 +753,26 @@ class MotorIA:
                 import random
 
                 if self.tipo == "preco":
-                    return np.array([random.uniform(-0.02, 0.02) for _ in range(len(X))])  # nosec B311
+                    return np.array(
+                        [random.uniform(-0.02, 0.02) for _ in range(len(X))]
+                    )  # nosec B311
                 elif self.tipo == "tendencia":
-                    return np.array([random.choice([0, 1, 2]) for _ in range(len(X))])  # nosec B311
+                    return np.array(
+                        [random.choice([0, 1, 2]) for _ in range(len(X))]
+                    )  # nosec B311
                 else:  # volatilidade
-                    return np.array([random.uniform(0.01, 0.05) for _ in range(len(X))])  # nosec B311
+                    return np.array(
+                        [random.uniform(0.01, 0.05) for _ in range(len(X))]
+                    )  # nosec B311
 
             def fit(self, X, y):
                 pass
 
-        self.modelos["modelo_predicao_preco"] = {"regressor": ModeloSimulado("preco"), "scaler": None, "treinado": True}
+        self.modelos["modelo_predicao_preco"] = {
+            "regressor": ModeloSimulado("preco"),
+            "scaler": None,
+            "treinado": True,
+        }
 
         self.modelos["modelo_classificacao_tendencia"] = {
             "classifier": ModeloSimulado("tendencia"),
@@ -728,11 +780,17 @@ class MotorIA:
             "treinado": True,
         }
 
-        self.modelos["modelo_volatilidade"] = {"regressor": ModeloSimulado("volatilidade"), "scaler": None, "treinado": True}
+        self.modelos["modelo_volatilidade"] = {
+            "regressor": ModeloSimulado("volatilidade"),
+            "scaler": None,
+            "treinado": True,
+        }
 
         logger.info("Modelos simulados criados")
 
-    async def analisar_mercado(self, symbol: str, ohlcv_data: List[List]) -> Dict[str, Any]:
+    async def analisar_mercado(
+        self, symbol: str, ohlcv_data: List[List]
+    ) -> Dict[str, Any]:
         """Análise de mercado usando IA"""
         try:
             if len(ohlcv_data) < 20:
@@ -751,7 +809,9 @@ class MotorIA:
                 "predicao_tendencia": predicao_tendencia,
                 "predicao_volatilidade": predicao_volatilidade,
                 "confianca": confianca,
-                "recomendacao": self._gerar_recomendacao(predicao_preco, predicao_tendencia, confianca),
+                "recomendacao": self._gerar_recomendacao(
+                    predicao_preco, predicao_tendencia, confianca
+                ),
                 "timestamp": datetime.now(),
                 "features_utilizadas": len(features) if features is not None else 0,
             }
@@ -767,7 +827,10 @@ class MotorIA:
     def _extrair_features(self, ohlcv_data: List[List]) -> Optional[np.ndarray]:
         """Extrai features dos dados OHLCV"""
         try:
-            df = pd.DataFrame(ohlcv_data, columns=["timestamp", "open", "high", "low", "close", "volume"])
+            df = pd.DataFrame(
+                ohlcv_data,
+                columns=["timestamp", "open", "high", "low", "close", "volume"],
+            )
 
             df["returns"] = df["close"].pct_change()
             df["volatility"] = df["returns"].rolling(10).std()
@@ -883,7 +946,9 @@ class MotorIA:
 
             historico = self.historico_predicoes.get(symbol, [])
             if len(historico) > 10:
-                acertos = sum(1 for pred in historico[-10:] if pred.get("acertou", False))
+                acertos = sum(
+                    1 for pred in historico[-10:] if pred.get("acertou", False)
+                )
                 taxa_acerto = acertos / 10
                 confianca_historica = taxa_acerto
             else:
@@ -900,7 +965,9 @@ class MotorIA:
             logger.error(f"Erro ao calcular confiança: {e}")
             return 0.5
 
-    def _gerar_recomendacao(self, predicao_preco: float, predicao_tendencia: str, confianca: float) -> str:
+    def _gerar_recomendacao(
+        self, predicao_preco: float, predicao_tendencia: str, confianca: float
+    ) -> str:
         """Gera recomendação de trading"""
         try:
             if confianca < 0.4:
@@ -938,7 +1005,9 @@ class MotorIA:
 
             logger.info("Iniciando treinamento de modelos de IA")
 
-            X, y_preco, y_tendencia, y_volatilidade = self._preparar_dados_treinamento(dados_historicos)
+            X, y_preco, y_tendencia, y_volatilidade = self._preparar_dados_treinamento(
+                dados_historicos
+            )
 
             if len(X) < 100:
                 logger.warning("Dados insuficientes para treinamento")
@@ -984,10 +1053,18 @@ class MotorIA:
                     else:
                         y_tendencia.append(1)  # lateral
 
-                    volatility = np.std([candle[4] for candle in ohlcv_list[i - 10 : i]]) / current_price
+                    volatility = (
+                        np.std([candle[4] for candle in ohlcv_list[i - 10 : i]])
+                        / current_price
+                    )
                     y_volatilidade.append(volatility)
 
-        return np.array(X), np.array(y_preco), np.array(y_tendencia), np.array(y_volatilidade)
+        return (
+            np.array(X),
+            np.array(y_preco),
+            np.array(y_tendencia),
+            np.array(y_volatilidade),
+        )
 
     async def _treinar_modelo_preco(self, X: np.ndarray, y: np.ndarray):
         """Treina modelo de predição de preço"""
@@ -1048,7 +1125,9 @@ class MotorIA:
         try:
             for nome, modelo in self.modelos.items():
                 if modelo.get("treinado"):
-                    modelo_path = os.path.join(self.ia_config.modelo_path, f"{nome}.pkl")
+                    modelo_path = os.path.join(
+                        self.ia_config.modelo_path, f"{nome}.pkl"
+                    )
                     with open(modelo_path, "wb") as f:
                         pickle.dump(modelo, f)
                     logger.info(f"Modelo {nome} salvo")
@@ -1056,7 +1135,9 @@ class MotorIA:
         except Exception as e:
             logger.error(f"Erro ao salvar modelos: {e}")
 
-    async def otimizar_parametros_bot(self, bot_name: str, historico_trades: List) -> Dict[str, Any]:
+    async def otimizar_parametros_bot(
+        self, bot_name: str, historico_trades: List
+    ) -> Dict[str, Any]:
         """Otimiza parâmetros de um bot usando IA"""
         try:
             logger.info(f"Otimizando parâmetros do bot {bot_name}")
@@ -1087,8 +1168,12 @@ class MotorIA:
 
         win_rate = winning_trades / total_trades if total_trades > 0 else 0
         total_pnl = sum(t.pnl for t in trades)
-        avg_win = np.mean([t.pnl for t in trades if t.pnl > 0]) if winning_trades > 0 else 0
-        avg_loss = np.mean([t.pnl for t in trades if t.pnl < 0]) if losing_trades > 0 else 0
+        avg_win = (
+            np.mean([t.pnl for t in trades if t.pnl > 0]) if winning_trades > 0 else 0
+        )
+        avg_loss = (
+            np.mean([t.pnl for t in trades if t.pnl < 0]) if losing_trades > 0 else 0
+        )
 
         return {
             "win_rate": win_rate,
@@ -1133,7 +1218,9 @@ class MotorIA:
         if self.ia_config.treinamento_ativo:
             await self._salvar_modelos()
 
-        metricas_path = os.path.join(self.ia_config.modelo_path, "metricas_performance.pkl")
+        metricas_path = os.path.join(
+            self.ia_config.modelo_path, "metricas_performance.pkl"
+        )
         try:
             with open(metricas_path, "wb") as f:
                 pickle.dump(self.metricas_performance, f)

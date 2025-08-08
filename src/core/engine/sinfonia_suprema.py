@@ -56,22 +56,46 @@ class SinfoniaSuprema:
         """Inicializa movimentos padrão da sinfonia"""
         self.movimento_configs = {
             "arbitragem": ConfiguracaoSinfonia(
-                movimento=MovimentoSinfonia.PRESTO, target_latency_ms=15.0, max_concurrent=8, batch_size=15, priority=9
+                movimento=MovimentoSinfonia.PRESTO,
+                target_latency_ms=15.0,
+                max_concurrent=8,
+                batch_size=15,
+                priority=9,
             ),
             "scalping": ConfiguracaoSinfonia(
-                movimento=MovimentoSinfonia.ALLEGRO, target_latency_ms=25.0, max_concurrent=6, batch_size=12, priority=8
+                movimento=MovimentoSinfonia.ALLEGRO,
+                target_latency_ms=25.0,
+                max_concurrent=6,
+                batch_size=12,
+                priority=8,
             ),
             "momentum": ConfiguracaoSinfonia(
-                movimento=MovimentoSinfonia.ALLEGRO, target_latency_ms=35.0, max_concurrent=4, batch_size=8, priority=7
+                movimento=MovimentoSinfonia.ALLEGRO,
+                target_latency_ms=35.0,
+                max_concurrent=4,
+                batch_size=8,
+                priority=7,
             ),
             "grid": ConfiguracaoSinfonia(
-                movimento=MovimentoSinfonia.ANDANTE, target_latency_ms=60.0, max_concurrent=3, batch_size=6, priority=5
+                movimento=MovimentoSinfonia.ANDANTE,
+                target_latency_ms=60.0,
+                max_concurrent=3,
+                batch_size=6,
+                priority=5,
             ),
             "mean_reversion": ConfiguracaoSinfonia(
-                movimento=MovimentoSinfonia.ANDANTE, target_latency_ms=80.0, max_concurrent=3, batch_size=5, priority=4
+                movimento=MovimentoSinfonia.ANDANTE,
+                target_latency_ms=80.0,
+                max_concurrent=3,
+                batch_size=5,
+                priority=4,
             ),
             "swing": ConfiguracaoSinfonia(
-                movimento=MovimentoSinfonia.LARGO, target_latency_ms=150.0, max_concurrent=2, batch_size=3, priority=2
+                movimento=MovimentoSinfonia.LARGO,
+                target_latency_ms=150.0,
+                max_concurrent=2,
+                batch_size=3,
+                priority=2,
             ),
         }
 
@@ -117,13 +141,21 @@ class SinfoniaSuprema:
 
         logger.info("🎼 Sinfonia Tecnológica Suprema inicializada com sucesso!")
 
-    async def execute_movimento(self, bot_name: str, execution_func: Callable, params: Dict[str, Any] = None) -> Any:
+    async def execute_movimento(
+        self, bot_name: str, execution_func: Callable, params: Dict[str, Any] = None
+    ) -> Any:
         """🎼 MOVIMENTO II: Andante - Execução de Movimento Sinfônico"""
         config = self.movimento_configs.get(bot_name)
         if not config:
-            logger.warning(f"⚠️ Configuração não encontrada para {bot_name}, usando padrão")
+            logger.warning(
+                f"⚠️ Configuração não encontrada para {bot_name}, usando padrão"
+            )
             config = ConfiguracaoSinfonia(
-                movimento=MovimentoSinfonia.ANDANTE, target_latency_ms=100.0, max_concurrent=2, batch_size=3, priority=3
+                movimento=MovimentoSinfonia.ANDANTE,
+                target_latency_ms=100.0,
+                max_concurrent=2,
+                batch_size=3,
+                priority=3,
             )
 
         start_time = time.time() * 1000
@@ -152,7 +184,9 @@ class SinfoniaSuprema:
             self._record_performance(bot_name, execution_time)
 
             if execution_time <= config.target_latency_ms:
-                logger.debug(f"🎼 {bot_name} {config.movimento.value}: {execution_time:.2f}ms ✅")
+                logger.debug(
+                    f"🎼 {bot_name} {config.movimento.value}: {execution_time:.2f}ms ✅"
+                )
             else:
                 logger.warning(
                     f"🎼 {bot_name} {config.movimento.value}: {execution_time:.2f}ms "
@@ -163,11 +197,15 @@ class SinfoniaSuprema:
 
         except Exception as e:
             execution_time = time.time() * 1000 - start_time
-            logger.error(f"❌ Erro no movimento {config.movimento.value} do {bot_name}: {e}")
+            logger.error(
+                f"❌ Erro no movimento {config.movimento.value} do {bot_name}: {e}"
+            )
             self._record_performance(bot_name, execution_time, error=True)
             raise
 
-    def _record_performance(self, bot_name: str, execution_time: float, error: bool = False):
+    def _record_performance(
+        self, bot_name: str, execution_time: float, error: bool = False
+    ):
         """Registra métricas de performance"""
         if bot_name not in self.performance_metrics:
             self.performance_metrics[bot_name] = []
@@ -201,7 +239,11 @@ class SinfoniaSuprema:
                 "min_latency_ms": min(recent_metrics),
                 "max_latency_ms": max(recent_metrics),
                 "execucoes_recentes": len(recent_metrics),
-                "target_achievement": sum(1 for m in recent_metrics if m <= (config.target_latency_ms if config else 100))
+                "target_achievement": sum(
+                    1
+                    for m in recent_metrics
+                    if m <= (config.target_latency_ms if config else 100)
+                )
                 / len(recent_metrics)
                 * 100,
             }
@@ -214,21 +256,33 @@ class SinfoniaSuprema:
             symphony_report["performance_global"] = {
                 "avg_latency_ms": sum(all_metrics) / len(all_metrics),
                 "total_execucoes": len(all_metrics),
-                "ultra_fast_achievement": sum(1 for m in all_metrics if m <= 15) / len(all_metrics) * 100,
-                "fast_achievement": sum(1 for m in all_metrics if m <= 50) / len(all_metrics) * 100,
+                "ultra_fast_achievement": sum(1 for m in all_metrics if m <= 15)
+                / len(all_metrics)
+                * 100,
+                "fast_achievement": sum(1 for m in all_metrics if m <= 50)
+                / len(all_metrics)
+                * 100,
             }
 
         if self.ultra_executor:
-            symphony_report["componentes"]["ultra_executor"] = self.ultra_executor.get_performance_stats()
+            symphony_report["componentes"][
+                "ultra_executor"
+            ] = self.ultra_executor.get_performance_stats()
 
         if self.websocket_manager:
-            symphony_report["componentes"]["websocket_manager"] = self.websocket_manager.get_premium_stats()
+            symphony_report["componentes"][
+                "websocket_manager"
+            ] = self.websocket_manager.get_premium_stats()
 
         if self.cache_intelligence:
-            symphony_report["componentes"]["cache_intelligence"] = self.cache_intelligence.get_stats()
+            symphony_report["componentes"][
+                "cache_intelligence"
+            ] = self.cache_intelligence.get_stats()
 
         if self.memory_optimizer:
-            symphony_report["componentes"]["memory_optimizer"] = self.memory_optimizer.get_stats()
+            symphony_report["componentes"][
+                "memory_optimizer"
+            ] = self.memory_optimizer.get_stats()
 
         return symphony_report
 

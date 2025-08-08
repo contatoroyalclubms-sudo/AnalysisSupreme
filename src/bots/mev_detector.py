@@ -86,7 +86,9 @@ class MEVDetectorBot(BotBase):
         sandwich_risk = await self._assess_sandwich_risk(transaction)
         frontrun_risk = await self._assess_frontrun_risk(transaction)
 
-        protection_strategy = await self._generate_protection_strategy(sandwich_risk, frontrun_risk)
+        protection_strategy = await self._generate_protection_strategy(
+            sandwich_risk, frontrun_risk
+        )
 
         return {
             "original_tx": transaction,
@@ -190,7 +192,9 @@ class MEVDetectorBot(BotBase):
         return {
             "risk_score": risk_score,
             "vulnerable": risk_score > 0.3,
-            "recommended_protection": "private_mempool" if risk_score > 0.5 else "standard",
+            "recommended_protection": (
+                "private_mempool" if risk_score > 0.5 else "standard"
+            ),
         }
 
     async def _assess_frontrun_risk(self, transaction: Dict) -> Dict:
@@ -205,10 +209,14 @@ class MEVDetectorBot(BotBase):
         return {
             "frontrun_probability": frontrun_probability,
             "vulnerable": frontrun_probability > 0.4,
-            "recommended_gas_price": gas_price * 1.2 if frontrun_probability > 0.4 else gas_price,
+            "recommended_gas_price": (
+                gas_price * 1.2 if frontrun_probability > 0.4 else gas_price
+            ),
         }
 
-    async def _generate_protection_strategy(self, sandwich_risk: Dict, frontrun_risk: Dict) -> Dict:
+    async def _generate_protection_strategy(
+        self, sandwich_risk: Dict, frontrun_risk: Dict
+    ) -> Dict:
         """Gera estratégia de proteção contra MEV"""
         await asyncio.sleep(0.002)
 
@@ -227,7 +235,9 @@ class MEVDetectorBot(BotBase):
             protection_methods.append("standard_execution")
             risk_reduction = 0.1
 
-        strategy = "multi_block_execution" if len(protection_methods) > 1 else "single_block"
+        strategy = (
+            "multi_block_execution" if len(protection_methods) > 1 else "single_block"
+        )
 
         return {
             "methods": protection_methods,
@@ -265,7 +275,10 @@ class MEVDetectorBot(BotBase):
 
         best_opportunity = opportunities[0]
 
-        if best_opportunity.profit_potential > 0.01 and best_opportunity.confidence > 0.7:
+        if (
+            best_opportunity.profit_potential > 0.01
+            and best_opportunity.confidence > 0.7
+        ):
             return {
                 "action": "EXECUTE_MEV",
                 "opportunity_type": best_opportunity.type,

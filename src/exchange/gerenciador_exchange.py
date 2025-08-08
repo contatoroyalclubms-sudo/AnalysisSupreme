@@ -28,12 +28,21 @@ class GerenciadorExchange:
 
         self.websocket_pool = WebSocketPool(max_connections_per_exchange=5)
         cache_config = config.get_cache_config()
-        l1_max_size_mb = cache_config.get("l1_max_size_mb", 512) if isinstance(cache_config, dict) else 512
+        l1_max_size_mb = (
+            cache_config.get("l1_max_size_mb", 512)
+            if isinstance(cache_config, dict)
+            else 512
+        )
         self.cache = CacheIntelligence(l1_max_size_mb)
         self.circuit_breakers = ExchangeCircuitBreakers()
         self.kpi_manager = GerenciadorKPIs()
 
-        self.performance_stats = {"total_requests": 0, "cache_hits": 0, "websocket_messages": 0, "circuit_breaker_trips": 0}
+        self.performance_stats = {
+            "total_requests": 0,
+            "cache_hits": 0,
+            "websocket_messages": 0,
+            "circuit_breaker_trips": 0,
+        }
 
     async def inicializar(self):
         """Inicializa conexões com exchanges e componentes de performance"""
@@ -80,7 +89,9 @@ class GerenciadorExchange:
 
             for exchange, url in websocket_urls.items():
                 if exchange in self.exchanges:
-                    self.websocket_pool.register_handler(exchange, self._handle_websocket_message)
+                    self.websocket_pool.register_handler(
+                        exchange, self._handle_websocket_message
+                    )
                     await self.websocket_pool.add_connection(exchange, url)
 
         except Exception as e:
@@ -155,7 +166,11 @@ class GerenciadorExchange:
                     bids.append([bid_price, volume])
                     asks.append([ask_price, volume])
 
-                return {"bids": bids, "asks": asks, "timestamp": datetime.now().timestamp()}
+                return {
+                    "bids": bids,
+                    "asks": asks,
+                    "timestamp": datetime.now().timestamp(),
+                }
 
             async def fetch_ohlcv(self, symbol, timeframe="1m", limit=100):
                 ticker = await self.fetch_ticker(symbol)
@@ -169,12 +184,27 @@ class GerenciadorExchange:
 
                     variation = random.uniform(-0.01, 0.01)  # nosec B311
                     open_price = base_price * (1 + variation)
-                    close_price = open_price * (1 + random.uniform(-0.005, 0.005))  # nosec B311
-                    high_price = max(open_price, close_price) * (1 + random.uniform(0, 0.01))  # nosec B311
-                    low_price = min(open_price, close_price) * (1 - random.uniform(0, 0.01))  # nosec B311
+                    close_price = open_price * (
+                        1 + random.uniform(-0.005, 0.005)
+                    )  # nosec B311
+                    high_price = max(open_price, close_price) * (
+                        1 + random.uniform(0, 0.01)
+                    )  # nosec B311
+                    low_price = min(open_price, close_price) * (
+                        1 - random.uniform(0, 0.01)
+                    )  # nosec B311
                     volume = random.uniform(10, 1000)  # nosec B311
 
-                    ohlcv.append([timestamp, open_price, high_price, low_price, close_price, volume])
+                    ohlcv.append(
+                        [
+                            timestamp,
+                            open_price,
+                            high_price,
+                            low_price,
+                            close_price,
+                            volume,
+                        ]
+                    )
 
                 return ohlcv
 
@@ -217,7 +247,9 @@ class GerenciadorExchange:
                 else:
                     return await self.exchange_principal.fetch_ticker(symbol)
 
-            result = await self.circuit_breakers.call_with_breaker(exchange_name, fetch_ticker_call)
+            result = await self.circuit_breakers.call_with_breaker(
+                exchange_name, fetch_ticker_call
+            )
 
             if result:
                 await self.cache.set_intelligent(cache_key, result, "ticker")
@@ -230,7 +262,9 @@ class GerenciadorExchange:
         finally:
             latencia_ms = self.kpi_manager.finalizar_medicao_latencia(medicao_id)
 
-    async def get_orderbook(self, symbol: str, limit: int = 10, exchange: str = None) -> Optional[Dict]:
+    async def get_orderbook(
+        self, symbol: str, limit: int = 10, exchange: str = None
+    ) -> Optional[Dict]:
         """Obtém order book com cache e circuit breaker"""
         try:
             self.performance_stats["total_requests"] += 1
@@ -246,11 +280,15 @@ class GerenciadorExchange:
 
             async def fetch_orderbook_call():
                 if exchange and exchange in self.exchanges:
-                    return await self.exchanges[exchange].fetch_order_book(symbol, limit)
+                    return await self.exchanges[exchange].fetch_order_book(
+                        symbol, limit
+                    )
                 else:
                     return await self.exchange_principal.fetch_order_book(symbol, limit)
 
-            result = await self.circuit_breakers.call_with_breaker(exchange_name, fetch_orderbook_call)
+            result = await self.circuit_breakers.call_with_breaker(
+                exchange_name, fetch_orderbook_call
+            )
 
             if result:
                 await self.cache.set_intelligent(cache_key, result, "orderbook")
@@ -261,7 +299,9 @@ class GerenciadorExchange:
             logger.error(f"Erro ao obter orderbook {symbol}: {e}")
             return None
 
-    async def get_ohlcv(self, symbol: str, timeframe: str = "1m", limit: int = 100, exchange: str = None) -> List[List]:
+    async def get_ohlcv(
+        self, symbol: str, timeframe: str = "1m", limit: int = 100, exchange: str = None
+    ) -> List[List]:
         """Obtém dados OHLCV com cache"""
         try:
             self.performance_stats["total_requests"] += 1
@@ -277,11 +317,17 @@ class GerenciadorExchange:
 
             async def fetch_ohlcv_call():
                 if exchange and exchange in self.exchanges:
-                    return await self.exchanges[exchange].fetch_ohlcv(symbol, timeframe, limit)
+                    return await self.exchanges[exchange].fetch_ohlcv(
+                        symbol, timeframe, limit
+                    )
                 else:
-                    return await self.exchange_principal.fetch_ohlcv(symbol, timeframe, limit)
+                    return await self.exchange_principal.fetch_ohlcv(
+                        symbol, timeframe, limit
+                    )
 
-            result = await self.circuit_breakers.call_with_breaker(exchange_name, fetch_ohlcv_call)
+            result = await self.circuit_breakers.call_with_breaker(
+                exchange_name, fetch_ohlcv_call
+            )
 
             if result:
                 await self.cache.set_intelligent(cache_key, result, "ohlcv")
@@ -293,7 +339,13 @@ class GerenciadorExchange:
             return []
 
     async def create_order(
-        self, symbol: str, order_type: str, side: str, amount: float, price: float = None, exchange: str = None
+        self,
+        symbol: str,
+        order_type: str,
+        side: str,
+        amount: float,
+        price: float = None,
+        exchange: str = None,
     ) -> Optional[Dict]:
         """Cria ordem com circuit breaker"""
         try:
@@ -316,11 +368,17 @@ class GerenciadorExchange:
 
                 async def create_order_call():
                     if exchange and exchange in self.exchanges:
-                        return await self.exchanges[exchange].create_order(symbol, order_type, side, amount, price)
+                        return await self.exchanges[exchange].create_order(
+                            symbol, order_type, side, amount, price
+                        )
                     else:
-                        return await self.exchange_principal.create_order(symbol, order_type, side, amount, price)
+                        return await self.exchange_principal.create_order(
+                            symbol, order_type, side, amount, price
+                        )
 
-                return await self.circuit_breakers.call_with_breaker(exchange_name, create_order_call)
+                return await self.circuit_breakers.call_with_breaker(
+                    exchange_name, create_order_call
+                )
 
         except Exception as e:
             logger.error(f"Erro ao criar ordem: {e}")

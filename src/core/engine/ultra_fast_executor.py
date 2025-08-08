@@ -65,13 +65,19 @@ class UltraFastExecutor:
         self.running = True
 
         for i in range(self.max_workers):
-            worker = asyncio.create_task(self._ultra_fast_worker(f"worker_{i}"), name=f"ultra_worker_{i}")
+            worker = asyncio.create_task(
+                self._ultra_fast_worker(f"worker_{i}"), name=f"ultra_worker_{i}"
+            )
             self.workers.append(worker)
 
-        priority_worker = asyncio.create_task(self._priority_worker(), name="priority_worker")
+        priority_worker = asyncio.create_task(
+            self._priority_worker(), name="priority_worker"
+        )
         self.workers.append(priority_worker)
 
-        logger.info(f"✅ Ultra Fast Executor inicializado com {len(self.workers)} workers")
+        logger.info(
+            f"✅ Ultra Fast Executor inicializado com {len(self.workers)} workers"
+        )
 
     async def execute_ultra_fast(self, task: ExecutionTask) -> Optional[Any]:
         """Execução ultra rápida de task"""
@@ -85,14 +91,18 @@ class UltraFastExecutor:
             else:  # Swing, mean reversion
                 await self.low_priority_queue.put(task)
 
-            result = await asyncio.wait_for(self._wait_for_result(task.task_id), timeout=0.015)  # 15ms timeout
+            result = await asyncio.wait_for(
+                self._wait_for_result(task.task_id), timeout=0.015
+            )  # 15ms timeout
 
             execution_time = time.time() * 1000 - start_time
             self.execution_times.append(execution_time)
             self.total_executions += 1
 
             if execution_time > 15:
-                logger.warning(f"⚠️  Execução lenta: {execution_time:.2f}ms (target: 15ms)")
+                logger.warning(
+                    f"⚠️  Execução lenta: {execution_time:.2f}ms (target: 15ms)"
+                )
 
             return result
 
@@ -126,7 +136,9 @@ class UltraFastExecutor:
 
                 if not task:
                     try:
-                        task = await asyncio.wait_for(self.low_priority_queue.get(), timeout=0.001)  # 1ms timeout
+                        task = await asyncio.wait_for(
+                            self.low_priority_queue.get(), timeout=0.001
+                        )  # 1ms timeout
                     except asyncio.TimeoutError:
                         continue
 
@@ -165,14 +177,18 @@ class UltraFastExecutor:
             if asyncio.iscoroutinefunction(func):
                 result = await func(**task.params)
             else:
-                result = await asyncio.get_event_loop().run_in_executor(self.thread_pool, func, **task.params)
+                result = await asyncio.get_event_loop().run_in_executor(
+                    self.thread_pool, func, **task.params
+                )
 
             self.reusable_objects[task.task_id] = result
 
             execution_time = time.time() * 1000 - start_time
 
             if execution_time <= 15:
-                logger.debug(f"⚡ Task {task.task_id} executada em {execution_time:.2f}ms")
+                logger.debug(
+                    f"⚡ Task {task.task_id} executada em {execution_time:.2f}ms"
+                )
             else:
                 logger.warning(f"🐌 Task {task.task_id} lenta: {execution_time:.2f}ms")
 
@@ -197,7 +213,12 @@ class UltraFastExecutor:
 
     async def _ultra_fast_order(self, **kwargs) -> Dict[str, Any]:
         """Execução ultra rápida de ordens"""
-        return {"order_id": f"ultra_{int(time.time() * 1000)}", "status": "filled", "execution_time_ms": 8.5, **kwargs}
+        return {
+            "order_id": f"ultra_{int(time.time() * 1000)}",
+            "status": "filled",
+            "execution_time_ms": 8.5,
+            **kwargs,
+        }
 
     async def _ultra_fast_ticker(self, **kwargs) -> Dict[str, Any]:
         """Obtenção ultra rápida de ticker"""
@@ -210,7 +231,12 @@ class UltraFastExecutor:
 
     async def _ultra_fast_signals(self, **kwargs) -> Dict[str, Any]:
         """Cálculo ultra rápido de sinais"""
-        return {"signal": "BUY" if time.time() % 2 > 1 else "SELL", "confidence": 0.85, "calculation_time_ms": 5.1, **kwargs}
+        return {
+            "signal": "BUY" if time.time() % 2 > 1 else "SELL",
+            "confidence": 0.85,
+            "calculation_time_ms": 5.1,
+            **kwargs,
+        }
 
     def _generic_execution(self, **kwargs) -> Dict[str, Any]:
         """Execução genérica otimizada"""
@@ -232,16 +258,29 @@ class UltraFastExecutor:
     def get_performance_stats(self) -> Dict[str, Any]:
         """Estatísticas de performance do engine"""
         if not self.execution_times:
-            return {"avg_execution_time_ms": 0, "total_executions": 0, "success_rate": 0, "target_achievement": 0}
+            return {
+                "avg_execution_time_ms": 0,
+                "total_executions": 0,
+                "success_rate": 0,
+                "target_achievement": 0,
+            }
 
         avg_time = sum(self.execution_times) / len(self.execution_times)
         success_rate = (
-            ((self.total_executions - self.failed_executions) / self.total_executions * 100)
+            (
+                (self.total_executions - self.failed_executions)
+                / self.total_executions
+                * 100
+            )
             if self.total_executions > 0
             else 0
         )
 
-        target_achievement = sum(1 for t in self.execution_times if t <= 15) / len(self.execution_times) * 100
+        target_achievement = (
+            sum(1 for t in self.execution_times if t <= 15)
+            / len(self.execution_times)
+            * 100
+        )
 
         return {
             "avg_execution_time_ms": round(avg_time, 2),

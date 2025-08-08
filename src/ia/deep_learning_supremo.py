@@ -34,7 +34,12 @@ class DeepLearningSupremo:
         self.lstm_ensemble = None
         self.attention_mechanism = None
         self.quantum_simulator = None
-        self.ensemble_weights = {"transformer": 0.4, "lstm": 0.3, "attention": 0.2, "quantum": 0.1}
+        self.ensemble_weights = {
+            "transformer": 0.4,
+            "lstm": 0.3,
+            "attention": 0.2,
+            "quantum": 0.1,
+        }
 
     async def initialize(self):
         """Inicializa todos os modelos de IA"""
@@ -50,7 +55,9 @@ class DeepLearningSupremo:
         attention_weights = await self._calculate_attention(market_data)
         quantum_pred = await self._quantum_prediction(market_data)
 
-        final_prediction = self._weighted_ensemble(transformer_pred, lstm_pred, attention_weights, quantum_pred)
+        final_prediction = self._weighted_ensemble(
+            transformer_pred, lstm_pred, attention_weights, quantum_pred
+        )
 
         return PredictionResult(
             price_direction=final_prediction["direction"],
@@ -70,7 +77,12 @@ class DeepLearningSupremo:
         direction_score = np.random.uniform(0.7, 0.95)
         direction = "BUY" if direction_score > 0.5 else "SELL"
 
-        return {"direction": direction, "confidence": direction_score, "model": "transformer", "features_used": len(features)}
+        return {
+            "direction": direction,
+            "confidence": direction_score,
+            "model": "transformer",
+            "features_used": len(features),
+        }
 
     async def _lstm_ensemble_prediction(self, market_data: Dict) -> Dict:
         """Predição usando ensemble de LSTM para séries temporais"""
@@ -84,7 +96,9 @@ class DeepLearningSupremo:
             predictions.append(pred)
 
         ensemble_confidence = np.mean([p["confidence"] for p in predictions])
-        ensemble_direction = max(predictions, key=lambda x: x["confidence"])["direction"]
+        ensemble_direction = max(predictions, key=lambda x: x["confidence"])[
+            "direction"
+        ]
 
         return {
             "direction": ensemble_direction,
@@ -124,14 +138,25 @@ class DeepLearningSupremo:
             "model": "quantum",
         }
 
-    def _weighted_ensemble(self, transformer_pred: Dict, lstm_pred: Dict, attention_pred: Dict, quantum_pred: Dict) -> Dict:
+    def _weighted_ensemble(
+        self,
+        transformer_pred: Dict,
+        lstm_pred: Dict,
+        attention_pred: Dict,
+        quantum_pred: Dict,
+    ) -> Dict:
         """Ensemble final ponderado"""
         predictions = [transformer_pred, lstm_pred, attention_pred, quantum_pred]
         weights = list(self.ensemble_weights.values())
 
-        weighted_confidence = sum(pred["confidence"] * weight for pred, weight in zip(predictions, weights))
+        weighted_confidence = sum(
+            pred["confidence"] * weight for pred, weight in zip(predictions, weights)
+        )
 
-        buy_score = sum((1.0 if pred["direction"] == "BUY" else 0.0) * weight for pred, weight in zip(predictions, weights))
+        buy_score = sum(
+            (1.0 if pred["direction"] == "BUY" else 0.0) * weight
+            for pred, weight in zip(predictions, weights)
+        )
 
         final_direction = "BUY" if buy_score > 0.5 else "SELL"
 
@@ -162,13 +187,21 @@ class DeepLearningSupremo:
         confidence = np.random.uniform(0.65, 0.88)
         direction = "BUY" if confidence > 0.5 else "SELL"
 
-        return {"direction": direction, "confidence": confidence, "model_type": model_type}
+        return {
+            "direction": direction,
+            "confidence": confidence,
+            "model_type": model_type,
+        }
 
     async def _simulate_quantum_superposition(self, market_data: Dict) -> Dict:
         """Simula superposição quântica para otimização"""
         await asyncio.sleep(0.0005)
 
-        return {"superposition_states": 8, "entanglement_factor": 0.85, "coherence_time": 100}
+        return {
+            "superposition_states": 8,
+            "entanglement_factor": 0.85,
+            "coherence_time": 100,
+        }
 
     async def _quantum_measurement(self, quantum_states: Dict) -> Dict:
         """Medição quântica para colapsar estado"""
@@ -178,7 +211,11 @@ class DeepLearningSupremo:
         confidence = np.random.uniform(0.8, 0.95)
         direction = "BUY" if confidence > 0.5 else "SELL"
 
-        return {"direction": direction, "confidence": confidence, "advantage": advantage_factor}
+        return {
+            "direction": direction,
+            "confidence": confidence,
+            "advantage": advantage_factor,
+        }
 
     async def _load_transformer_model(self):
         """Carrega modelo Transformer"""

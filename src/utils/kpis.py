@@ -95,7 +95,11 @@ class GerenciadorKPIs:
     def iniciar_medicao_latencia(self, bot: str, operacao: str) -> str:
         """Inicia medição de latência"""
         medicao_id = f"{bot}_{operacao}_{int(time.time() * 1000)}"
-        self.medicoes_ativas[medicao_id] = {"bot": bot, "operacao": operacao, "inicio": time.time() * 1000}
+        self.medicoes_ativas[medicao_id] = {
+            "bot": bot,
+            "operacao": operacao,
+            "inicio": time.time() * 1000,
+        }
         return medicao_id
 
     def finalizar_medicao_latencia(self, medicao_id: str) -> float:
@@ -121,25 +125,35 @@ class GerenciadorKPIs:
         kpi.spread_capturado = spread
         kpi.execucao_simultanea = execucao_simultanea
 
-        logger.info(f"KPI Arbitragem - Spread: {spread:.3f}%, Execução: {execucao_simultanea:.1f}%")
+        logger.info(
+            f"KPI Arbitragem - Spread: {spread:.3f}%, Execução: {execucao_simultanea:.1f}%"
+        )
 
-    def atualizar_kpi_grid(self, eficiencia: float, adaptabilidade: float, lucro_lateral: float):
+    def atualizar_kpi_grid(
+        self, eficiencia: float, adaptabilidade: float, lucro_lateral: float
+    ):
         """Atualiza KPIs específicos de grid trading"""
         kpi = self.kpis["grid"]
         kpi.range_eficiencia = eficiencia
         kpi.grid_adaptabilidade = adaptabilidade
         kpi.lucro_lateral = lucro_lateral
 
-        logger.info(f"KPI Grid - Eficiência: {eficiencia:.1f}%, Adaptabilidade: {adaptabilidade:.2f}")
+        logger.info(
+            f"KPI Grid - Eficiência: {eficiencia:.1f}%, Adaptabilidade: {adaptabilidade:.2f}"
+        )
 
-    def atualizar_kpi_momentum(self, precisao: float, false_signals: float, stop_eficiencia: float):
+    def atualizar_kpi_momentum(
+        self, precisao: float, false_signals: float, stop_eficiencia: float
+    ):
         """Atualiza KPIs específicos de momentum"""
         kpi = self.kpis["momentum"]
         kpi.breakout_precisao = precisao
         kpi.false_signal_rate = false_signals
         kpi.stop_eficiencia = stop_eficiencia
 
-        logger.info(f"KPI Momentum - Precisão: {precisao:.1f}%, False Signals: {false_signals:.1f}%")
+        logger.info(
+            f"KPI Momentum - Precisão: {precisao:.1f}%, False Signals: {false_signals:.1f}%"
+        )
 
     def atualizar_kpi_scalping(self, throughput: float, fee_optimization: float):
         """Atualiza KPIs específicos de scalping"""
@@ -147,25 +161,35 @@ class GerenciadorKPIs:
         kpi.throughput_ops = throughput
         kpi.fee_optimization = fee_optimization
 
-        logger.info(f"KPI Scalping - Throughput: {throughput:.1f} ops/min, Fee Opt: {fee_optimization:.2f}")
+        logger.info(
+            f"KPI Scalping - Throughput: {throughput:.1f} ops/min, Fee Opt: {fee_optimization:.2f}"
+        )
 
-    def atualizar_kpi_mean_reversion(self, timing: float, oversold: float, rsi_effectiveness: float):
+    def atualizar_kpi_mean_reversion(
+        self, timing: float, oversold: float, rsi_effectiveness: float
+    ):
         """Atualiza KPIs específicos de mean reversion"""
         kpi = self.kpis["mean_reversion"]
         kpi.reversao_timing = timing
         kpi.oversold_detection = oversold
         kpi.rsi_effectiveness = rsi_effectiveness
 
-        logger.info(f"KPI Mean Reversion - Timing: {timing:.1f}%, Oversold: {oversold:.1f}%")
+        logger.info(
+            f"KPI Mean Reversion - Timing: {timing:.1f}%, Oversold: {oversold:.1f}%"
+        )
 
-    def atualizar_kpi_swing(self, trend_capture: float, hold_time: float, pattern_recognition: float):
+    def atualizar_kpi_swing(
+        self, trend_capture: float, hold_time: float, pattern_recognition: float
+    ):
         """Atualiza KPIs específicos de swing"""
         kpi = self.kpis["swing"]
         kpi.trend_capture = trend_capture
         kpi.hold_time_optimal = hold_time
         kpi.pattern_recognition = pattern_recognition
 
-        logger.info(f"KPI Swing - Trend Capture: {trend_capture:.1f}%, Pattern: {pattern_recognition:.2f}")
+        logger.info(
+            f"KPI Swing - Trend Capture: {trend_capture:.1f}%, Pattern: {pattern_recognition:.2f}"
+        )
 
     def verificar_targets(self, bot: str) -> Dict[str, bool]:
         """Verifica se KPIs atingem targets"""
@@ -214,8 +238,16 @@ class GerenciadorKPIs:
             relatorio["bots"][bot_name] = {
                 "kpis": kpi.__dict__,
                 "targets": targets,
-                "performance": f"{targets_atingidos}/{total_targets}" if total_targets > 0 else "0/0",
-                "score": (targets_atingidos / total_targets * 100) if total_targets > 0 else 0,
+                "performance": (
+                    f"{targets_atingidos}/{total_targets}"
+                    if total_targets > 0
+                    else "0/0"
+                ),
+                "score": (
+                    (targets_atingidos / total_targets * 100)
+                    if total_targets > 0
+                    else 0
+                ),
             }
 
         return relatorio

@@ -45,12 +45,16 @@ class PerformanceBenchmark:
             results["ticker_latencies"].append(latency)
 
             if i % 20 == 0:
-                logger.info(f"Benchmark ticker: {i}/{iterations} - Latência: {latency:.2f}ms")
+                logger.info(
+                    f"Benchmark ticker: {i}/{iterations} - Latência: {latency:.2f}ms"
+                )
 
         for i in range(iterations // 2):
             start_time = time.time() * 1000
 
-            tasks = [self.exchange_manager.get_orderbook(symbol, 10) for symbol in symbols]
+            tasks = [
+                self.exchange_manager.get_orderbook(symbol, 10) for symbol in symbols
+            ]
             await asyncio.gather(*tasks)
 
             end_time = time.time() * 1000
@@ -60,7 +64,9 @@ class PerformanceBenchmark:
         for i in range(iterations // 4):
             start_time = time.time() * 1000
 
-            tasks = [self.exchange_manager.get_ohlcv(symbol, "1m", 50) for symbol in symbols]
+            tasks = [
+                self.exchange_manager.get_ohlcv(symbol, "1m", 50) for symbol in symbols
+            ]
             await asyncio.gather(*tasks)
 
             end_time = time.time() * 1000
@@ -105,14 +111,21 @@ class PerformanceBenchmark:
             upper = sorted_data[int(index) + 1]
             return lower + (upper - lower) * (index - int(index))
 
-    async def run_throughput_benchmark(self, duration_seconds: int = 60) -> Dict[str, Any]:
+    async def run_throughput_benchmark(
+        self, duration_seconds: int = 60
+    ) -> Dict[str, Any]:
         """Executa benchmark de throughput"""
         logger.info(f"Iniciando benchmark de throughput por {duration_seconds}s")
 
         start_time = time.time()
         end_time = start_time + duration_seconds
 
-        operation_counts = {"ticker_requests": 0, "orderbook_requests": 0, "cache_hits": 0, "websocket_messages": 0}
+        operation_counts = {
+            "ticker_requests": 0,
+            "orderbook_requests": 0,
+            "cache_hits": 0,
+            "websocket_messages": 0,
+        }
 
         initial_stats = self.exchange_manager.get_performance_stats()
 
@@ -136,12 +149,15 @@ class PerformanceBenchmark:
             "cache_performance": {
                 "initial_hits": initial_stats["cache"]["hits"],
                 "final_hits": final_stats["cache"]["hits"],
-                "hits_during_test": final_stats["cache"]["hits"] - initial_stats["cache"]["hits"],
+                "hits_during_test": final_stats["cache"]["hits"]
+                - initial_stats["cache"]["hits"],
             },
             "timestamp": datetime.now().isoformat(),
         }
 
-        logger.info(f"Benchmark de throughput concluído: {results['total_operations']} operações")
+        logger.info(
+            f"Benchmark de throughput concluído: {results['total_operations']} operações"
+        )
         return results
 
     async def _continuous_ticker_requests(self, end_time: float, counters: Dict):
@@ -165,7 +181,9 @@ class PerformanceBenchmark:
 
         while time.time() < end_time:
             try:
-                tasks = [self.exchange_manager.get_orderbook(symbol, 5) for symbol in symbols]
+                tasks = [
+                    self.exchange_manager.get_orderbook(symbol, 5) for symbol in symbols
+                ]
                 await asyncio.gather(*tasks)
                 counters["orderbook_requests"] += len(symbols)
 
@@ -218,8 +236,16 @@ class PerformanceBenchmark:
         latency_stats = report["latency_benchmark"]
 
         return {
-            "general_latency": latency_stats.get("ticker_stats", {}).get("mean", 999) < targets["general_latency_ms"],
-            "throughput": report["throughput_benchmark"]["operations_per_second"].get("ticker", 0)
+            "general_latency": latency_stats.get("ticker_stats", {}).get("mean", 999)
+            < targets["general_latency_ms"],
+            "throughput": report["throughput_benchmark"]["operations_per_second"].get(
+                "ticker", 0
+            )
             > targets["min_throughput_ops_per_sec"],
-            "cache_hit_rate": float(report["current_stats"]["exchange"]["cache"]["hit_rate"].replace("%", "")) > 50.0,
+            "cache_hit_rate": float(
+                report["current_stats"]["exchange"]["cache"]["hit_rate"].replace(
+                    "%", ""
+                )
+            )
+            > 50.0,
         }

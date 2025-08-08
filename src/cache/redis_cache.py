@@ -21,7 +21,14 @@ class RedisCache:
         self.local_cache = {}
         self.cache_stats = {"hits": 0, "misses": 0, "sets": 0}
 
-        self.ttl_config = {"ticker": 100, "orderbook": 50, "trades": 200, "ohlcv": 1000, "balance": 5000, "orders": 1000}
+        self.ttl_config = {
+            "ticker": 100,
+            "orderbook": 50,
+            "trades": 200,
+            "ohlcv": 1000,
+            "balance": 5000,
+            "orders": 1000,
+        }
 
     async def initialize(self):
         """Inicializa conexão Redis"""
@@ -81,7 +88,9 @@ class RedisCache:
             ttl_seconds = max(1, ttl_ms // 1000)
 
             if self.redis_client:
-                await self.redis_client.setex(key, ttl_seconds, json.dumps(value, default=str))
+                await self.redis_client.setex(
+                    key, ttl_seconds, json.dumps(value, default=str)
+                )
 
             self.local_cache[key] = {"data": value, "timestamp": time.time() * 1000}
 
@@ -120,7 +129,11 @@ class RedisCache:
     def get_stats(self) -> Dict[str, Any]:
         """Retorna estatísticas do cache"""
         total_requests = self.cache_stats["hits"] + self.cache_stats["misses"]
-        hit_rate = (self.cache_stats["hits"] / total_requests * 100) if total_requests > 0 else 0
+        hit_rate = (
+            (self.cache_stats["hits"] / total_requests * 100)
+            if total_requests > 0
+            else 0
+        )
 
         return {
             "hits": self.cache_stats["hits"],

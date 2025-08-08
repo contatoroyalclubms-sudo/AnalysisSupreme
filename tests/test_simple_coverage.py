@@ -30,7 +30,15 @@ class TestSimpleCoverage:
         for exchange in exchanges:
             result = config.get_exchange_config(exchange)
 
-        bots = ["arbitragem", "grid", "momentum", "scalping", "mean_reversion", "swing", "invalid_bot"]
+        bots = [
+            "arbitragem",
+            "grid",
+            "momentum",
+            "scalping",
+            "mean_reversion",
+            "swing",
+            "invalid_bot",
+        ]
         for bot in bots:
             result = config.get_bot_config(bot)
 
@@ -54,7 +62,14 @@ class TestSimpleCoverage:
         invalid_latencia = kpi_manager.finalizar_medicao_latencia("invalid_id")
         assert invalid_latencia == 0.0
 
-        for bot in ["arbitragem", "grid", "momentum", "scalping", "mean_reversion", "swing"]:
+        for bot in [
+            "arbitragem",
+            "grid",
+            "momentum",
+            "scalping",
+            "mean_reversion",
+            "swing",
+        ]:
             targets = kpi_manager.verificar_targets(bot)
             assert isinstance(targets, dict)
 
@@ -75,8 +90,20 @@ class TestSimpleCoverage:
         assert empty_metrics["win_rate"] == 0.0
 
         winning_trades = [
-            Trade("1", "arbitragem", "BTC/USDT", "buy", 0.01, 50000, datetime.now(), 1, pnl=100),
-            Trade("2", "grid", "ETH/USDT", "sell", 0.1, 3000, datetime.now(), 2, pnl=50),
+            Trade(
+                "1",
+                "arbitragem",
+                "BTC/USDT",
+                "buy",
+                0.01,
+                50000,
+                datetime.now(),
+                1,
+                pnl=100,
+            ),
+            Trade(
+                "2", "grid", "ETH/USDT", "sell", 0.1, 3000, datetime.now(), 2, pnl=50
+            ),
         ]
 
         win_metrics = calc.calcular_metricas(winning_trades)
@@ -85,8 +112,28 @@ class TestSimpleCoverage:
         assert win_metrics["pnl_total"] == 150
 
         losing_trades = [
-            Trade("3", "momentum", "BTC/USDT", "sell", 0.01, 49000, datetime.now(), 1, pnl=-100),
-            Trade("4", "scalping", "ETH/USDT", "buy", 0.1, 3100, datetime.now(), 3, pnl=-50),
+            Trade(
+                "3",
+                "momentum",
+                "BTC/USDT",
+                "sell",
+                0.01,
+                49000,
+                datetime.now(),
+                1,
+                pnl=-100,
+            ),
+            Trade(
+                "4",
+                "scalping",
+                "ETH/USDT",
+                "buy",
+                0.1,
+                3100,
+                datetime.now(),
+                3,
+                pnl=-50,
+            ),
         ]
 
         loss_metrics = calc.calcular_metricas(losing_trades)
@@ -209,7 +256,9 @@ class TestSimpleCoverage:
         assert sinal_parar.acao == "parar"
         assert sinal_parar.confidence == 0.1
 
-        sinal_completo = Sinal("comprar", 0.95, preco_entrada=50000, stop_loss=49000, take_profit=51000)
+        sinal_completo = Sinal(
+            "comprar", 0.95, preco_entrada=50000, stop_loss=49000, take_profit=51000
+        )
         assert sinal_completo.preco_entrada == 50000
         assert sinal_completo.stop_loss == 49000
         assert sinal_completo.take_profit == 51000
@@ -247,12 +296,23 @@ class TestSimpleCoverage:
         """Testa AutoTuner básico"""
         tuner = AutoTuner()
 
-        minimal_historico = {"precos": [50000, 50100], "volumes": [1000, 1100], "timestamps": [1, 2]}
+        minimal_historico = {
+            "precos": [50000, 50100],
+            "volumes": [1000, 1100],
+            "timestamps": [1, 2],
+        }
 
         parametros = tuner.otimizar_parametros("arbitragem", minimal_historico)
         assert isinstance(parametros, dict)
 
-        for estrategia in ["arbitragem", "grid", "momentum", "scalping", "mean_reversion", "swing"]:
+        for estrategia in [
+            "arbitragem",
+            "grid",
+            "momentum",
+            "scalping",
+            "mean_reversion",
+            "swing",
+        ]:
             params = tuner.otimizar_parametros(estrategia, minimal_historico)
             assert isinstance(params, dict)
 

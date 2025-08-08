@@ -57,7 +57,9 @@ class BotMomentum(BotBase):
             except Exception as e:
                 self.logger.error(f"Erro no momentum breakout para {symbol}: {e}")
 
-    async def _detectar_breakout(self, symbol: str, volume_confirm: bool) -> Optional[Dict]:
+    async def _detectar_breakout(
+        self, symbol: str, volume_confirm: bool
+    ) -> Optional[Dict]:
         """Detecta breakout de resistência/suporte"""
         try:
             ohlcv = await self.exchange_manager.get_ohlcv(symbol, "5m", 100)
@@ -108,13 +110,17 @@ class BotMomentum(BotBase):
 
         for symbol in symbols:
             try:
-                continuacao = await self._detectar_continuacao_tendencia(symbol, trend_confirm)
+                continuacao = await self._detectar_continuacao_tendencia(
+                    symbol, trend_confirm
+                )
                 if continuacao:
                     await self._executar_momentum_trade(symbol, continuacao, 2)
             except Exception as e:
                 self.logger.error(f"Erro no momentum continuação para {symbol}: {e}")
 
-    async def _detectar_continuacao_tendencia(self, symbol: str, trend_confirm: bool) -> Optional[Dict]:
+    async def _detectar_continuacao_tendencia(
+        self, symbol: str, trend_confirm: bool
+    ) -> Optional[Dict]:
         """Detecta continuação de tendência"""
         try:
             analise = await self.analisar_mercado(symbol)
@@ -162,13 +168,17 @@ class BotMomentum(BotBase):
 
         for symbol in symbols:
             try:
-                momentum_volume = await self._detectar_momentum_volume(symbol, volume_threshold)
+                momentum_volume = await self._detectar_momentum_volume(
+                    symbol, volume_threshold
+                )
                 if momentum_volume:
                     await self._executar_momentum_trade(symbol, momentum_volume, 3)
             except Exception as e:
                 self.logger.error(f"Erro no momentum volume para {symbol}: {e}")
 
-    async def _detectar_momentum_volume(self, symbol: str, volume_threshold: float) -> Optional[Dict]:
+    async def _detectar_momentum_volume(
+        self, symbol: str, volume_threshold: float
+    ) -> Optional[Dict]:
         """Detecta momentum com confirmação de volume"""
         try:
             ohlcv = await self.exchange_manager.get_ohlcv(symbol, "1m", 30)
@@ -247,7 +257,12 @@ class BotMomentum(BotBase):
             trade = await self.executar_trade(symbol, side, amount, caso_uso=caso_uso)
 
             if trade:
-                self.sinais_momentum[trade.id] = {"sinal": sinal, "timestamp": datetime.now(), "symbol": symbol, "side": side}
+                self.sinais_momentum[trade.id] = {
+                    "sinal": sinal,
+                    "timestamp": datetime.now(),
+                    "symbol": symbol,
+                    "side": side,
+                }
 
                 await self._definir_stop_take_profit(trade, sinal)
 
@@ -281,12 +296,17 @@ class BotMomentum(BotBase):
                 "timestamp": datetime.now(),
             }
 
-            self.logger.info(f"Stop/TP definidos para {trade.symbol}: " f"Stop: {stop_price:.4f}, TP: {take_profit_price:.4f}")
+            self.logger.info(
+                f"Stop/TP definidos para {trade.symbol}: "
+                f"Stop: {stop_price:.4f}, TP: {take_profit_price:.4f}"
+            )
 
         except Exception as e:
             self.logger.error(f"Erro ao definir stop/take profit: {e}")
 
-    async def executar_casos_paralelos(self, semaphore: asyncio.Semaphore, batch_size: int):
+    async def executar_casos_paralelos(
+        self, semaphore: asyncio.Semaphore, batch_size: int
+    ):
         """Executa casos de uso em paralelo com semáforo"""
         async with semaphore:
             tasks = []

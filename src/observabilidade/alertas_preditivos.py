@@ -121,7 +121,11 @@ class AlertasPreditivos:
             deviation = abs(current_value - baseline_value) / baseline_value
 
             if deviation > 0.2:
-                severity = "critical" if deviation > 0.5 else "high" if deviation > 0.3 else "medium"
+                severity = (
+                    "critical"
+                    if deviation > 0.5
+                    else "high" if deviation > 0.3 else "medium"
+                )
 
                 anomaly = {
                     "metric": metric,
@@ -272,9 +276,24 @@ class AlertasPreditivos:
     def _get_resource_actions(self, resource: str) -> List[str]:
         """Retorna ações para recursos"""
         actions_map = {
-            "memory": ["Limpar cache", "Reiniciar serviços", "Aumentar swap", "Otimizar uso de memória"],
-            "disk": ["Limpar logs antigos", "Comprimir arquivos", "Mover dados para storage", "Expandir disco"],
-            "cpu": ["Reduzir processos", "Otimizar algoritmos", "Escalar recursos", "Balancear carga"],
+            "memory": [
+                "Limpar cache",
+                "Reiniciar serviços",
+                "Aumentar swap",
+                "Otimizar uso de memória",
+            ],
+            "disk": [
+                "Limpar logs antigos",
+                "Comprimir arquivos",
+                "Mover dados para storage",
+                "Expandir disco",
+            ],
+            "cpu": [
+                "Reduzir processos",
+                "Otimizar algoritmos",
+                "Escalar recursos",
+                "Balancear carga",
+            ],
         }
 
         return actions_map.get(resource, ["Verificar recurso específico"])
@@ -360,7 +379,11 @@ class AlertasPreditivos:
         """Analisa padrões históricos"""
         await asyncio.sleep(0.003)
         return {
-            "most_common_issues": ["connection_timeout", "high_latency", "memory_spike"],
+            "most_common_issues": [
+                "connection_timeout",
+                "high_latency",
+                "memory_spike",
+            ],
             "peak_hours": ["09:00-11:00", "14:00-16:00", "20:00-22:00"],
             "seasonal_patterns": "volatility_increases_on_weekends",
         }

@@ -59,7 +59,9 @@ class RiskManagerSupreme:
         """Valida trade baseado em risco"""
         return signal.confidence >= 0.75
 
-    async def calculate_position_size(self, symbol: str, price: float, risk_pct: float) -> float:
+    async def calculate_position_size(
+        self, symbol: str, price: float, risk_pct: float
+    ) -> float:
         """Calcula tamanho da posição"""
         return 0.001  # Tamanho fixo para simulação
 
@@ -71,7 +73,9 @@ class SignalProcessorUltra:
         """Inicializa modelos de IA"""
         logger.info("🧠 Signal Processor Ultra inicializado")
 
-    async def generate_signal_supreme(self, symbol: str, historical_data: List, current_data: Dict) -> Optional[MarketSignal]:
+    async def generate_signal_supreme(
+        self, symbol: str, historical_data: List, current_data: Dict
+    ) -> Optional[MarketSignal]:
         """Gera sinal supremo com IA"""
         import random
 
@@ -115,7 +119,9 @@ class ExecutionEngineQuantum:
             "success": True,
             "order_id": f"quantum_{int(time.time() * 1000000)}",
             "execution_time_ms": execution_time,
-            "performance_tier": "sub_millisecond" if execution_time < 1.0 else "standard",
+            "performance_tier": (
+                "sub_millisecond" if execution_time < 1.0 else "standard"
+            ),
         }
 
     async def _validate_order_params(self, **kwargs):
@@ -254,13 +260,19 @@ class CryptoBotOrchestrator:
                 "ws_url": "wss://stream.bybit.com/v5/public/spot",
                 "max_connections": 8,
             },
-            "okx": {"rest_url": "https://www.okx.com", "ws_url": "wss://ws.okx.com:8443/ws/v5/public", "max_connections": 6},
+            "okx": {
+                "rest_url": "https://www.okx.com",
+                "ws_url": "wss://ws.okx.com:8443/ws/v5/public",
+                "max_connections": 6,
+            },
         }
 
         for exchange, config in exchanges.items():
             try:
                 connector = aiohttp.TCPConnector(
-                    limit=config["max_connections"], limit_per_host=config["max_connections"], keepalive_timeout=30
+                    limit=config["max_connections"],
+                    limit_per_host=config["max_connections"],
+                    keepalive_timeout=30,
                 )
 
                 self.session_pool[exchange] = aiohttp.ClientSession(
@@ -269,7 +281,9 @@ class CryptoBotOrchestrator:
                     headers={"User-Agent": "CryptoBotSupremo/2.0"},
                 )
 
-                ws = await websockets.connect(config["ws_url"], ping_interval=20, ping_timeout=10, max_size=65536)
+                ws = await websockets.connect(
+                    config["ws_url"], ping_interval=20, ping_timeout=10, max_size=65536
+                )
                 self.ws_connections[exchange] = ws
 
                 asyncio.create_task(self._handle_ws_messages(exchange, ws))
@@ -313,13 +327,21 @@ class CryptoBotOrchestrator:
             if exchange == "binance":
                 subscribe_msg = {
                     "method": "SUBSCRIBE",
-                    "params": [f"{symbol.lower()}@ticker", f"{symbol.lower()}@trade", f"{symbol.lower()}@depth20@100ms"],
+                    "params": [
+                        f"{symbol.lower()}@ticker",
+                        f"{symbol.lower()}@trade",
+                        f"{symbol.lower()}@depth20@100ms",
+                    ],
                     "id": int(time.time()),
                 }
             elif exchange == "bybit":
                 subscribe_msg = {
                     "op": "subscribe",
-                    "args": [f"tickers.{symbol}", f"publicTrade.{symbol}", f"orderbook.50.{symbol}"],
+                    "args": [
+                        f"tickers.{symbol}",
+                        f"publicTrade.{symbol}",
+                        f"orderbook.50.{symbol}",
+                    ],
                 }
             elif exchange == "okx":
                 subscribe_msg = {
@@ -370,7 +392,11 @@ class CryptoBotOrchestrator:
         """Processa atualizações de mercado com velocidade quântica"""
 
         cache_key = f"{exchange}:{data.get('symbol', 'unknown')}"
-        self.market_data_cache[cache_key] = {"data": data, "timestamp": time.time(), "exchange": exchange}
+        self.market_data_cache[cache_key] = {
+            "data": data,
+            "timestamp": time.time(),
+            "exchange": exchange,
+        }
 
         if self._should_analyze(data):
             asyncio.create_task(self._analyze_trading_opportunity(exchange, data))
@@ -393,7 +419,9 @@ class CryptoBotOrchestrator:
             if not historical_data:
                 return
 
-            signal = await self.signal_processor.generate_signal_supreme(symbol, historical_data, data)
+            signal = await self.signal_processor.generate_signal_supreme(
+                symbol, historical_data, data
+            )
 
             if signal and signal.confidence >= self.config.min_confidence:
                 if await self.risk_manager.validate_trade(signal):
@@ -436,14 +464,18 @@ class CryptoBotOrchestrator:
 
             if result.get("success"):
                 self._record_successful_trade(signal, result, execution_time)
-                logger.info(f"✅ Trade executado: {signal.symbol} {signal.action} em {execution_time:.1f}ms")
+                logger.info(
+                    f"✅ Trade executado: {signal.symbol} {signal.action} em {execution_time:.1f}ms"
+                )
             else:
                 logger.warning(f"❌ Falha execução: {result.get('error', 'Unknown')}")
 
         except Exception as e:
             logger.error(f"❌ Erro execução trade: {e}")
 
-    def _record_successful_trade(self, signal: MarketSignal, result: Dict, execution_time: float):
+    def _record_successful_trade(
+        self, signal: MarketSignal, result: Dict, execution_time: float
+    ):
         """Registra trade bem-sucedido"""
 
         self.daily_trades += 1
@@ -455,7 +487,9 @@ class CryptoBotOrchestrator:
 
         total_trades = sum(1 for m in self.performance_metrics["execution_time_ms"])
         if total_trades > 0:
-            successful_trades = len([t for t in self.performance_metrics["trade_confidence"] if t > 0.7])
+            successful_trades = len(
+                [t for t in self.performance_metrics["trade_confidence"] if t > 0.7]
+            )
             self.success_rate = successful_trades / total_trades
 
     def _record_metric(self, metric_name: str, value: float):
@@ -493,9 +527,9 @@ class CryptoBotOrchestrator:
             try:
                 avg_execution_time = 0
                 if self.performance_metrics["execution_time_ms"]:
-                    avg_execution_time = sum(self.performance_metrics["execution_time_ms"]) / len(
+                    avg_execution_time = sum(
                         self.performance_metrics["execution_time_ms"]
-                    )
+                    ) / len(self.performance_metrics["execution_time_ms"])
 
                 logger.info(
                     f"📊 Performance: {avg_execution_time:.1f}ms avg | {self.daily_trades} trades | {self.success_rate:.1%} success"
@@ -512,10 +546,14 @@ class CryptoBotOrchestrator:
 
         while self.is_running:
             try:
-                daily_risk_pct = abs(self.total_pnl) / 10000 * 100  # Assumindo capital de $10k
+                daily_risk_pct = (
+                    abs(self.total_pnl) / 10000 * 100
+                )  # Assumindo capital de $10k
 
                 if daily_risk_pct > self.config.max_daily_risk:
-                    logger.warning(f"🚨 Limite de risco diário excedido: {daily_risk_pct:.1f}%")
+                    logger.warning(
+                        f"🚨 Limite de risco diário excedido: {daily_risk_pct:.1f}%"
+                    )
 
                 await asyncio.sleep(30)
 
@@ -528,11 +566,15 @@ class CryptoBotOrchestrator:
 
         while self.is_running:
             try:
-                active_connections = sum(1 for ws in self.ws_connections.values() if not ws.closed)
+                active_connections = sum(
+                    1 for ws in self.ws_connections.values() if not ws.closed
+                )
 
                 active_bots = len(self.active_bots)
 
-                logger.debug(f"💚 Health: {active_connections} WS | {active_bots} bots | {len(self.market_data_cache)} cache")
+                logger.debug(
+                    f"💚 Health: {active_connections} WS | {active_bots} bots | {len(self.market_data_cache)} cache"
+                )
 
                 await asyncio.sleep(30)
 
@@ -551,7 +593,8 @@ class CryptoBotOrchestrator:
             "ws_connections": len(self.ws_connections),
             "cache_size": len(self.market_data_cache),
             "avg_execution_time_ms": (
-                sum(self.performance_metrics["execution_time_ms"]) / len(self.performance_metrics["execution_time_ms"])
+                sum(self.performance_metrics["execution_time_ms"])
+                / len(self.performance_metrics["execution_time_ms"])
                 if self.performance_metrics["execution_time_ms"]
                 else 0
             ),

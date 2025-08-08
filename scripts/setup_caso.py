@@ -13,7 +13,14 @@ def setup_caso_uso(bot: str, regime: str, par: str = "BTC/USDT"):
     """Configura caso de uso específico"""
     print(f"🔧 Configurando caso de uso: {bot} - {regime} - {par}")
 
-    regime_mapping = {"alta_vol": 1, "baixa_vol": 2, "lateral": 3, "breakout": 1, "continuacao": 2, "volume": 3}
+    regime_mapping = {
+        "alta_vol": 1,
+        "baixa_vol": 2,
+        "lateral": 3,
+        "breakout": 1,
+        "continuacao": 2,
+        "volume": 3,
+    }
 
     caso_uso = regime_mapping.get(regime, 1)
 
@@ -63,12 +70,32 @@ def setup_caso_uso(bot: str, regime: str, par: str = "BTC/USDT"):
 def main():
     parser = argparse.ArgumentParser(description="Configurar caso de uso específico")
     parser.add_argument(
-        "--bot", required=True, choices=["arbitragem", "grid", "momentum", "scalping", "mean_reversion", "swing"]
+        "--bot",
+        required=True,
+        choices=[
+            "arbitragem",
+            "grid",
+            "momentum",
+            "scalping",
+            "mean_reversion",
+            "swing",
+        ],
     )
     parser.add_argument(
-        "--regime", required=True, choices=["alta_vol", "baixa_vol", "lateral", "breakout", "continuacao", "volume"]
+        "--regime",
+        required=True,
+        choices=[
+            "alta_vol",
+            "baixa_vol",
+            "lateral",
+            "breakout",
+            "continuacao",
+            "volume",
+        ],
     )
-    parser.add_argument("--par", default="BTC/USDT", help="Par de trading (default: BTC/USDT)")
+    parser.add_argument(
+        "--par", default="BTC/USDT", help="Par de trading (default: BTC/USDT)"
+    )
 
     args = parser.parse_args()
 

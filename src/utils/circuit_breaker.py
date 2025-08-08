@@ -26,7 +26,12 @@ class CircuitBreakerOpenException(Exception):
 class CircuitBreaker:
     """Circuit Breaker para proteger chamadas a exchanges"""
 
-    def __init__(self, failure_threshold: int = 5, timeout: int = 60, expected_exception: type = Exception):
+    def __init__(
+        self,
+        failure_threshold: int = 5,
+        timeout: int = 60,
+        expected_exception: type = Exception,
+    ):
         self.failure_threshold = failure_threshold
         self.timeout = timeout
         self.expected_exception = expected_exception
@@ -97,7 +102,11 @@ class CircuitBreaker:
             "failure_count": self.failure_count,
             "success_count": self.success_count,
             "last_failure_time": self.last_failure_time,
-            "time_until_retry": max(0, self.timeout - (time.time() - self.last_failure_time)) if self.last_failure_time else 0,
+            "time_until_retry": (
+                max(0, self.timeout - (time.time() - self.last_failure_time))
+                if self.last_failure_time
+                else 0
+            ),
         }
 
 
@@ -110,14 +119,20 @@ class ExchangeCircuitBreakers:
     def get_breaker(self, exchange: str) -> CircuitBreaker:
         """Obtém circuit breaker para exchange específica"""
         if exchange not in self.breakers:
-            self.breakers[exchange] = CircuitBreaker(failure_threshold=5, timeout=60, expected_exception=Exception)
+            self.breakers[exchange] = CircuitBreaker(
+                failure_threshold=5, timeout=60, expected_exception=Exception
+            )
         return self.breakers[exchange]
 
-    async def call_with_breaker(self, exchange: str, func: Callable, *args, **kwargs) -> Any:
+    async def call_with_breaker(
+        self, exchange: str, func: Callable, *args, **kwargs
+    ) -> Any:
         """Executa função com circuit breaker da exchange"""
         breaker = self.get_breaker(exchange)
         return await breaker.call(func, *args, **kwargs)
 
     def get_all_states(self) -> dict:
         """Retorna estado de todos os circuit breakers"""
-        return {exchange: breaker.get_state() for exchange, breaker in self.breakers.items()}
+        return {
+            exchange: breaker.get_state() for exchange, breaker in self.breakers.items()
+        }

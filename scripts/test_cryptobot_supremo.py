@@ -25,7 +25,13 @@ async def test_cryptobot_supremo():
         await executor.initialize()
 
         start_time = time.time() * 1000
-        task = ExecutionTask(task_id="test_ultra", bot_name="arbitragem", action="test", params={}, priority=9)
+        task = ExecutionTask(
+            task_id="test_ultra",
+            bot_name="arbitragem",
+            action="test",
+            params={},
+            priority=9,
+        )
 
         result = await executor.execute_ultra_fast(task)
         execution_time = time.time() * 1000 - start_time
@@ -55,7 +61,9 @@ async def test_cryptobot_supremo():
 
     print("🎼 Testando Sinfonia Tecnológica Suprema...")
     try:
-        print("✅ Sinfonia Tecnológica: 6 componentes ativos (mock test - no async operations)")
+        print(
+            "✅ Sinfonia Tecnológica: 6 componentes ativos (mock test - no async operations)"
+        )
         print("⚠️ Sinfonia Tecnológica: Full tests skipped to prevent hanging")
 
     except Exception as e:

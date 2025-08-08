@@ -19,7 +19,9 @@ def check_obstacles():
         print(f"Found {len(obstacles)} obstacles tracked")
 
         for obstacle in obstacles[-3:]:  # Last 3 obstacles
-            print(f"- {obstacle['timestamp']}: {obstacle['etapa']} - {obstacle['resultado']}")
+            print(
+                f"- {obstacle['timestamp']}: {obstacle['etapa']} - {obstacle['resultado']}"
+            )
     else:
         print("No obstacles tracked")
 

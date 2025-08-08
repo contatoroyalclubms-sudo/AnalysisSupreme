@@ -53,13 +53,17 @@ class BotMeanReversion(BotBase):
 
         for symbol in symbols:
             try:
-                reversion = await self._detectar_reversion_simples(symbol, media_type, lookback)
+                reversion = await self._detectar_reversion_simples(
+                    symbol, media_type, lookback
+                )
                 if reversion:
                     await self._executar_mean_reversion_trade(symbol, reversion, 1)
             except Exception as e:
                 self.logger.error(f"Erro na mean reversion simples para {symbol}: {e}")
 
-    async def _detectar_reversion_simples(self, symbol: str, media_type: str, lookback: int) -> Optional[Dict]:
+    async def _detectar_reversion_simples(
+        self, symbol: str, media_type: str, lookback: int
+    ) -> Optional[Dict]:
         """Detecta oportunidade de reversão à média simples"""
         try:
             ohlcv = await self.exchange_manager.get_ohlcv(symbol, "15m", lookback + 10)
@@ -76,7 +80,10 @@ class BotMeanReversion(BotBase):
 
             desvio_percent = (preco_atual - media) / media
 
-            returns = [(closes[i] - closes[i - 1]) / closes[i - 1] for i in range(1, len(closes))]
+            returns = [
+                (closes[i] - closes[i - 1]) / closes[i - 1]
+                for i in range(1, len(closes))
+            ]
             volatilidade = self._calcular_volatilidade(returns[-lookback:])
 
             threshold = volatilidade * 2
@@ -129,13 +136,17 @@ class BotMeanReversion(BotBase):
 
         for symbol in symbols:
             try:
-                bollinger = await self._detectar_bollinger_reversion(symbol, period, std_dev)
+                bollinger = await self._detectar_bollinger_reversion(
+                    symbol, period, std_dev
+                )
                 if bollinger:
                     await self._executar_mean_reversion_trade(symbol, bollinger, 2)
             except Exception as e:
                 self.logger.error(f"Erro na Bollinger reversion para {symbol}: {e}")
 
-    async def _detectar_bollinger_reversion(self, symbol: str, period: int, std_dev: float) -> Optional[Dict]:
+    async def _detectar_bollinger_reversion(
+        self, symbol: str, period: int, std_dev: float
+    ) -> Optional[Dict]:
         """Detecta reversão usando Bandas de Bollinger"""
         try:
             ohlcv = await self.exchange_manager.get_ohlcv(symbol, "30m", period + 10)
@@ -192,7 +203,9 @@ class BotMeanReversion(BotBase):
             except Exception as e:
                 self.logger.error(f"Erro na RSI divergence para {symbol}: {e}")
 
-    async def _detectar_rsi_divergence(self, symbol: str, rsi_period: int) -> Optional[Dict]:
+    async def _detectar_rsi_divergence(
+        self, symbol: str, rsi_period: int
+    ) -> Optional[Dict]:
         """Detecta divergência no RSI"""
         try:
             ohlcv = await self.exchange_manager.get_ohlcv(symbol, "1h", rsi_period + 20)
@@ -212,7 +225,11 @@ class BotMeanReversion(BotBase):
             rsi_low_atual = min(rsi_values[-5:])
             rsi_low_anterior = min(rsi_values[-15:-10])
 
-            if preco_low_atual < preco_low_anterior and rsi_low_atual > rsi_low_anterior and rsi_low_atual < 40:
+            if (
+                preco_low_atual < preco_low_anterior
+                and rsi_low_atual > rsi_low_anterior
+                and rsi_low_atual < 40
+            ):
 
                 return {
                     "tipo": "rsi_divergence_bullish",
@@ -230,7 +247,11 @@ class BotMeanReversion(BotBase):
             rsi_high_atual = max(rsi_values[-5:])
             rsi_high_anterior = max(rsi_values[-15:-10])
 
-            if preco_high_atual > preco_high_anterior and rsi_high_atual < rsi_high_anterior and rsi_high_atual > 60:
+            if (
+                preco_high_atual > preco_high_anterior
+                and rsi_high_atual < rsi_high_anterior
+                and rsi_high_atual > 60
+            ):
 
                 return {
                     "tipo": "rsi_divergence_bearish",
@@ -276,7 +297,9 @@ class BotMeanReversion(BotBase):
 
         return rsi_values
 
-    async def _executar_mean_reversion_trade(self, symbol: str, sinal: Dict, caso_uso: int):
+    async def _executar_mean_reversion_trade(
+        self, symbol: str, sinal: Dict, caso_uso: int
+    ):
         """Executa trade de mean reversion"""
         try:
             tipo = sinal["tipo"]
@@ -318,7 +341,9 @@ class BotMeanReversion(BotBase):
 
             elif "rsi_divergence" in tipo:
                 target_percent = min(0.05, sinal.get("forca_divergencia", 10) / 1000)
-                target_price = trade.price * (1 + target_percent if trade.side == "buy" else 1 - target_percent)
+                target_price = trade.price * (
+                    1 + target_percent if trade.side == "buy" else 1 - target_percent
+                )
                 stop_percent = 0.025  # 2.5% stop
 
             else:
@@ -338,12 +363,17 @@ class BotMeanReversion(BotBase):
                 "timestamp": datetime.now(),
             }
 
-            self.logger.info(f"Targets definidos para {trade.symbol}: " f"Target: {target_price:.4f}, Stop: {stop_price:.4f}")
+            self.logger.info(
+                f"Targets definidos para {trade.symbol}: "
+                f"Target: {target_price:.4f}, Stop: {stop_price:.4f}"
+            )
 
         except Exception as e:
             self.logger.error(f"Erro ao definir targets reversion: {e}")
 
-    async def executar_casos_paralelos(self, semaphore: asyncio.Semaphore, batch_size: int):
+    async def executar_casos_paralelos(
+        self, semaphore: asyncio.Semaphore, batch_size: int
+    ):
         """Executa casos de uso em paralelo com semáforo"""
         async with semaphore:
             tasks = []

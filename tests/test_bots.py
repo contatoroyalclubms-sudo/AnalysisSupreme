@@ -22,7 +22,10 @@ def mock_config():
     config = Mock(spec=Configuracao)
     config.paper_mode = True
     config.get_bot_config.return_value = Mock(
-        nome="test_bot", ativo=True, parametros={"test_param": 1.0}, casos_uso={1: {"tipo": "test"}}
+        nome="test_bot",
+        ativo=True,
+        parametros={"test_param": 1.0},
+        casos_uso={1: {"tipo": "test"}},
     )
     return config
 
@@ -41,7 +44,11 @@ def mock_motor_ia():
     """Motor IA mock para testes"""
     motor_ia = AsyncMock()
     motor_ia.analisar_mercado = AsyncMock(
-        return_value={"predicao_preco_percent": 0.01, "predicao_tendencia": "alta", "confianca": 0.8}
+        return_value={
+            "predicao_preco_percent": 0.01,
+            "predicao_tendencia": "alta",
+            "confianca": 0.8,
+        }
     )
     return motor_ia
 
@@ -63,16 +70,23 @@ class TestBotArbitragem:
         mock_monitor.registrar_bot.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_detectar_arbitragem_simples(self, mock_config, mock_monitor, mock_motor_ia):
+    async def test_detectar_arbitragem_simples(
+        self, mock_config, mock_monitor, mock_motor_ia
+    ):
         """Testa detecção de arbitragem simples"""
         bot = BotArbitragem(mock_config, mock_monitor, mock_motor_ia)
         bot.exchange_manager = AsyncMock()
 
         bot.exchange_manager.get_ticker = AsyncMock(
-            side_effect=[{"bid": 45100, "ask": 45200}, {"bid": 44900, "ask": 45000}]  # Exchange 1  # Exchange 2
+            side_effect=[
+                {"bid": 45100, "ask": 45200},
+                {"bid": 44900, "ask": 45000},
+            ]  # Exchange 1  # Exchange 2
         )
 
-        oportunidade = await bot._detectar_arbitragem_simples("BTC/USDT", "binance", "coinbase", 0.002)
+        oportunidade = await bot._detectar_arbitragem_simples(
+            "BTC/USDT", "binance", "coinbase", 0.002
+        )
 
         assert oportunidade is not None
         assert oportunidade["profit_percent"] > 0.002
@@ -84,7 +98,12 @@ class TestBotArbitragem:
         bot.exchange_manager = AsyncMock()
         bot.executar_trade = AsyncMock()
 
-        bot.get_parametros_caso_uso = Mock(return_value={"exchanges": ["binance", "coinbase"], "min_profit_percent": 0.5})
+        bot.get_parametros_caso_uso = Mock(
+            return_value={
+                "exchanges": ["binance", "coinbase"],
+                "min_profit_percent": 0.5,
+            }
+        )
 
         await bot.executar_caso_uso(1)
 
@@ -108,7 +127,9 @@ class TestBotGrid:
         assert grid["preco_max"] == 46000
 
     @pytest.mark.asyncio
-    async def test_calcular_volatilidade(self, mock_config, mock_monitor, mock_motor_ia):
+    async def test_calcular_volatilidade(
+        self, mock_config, mock_monitor, mock_motor_ia
+    ):
         """Testa cálculo de volatilidade"""
         bot = BotGrid(mock_config, mock_monitor, mock_motor_ia)
         bot.exchange_manager = AsyncMock()
@@ -154,12 +175,20 @@ class TestBotMomentum:
         assert breakout["tipo"] == "breakout_alta"
 
     @pytest.mark.asyncio
-    async def test_calcular_momentum_score(self, mock_config, mock_monitor, mock_motor_ia):
+    async def test_calcular_momentum_score(
+        self, mock_config, mock_monitor, mock_motor_ia
+    ):
         """Testa cálculo de score de momentum"""
         bot = BotMomentum(mock_config, mock_monitor, mock_motor_ia)
 
         analise_mock = {
-            "analise_tecnica": {"sma_20": 45000, "sma_50": 44500, "rsi": 60, "volume_ratio": 1.5, "tendencia": "alta"},
+            "analise_tecnica": {
+                "sma_20": 45000,
+                "sma_50": 44500,
+                "rsi": 60,
+                "volume_ratio": 1.5,
+                "tendencia": "alta",
+            },
             "analise_ia": {"predicao_direcao": "alta"},
         }
 
@@ -173,12 +202,16 @@ class TestBotScalping:
     """Testes do bot de scalping"""
 
     @pytest.mark.asyncio
-    async def test_detectar_spread_opportunity(self, mock_config, mock_monitor, mock_motor_ia):
+    async def test_detectar_spread_opportunity(
+        self, mock_config, mock_monitor, mock_motor_ia
+    ):
         """Testa detecção de oportunidade de spread"""
         bot = BotScalping(mock_config, mock_monitor, mock_motor_ia)
         bot.exchange_manager = AsyncMock()
 
-        bot.exchange_manager.get_ticker = AsyncMock(return_value={"bid": 45000, "ask": 45025})  # Spread de 0.055%
+        bot.exchange_manager.get_ticker = AsyncMock(
+            return_value={"bid": 45000, "ask": 45025}
+        )  # Spread de 0.055%
 
         bot.exchange_manager.get_orderbook = AsyncMock(
             return_value={
@@ -193,7 +226,9 @@ class TestBotScalping:
         assert oportunidade["spread_percent"] >= 0.0005
 
     @pytest.mark.asyncio
-    async def test_detectar_micro_movimento(self, mock_config, mock_monitor, mock_motor_ia):
+    async def test_detectar_micro_movimento(
+        self, mock_config, mock_monitor, mock_motor_ia
+    ):
         """Testa detecção de micro-movimento"""
         bot = BotScalping(mock_config, mock_monitor, mock_motor_ia)
         bot.exchange_manager = AsyncMock()
@@ -216,7 +251,9 @@ class TestBotMeanReversion:
     """Testes do bot de mean reversion"""
 
     @pytest.mark.asyncio
-    async def test_detectar_reversion_simples(self, mock_config, mock_monitor, mock_motor_ia):
+    async def test_detectar_reversion_simples(
+        self, mock_config, mock_monitor, mock_motor_ia
+    ):
         """Testa detecção de reversão simples"""
         bot = BotMeanReversion(mock_config, mock_monitor, mock_motor_ia)
         bot.exchange_manager = AsyncMock()

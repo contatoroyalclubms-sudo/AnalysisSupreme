@@ -15,7 +15,10 @@ def configurar_logger(log_level: str = "INFO"):
 
     level = getattr(logging, log_level.upper(), logging.INFO)
 
-    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+    formatter = logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
 
     root_logger = logging.getLogger()
     root_logger.setLevel(level)

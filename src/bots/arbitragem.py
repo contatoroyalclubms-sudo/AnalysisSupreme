@@ -24,7 +24,9 @@ class BotArbitragem(BotBase):
         await super().inicializar()
 
         self.exchanges_ativas = await self._configurar_exchanges()
-        self.logger.info(f"Bot arbitragem configurado com {len(self.exchanges_ativas)} exchanges")
+        self.logger.info(
+            f"Bot arbitragem configurado com {len(self.exchanges_ativas)} exchanges"
+        )
 
     async def _configurar_exchanges(self) -> List[str]:
         """Configura exchanges disponíveis para arbitragem"""
@@ -77,7 +79,9 @@ class BotArbitragem(BotBase):
 
         for symbol in symbols:
             try:
-                oportunidade = await self._detectar_arbitragem_simples(symbol, exchanges[0], exchanges[1], min_profit)
+                oportunidade = await self._detectar_arbitragem_simples(
+                    symbol, exchanges[0], exchanges[1], min_profit
+                )
 
                 if oportunidade:
                     await self._executar_arbitragem_simples(oportunidade)
@@ -90,7 +94,9 @@ class BotArbitragem(BotBase):
     ) -> Optional[Dict]:
         """Detecta oportunidade de arbitragem simples"""
         try:
-            medicao_id = self.kpi_manager.iniciar_medicao_latencia("arbitragem", "deteccao_simples")
+            medicao_id = self.kpi_manager.iniciar_medicao_latencia(
+                "arbitragem", "deteccao_simples"
+            )
 
             ticker1 = await self.exchange_manager.get_ticker(symbol, exchange1)
             ticker2 = await self.exchange_manager.get_ticker(symbol, exchange2)
@@ -106,9 +112,13 @@ class BotArbitragem(BotBase):
             if price1 > price2:
                 profit_percent = (price1 - price2) / price2
                 spread_percent = profit_percent * 100
-                execucao_simultanea = 100.0 if latencia_ms < 50 else max(0, 100 - (latencia_ms - 50) * 2)
+                execucao_simultanea = (
+                    100.0 if latencia_ms < 50 else max(0, 100 - (latencia_ms - 50) * 2)
+                )
 
-                self.kpi_manager.atualizar_kpi_arbitragem(spread_percent, execucao_simultanea)
+                self.kpi_manager.atualizar_kpi_arbitragem(
+                    spread_percent, execucao_simultanea
+                )
 
                 if profit_percent >= min_profit:
                     return {
@@ -135,12 +145,19 @@ class BotArbitragem(BotBase):
         symbol = oportunidade["symbol"]
         amount = 0.01  # Quantidade fixa para teste
 
-        self.logger.info(f"Oportunidade de arbitragem detectada: {symbol} " f"Profit: {oportunidade['profit_percent']:.2%}")
+        self.logger.info(
+            f"Oportunidade de arbitragem detectada: {symbol} "
+            f"Profit: {oportunidade['profit_percent']:.2%}"
+        )
 
-        trade_buy = await self.executar_trade(symbol, "buy", amount, oportunidade["buy_price"], caso_uso=1)
+        trade_buy = await self.executar_trade(
+            symbol, "buy", amount, oportunidade["buy_price"], caso_uso=1
+        )
 
         if trade_buy:
-            trade_sell = await self.executar_trade(symbol, "sell", amount, oportunidade["sell_price"], caso_uso=1)
+            trade_sell = await self.executar_trade(
+                symbol, "sell", amount, oportunidade["sell_price"], caso_uso=1
+            )
 
             if trade_sell:
                 pnl = (oportunidade["sell_price"] - oportunidade["buy_price"]) * amount
@@ -164,17 +181,24 @@ class BotArbitragem(BotBase):
         """Caso de uso 2: Arbitragem triangular em uma exchange"""
         exchange = parametros.get("exchange", "binance")
 
-        triangulos = [["BTC/USDT", "ETH/BTC", "ETH/USDT"], ["BTC/USDT", "ADA/BTC", "ADA/USDT"]]
+        triangulos = [
+            ["BTC/USDT", "ETH/BTC", "ETH/USDT"],
+            ["BTC/USDT", "ADA/BTC", "ADA/USDT"],
+        ]
 
         for triangulo in triangulos:
             try:
-                oportunidade = await self._detectar_arbitragem_triangular(triangulo, exchange)
+                oportunidade = await self._detectar_arbitragem_triangular(
+                    triangulo, exchange
+                )
                 if oportunidade:
                     await self._executar_arbitragem_triangular(oportunidade)
             except Exception as e:
                 self.logger.error(f"Erro na arbitragem triangular: {e}")
 
-    async def _detectar_arbitragem_triangular(self, pares: List[str], exchange: str) -> Optional[Dict]:
+    async def _detectar_arbitragem_triangular(
+        self, pares: List[str], exchange: str
+    ) -> Optional[Dict]:
         """Detecta oportunidade de arbitragem triangular"""
         try:
             tickers = {}
@@ -208,7 +232,9 @@ class BotArbitragem(BotBase):
 
     async def _executar_arbitragem_triangular(self, oportunidade: Dict):
         """Executa arbitragem triangular"""
-        self.logger.info(f"Arbitragem triangular detectada. Profit: {oportunidade['profit_percent']:.2%}")
+        self.logger.info(
+            f"Arbitragem triangular detectada. Profit: {oportunidade['profit_percent']:.2%}"
+        )
 
         amount = 100  # USDT inicial
 
@@ -253,7 +279,9 @@ class BotArbitragem(BotBase):
             await self.executar_trade(f"{symbol}_PERP", "buy", 0.01, caso_uso=3)
             await self.executar_trade(symbol, "sell", 0.01, caso_uso=3)
 
-    async def executar_casos_paralelos(self, semaphore: asyncio.Semaphore, batch_size: int):
+    async def executar_casos_paralelos(
+        self, semaphore: asyncio.Semaphore, batch_size: int
+    ):
         """Executa casos de uso em paralelo com semáforo"""
         async with semaphore:
             tasks = []

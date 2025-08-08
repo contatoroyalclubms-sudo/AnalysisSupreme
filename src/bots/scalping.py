@@ -51,13 +51,17 @@ class BotScalping(BotBase):
 
         for symbol in symbols:
             try:
-                oportunidade = await self._detectar_spread_opportunity(symbol, min_spread)
+                oportunidade = await self._detectar_spread_opportunity(
+                    symbol, min_spread
+                )
                 if oportunidade:
                     await self._executar_scalping_spread(symbol, oportunidade, 1)
             except Exception as e:
                 self.logger.error(f"Erro no scalping spread para {symbol}: {e}")
 
-    async def _detectar_spread_opportunity(self, symbol: str, min_spread: float) -> Optional[Dict]:
+    async def _detectar_spread_opportunity(
+        self, symbol: str, min_spread: float
+    ) -> Optional[Dict]:
         """Detecta oportunidade de scalping no spread"""
         try:
             ticker = await self.exchange_manager.get_ticker(symbol)
@@ -91,7 +95,9 @@ class BotScalping(BotBase):
             self.logger.error(f"Erro ao detectar spread opportunity: {e}")
             return None
 
-    async def _executar_scalping_spread(self, symbol: str, oportunidade: Dict, caso_uso: int):
+    async def _executar_scalping_spread(
+        self, symbol: str, oportunidade: Dict, caso_uso: int
+    ):
         """Executa scalping no spread"""
         try:
             amount = 0.005  # Quantidade pequena para scalping
@@ -99,12 +105,19 @@ class BotScalping(BotBase):
             bid_price = oportunidade["bid"]
             ask_price = oportunidade["ask"]
 
-            self.logger.info(f"Scalping spread {symbol}: " f"Spread: {oportunidade['spread_percent']:.4%}")
+            self.logger.info(
+                f"Scalping spread {symbol}: "
+                f"Spread: {oportunidade['spread_percent']:.4%}"
+            )
 
-            trade_buy = await self.executar_trade(symbol, "buy", amount, bid_price, caso_uso=caso_uso)
+            trade_buy = await self.executar_trade(
+                symbol, "buy", amount, bid_price, caso_uso=caso_uso
+            )
 
             if trade_buy:
-                trade_sell = await self.executar_trade(symbol, "sell", amount, ask_price, caso_uso=caso_uso)
+                trade_sell = await self.executar_trade(
+                    symbol, "sell", amount, ask_price, caso_uso=caso_uso
+                )
 
                 if trade_sell:
                     pnl = (ask_price - bid_price) * amount
@@ -129,7 +142,9 @@ class BotScalping(BotBase):
             except Exception as e:
                 self.logger.error(f"Erro no scalping micro para {symbol}: {e}")
 
-    async def _detectar_micro_movimento(self, symbol: str, tick_size: float) -> Optional[Dict]:
+    async def _detectar_micro_movimento(
+        self, symbol: str, tick_size: float
+    ) -> Optional[Dict]:
         """Detecta micro-movimentos de preço"""
         try:
             ohlcv = await self.exchange_manager.get_ohlcv(symbol, "1m", 10)
@@ -166,13 +181,18 @@ class BotScalping(BotBase):
             self.logger.error(f"Erro ao detectar micro movimento: {e}")
             return None
 
-    async def _executar_scalping_micro(self, symbol: str, movimento: Dict, caso_uso: int):
+    async def _executar_scalping_micro(
+        self, symbol: str, movimento: Dict, caso_uso: int
+    ):
         """Executa scalping em micro-movimentos"""
         try:
             amount = 0.003
             direcao = movimento["direcao"]
 
-            self.logger.info(f"Micro-movimento detectado {symbol}: " f"{direcao} {movimento['movimento_percent']:.4%}")
+            self.logger.info(
+                f"Micro-movimento detectado {symbol}: "
+                f"{direcao} {movimento['movimento_percent']:.4%}"
+            )
 
             if direcao == "alta":
                 side = "buy"
@@ -181,7 +201,9 @@ class BotScalping(BotBase):
                 side = "sell"
                 target_price = movimento["preco_atual"] * 0.9995  # 0.05% target
 
-            trade_entrada = await self.executar_trade(symbol, side, amount, caso_uso=caso_uso)
+            trade_entrada = await self.executar_trade(
+                symbol, side, amount, caso_uso=caso_uso
+            )
 
             if trade_entrada:
                 self.posicoes_scalping[trade_entrada.id] = {
@@ -203,13 +225,17 @@ class BotScalping(BotBase):
 
         for symbol in symbols:
             try:
-                imbalance = await self._detectar_orderbook_imbalance(symbol, depth_levels)
+                imbalance = await self._detectar_orderbook_imbalance(
+                    symbol, depth_levels
+                )
                 if imbalance:
                     await self._executar_scalping_orderbook(symbol, imbalance, 3)
             except Exception as e:
                 self.logger.error(f"Erro no scalping orderbook para {symbol}: {e}")
 
-    async def _detectar_orderbook_imbalance(self, symbol: str, depth_levels: int) -> Optional[Dict]:
+    async def _detectar_orderbook_imbalance(
+        self, symbol: str, depth_levels: int
+    ) -> Optional[Dict]:
         """Detecta desequilíbrio no order book"""
         try:
             orderbook = await self.exchange_manager.get_orderbook(symbol, depth_levels)
@@ -253,13 +279,18 @@ class BotScalping(BotBase):
             self.logger.error(f"Erro ao detectar orderbook imbalance: {e}")
             return None
 
-    async def _executar_scalping_orderbook(self, symbol: str, imbalance: Dict, caso_uso: int):
+    async def _executar_scalping_orderbook(
+        self, symbol: str, imbalance: Dict, caso_uso: int
+    ):
         """Executa scalping baseado em desequilíbrio do orderbook"""
         try:
             amount = 0.002
             tipo = imbalance["tipo"]
 
-            self.logger.info(f"Desequilíbrio orderbook {symbol}: " f"{tipo} - Força: {imbalance['imbalance_strength']:.3f}")
+            self.logger.info(
+                f"Desequilíbrio orderbook {symbol}: "
+                f"{tipo} - Força: {imbalance['imbalance_strength']:.3f}"
+            )
 
             if tipo == "bid_dominance":
                 side = "buy"
@@ -299,9 +330,15 @@ class BotScalping(BotBase):
                 if ticker:
                     preco_atual = ticker["last"]
 
-                    if posicao["side"] == "buy" and preco_atual >= posicao["target_price"]:
+                    if (
+                        posicao["side"] == "buy"
+                        and preco_atual >= posicao["target_price"]
+                    ):
                         posicoes_para_fechar.append(trade_id)
-                    elif posicao["side"] == "sell" and preco_atual <= posicao["target_price"]:
+                    elif (
+                        posicao["side"] == "sell"
+                        and preco_atual <= posicao["target_price"]
+                    ):
                         posicoes_para_fechar.append(trade_id)
 
         for trade_id in posicoes_para_fechar:
@@ -317,7 +354,10 @@ class BotScalping(BotBase):
         side_fechamento = "sell" if posicao["side"] == "buy" else "buy"
 
         trade_fechamento = await self.executar_trade(
-            posicao["symbol"], side_fechamento, posicao["amount"], caso_uso=posicao.get("caso_uso", 1)
+            posicao["symbol"],
+            side_fechamento,
+            posicao["amount"],
+            caso_uso=posicao.get("caso_uso", 1),
         )
 
         if trade_fechamento:
@@ -325,7 +365,9 @@ class BotScalping(BotBase):
 
         del self.posicoes_scalping[trade_id]
 
-    async def executar_casos_paralelos(self, semaphore: asyncio.Semaphore, batch_size: int):
+    async def executar_casos_paralelos(
+        self, semaphore: asyncio.Semaphore, batch_size: int
+    ):
         """Executa casos de uso em paralelo com semáforo"""
         async with semaphore:
             tasks = []

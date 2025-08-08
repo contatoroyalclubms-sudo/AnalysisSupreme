@@ -75,7 +75,9 @@ class MemoryOptimizer:
 
         await self._take_memory_snapshot()
 
-        logger.info(f"✅ Memory Optimizer inicializado (target: {self.target_memory_mb}MB)")
+        logger.info(
+            f"✅ Memory Optimizer inicializado (target: {self.target_memory_mb}MB)"
+        )
 
     async def _memory_monitor(self):
         """Monitor contínuo de memória"""
@@ -91,7 +93,9 @@ class MemoryOptimizer:
 
                 await self._take_memory_snapshot()
 
-                if current_usage_mb > self.target_memory_mb * 1.2:  # 20% acima do target
+                if (
+                    current_usage_mb > self.target_memory_mb * 1.2
+                ):  # 20% acima do target
                     logger.warning(f"⚠️  Uso de memória alto: {current_usage_mb:.1f}MB")
                     await self._emergency_cleanup()
 
@@ -116,7 +120,9 @@ class MemoryOptimizer:
             if self.trace_enabled:
                 snapshot = tracemalloc.take_snapshot()
                 top_stats = snapshot.statistics("lineno")[:10]
-                top_allocations = [(stat.traceback.format()[-1], stat.size) for stat in top_stats]
+                top_allocations = [
+                    (stat.traceback.format()[-1], stat.size) for stat in top_stats
+                ]
 
             snapshot = MemorySnapshot(
                 timestamp=time.time(),
@@ -237,7 +243,11 @@ class MemoryOptimizer:
             top_stats = snapshot.statistics("filename")
 
             for stat in top_stats[:20]:
-                filename = stat.traceback.format()[-1] if stat.traceback.format() else "unknown"
+                filename = (
+                    stat.traceback.format()[-1]
+                    if stat.traceback.format()
+                    else "unknown"
+                )
                 self.allocation_stats[filename] += stat.size
 
         except Exception as e:
@@ -288,7 +298,11 @@ class MemoryOptimizer:
 
                 if current_counts[0] > self.gc_thresholds[0] * 1.5:
                     new_threshold = min(self.gc_thresholds[0] * 1.1, 1000)
-                    self.gc_thresholds = (int(new_threshold), self.gc_thresholds[1], self.gc_thresholds[2])
+                    self.gc_thresholds = (
+                        int(new_threshold),
+                        self.gc_thresholds[1],
+                        self.gc_thresholds[2],
+                    )
                     gc.set_threshold(*self.gc_thresholds)
                     logger.debug(f"🔧 GC threshold ajustado: {self.gc_thresholds}")
 
@@ -353,7 +367,11 @@ class MemoryOptimizer:
         return {
             "current_memory_mb": round(current_memory, 2),
             "target_memory_mb": self.target_memory_mb,
-            "memory_efficiency_pct": round((self.target_memory_mb / current_memory) * 100, 1) if current_memory > 0 else 100,
+            "memory_efficiency_pct": (
+                round((self.target_memory_mb / current_memory) * 100, 1)
+                if current_memory > 0
+                else 100
+            ),
             "total_cleanups": self.total_cleanups,
             "memory_freed_mb": round(self.memory_freed_mb, 2),
             "gc_forced_collections": self.gc_forced_collections,

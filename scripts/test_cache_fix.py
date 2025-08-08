@@ -20,7 +20,10 @@ def test_cache_intelligence_fix():
         from unittest.mock import Mock
 
         mock_config = Mock(spec=Configuracao)
-        mock_config.get_cache_config.return_value = {"l1_max_size_mb": 512, "redis_url": "redis://localhost:6379"}
+        mock_config.get_cache_config.return_value = {
+            "l1_max_size_mb": 512,
+            "redis_url": "redis://localhost:6379",
+        }
 
         manager = GerenciadorExchange(mock_config)
         print("✅ CacheIntelligence integration fix successful!")
