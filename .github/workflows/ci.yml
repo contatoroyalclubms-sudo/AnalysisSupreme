@@ -50,7 +50,9 @@ jobs:
     
     - name: Test with pytest
       run: |
-        PYTHONPATH=${{ github.workspace }} python -m pytest tests/ -v --cov=src --cov-report=xml --cov-report=html
+        export PYTHONPATH="${{ github.workspace }}:$PYTHONPATH"
+        python -c "import sys; sys.path.insert(0, '${{ github.workspace }}'); print('Python path setup complete')"
+        python -m pytest tests/ -v --cov=src --cov-report=xml --cov-report=html
     
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
