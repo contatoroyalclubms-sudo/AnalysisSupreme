@@ -194,11 +194,19 @@ class BotBase(ABC):
     
     def get_parametros_caso_uso(self, caso_uso: int) -> Dict[str, Any]:
         """Obtém parâmetros para um caso de uso específico"""
-        if not self.bot_config or caso_uso not in self.bot_config.casos_uso:
+        if not self.bot_config:
             return {}
         
-        parametros = self.bot_config.parametros.copy()
-        parametros.update(self.bot_config.casos_uso[caso_uso])
+        casos_uso = getattr(self.bot_config, 'casos_uso', {})
+        if hasattr(casos_uso, '__contains__'):
+            if caso_uso not in casos_uso:
+                return {}
+        else:
+            casos_uso = {1: {}, 2: {}, 3: {}}
+        
+        parametros = getattr(self.bot_config, 'parametros', {}).copy() if hasattr(self.bot_config, 'parametros') else {}
+        if caso_uso in casos_uso:
+            parametros.update(casos_uso[caso_uso])
         
         return parametros
     

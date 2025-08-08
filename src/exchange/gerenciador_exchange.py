@@ -27,7 +27,8 @@ class GerenciadorExchange:
         
         self.websocket_pool = WebSocketPool(max_connections_per_exchange=5)
         cache_config = config.get_cache_config()
-        self.cache = CacheIntelligence(cache_config.get('l1_max_size_mb', 512))
+        l1_max_size_mb = cache_config.get('l1_max_size_mb', 512) if isinstance(cache_config, dict) else 512
+        self.cache = CacheIntelligence(l1_max_size_mb)
         self.circuit_breakers = ExchangeCircuitBreakers()
         self.kpi_manager = GerenciadorKPIs()
         

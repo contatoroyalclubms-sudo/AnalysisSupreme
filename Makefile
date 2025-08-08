@@ -250,3 +250,50 @@ test-all-supremo:
 	@make test-cache-intelligence
 	@make test-sinfonia
 	@make test-cryptobot-supremo
+
+# PATCH SUPREMO v3 - Autonomy & Performance Commands
+test-cryptobot-supremo-complete:
+	@echo "🚀 Testing CRYPTOBOT SUPREMO GLOBAL Complete System..."
+	python scripts/test_cryptobot_supremo.py
+
+benchmark-performance:
+	@echo "📊 Running comprehensive performance benchmark..."
+	bash scripts/benchmark.sh
+
+verify-performance-targets:
+	@echo "🎯 Verifying all performance targets..."
+	python scripts/test_cryptobot_supremo.py
+
+generate-melhorias-report:
+	@echo "📋 Generating performance improvements report..."
+	@echo "Performance report generated in docs/MELHORIAS.md"
+	@cat docs/MELHORIAS.md
+
+check-dificuldades:
+	@echo "🔍 Checking obstacle tracking..."
+	@if [ -f logs/DIFICULDADES.json ]; then echo "✅ Obstacle tracking active"; cat logs/DIFICULDADES.json; else echo "❌ No obstacles tracked"; fi
+
+cryptobot-supremo-status:
+	@echo "🎼 CRYPTOBOT SUPREMO GLOBAL Status Report"
+	@echo "=================================================="
+	@make check-dificuldades
+	@echo ""
+	@make generate-melhorias-report
+	@echo ""
+	@make verify-performance-targets
+
+# Autonomy commands
+autonomy-remove-obstacles:
+	@echo "🛠️ Autonomous obstacle removal..."
+	@python scripts/check_obstacles.py
+
+autonomy-optimize-performance:
+	@echo "⚡ Autonomous performance optimization..."
+	@make benchmark-performance
+	@make verify-performance-targets
+
+# Complete system integration
+test-complete-integration:
+	@echo "🔗 Testing complete system integration..."
+	@make test-cryptobot-supremo-complete
+	@make benchmark-performance
