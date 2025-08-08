@@ -26,7 +26,8 @@ class GerenciadorExchange:
         self.exchange_principal = None
         
         self.websocket_pool = WebSocketPool(max_connections_per_exchange=5)
-        self.cache = CacheIntelligence(config.get_cache_config() if hasattr(config, 'get_cache_config') else {})
+        cache_config = config.get_cache_config()
+        self.cache = CacheIntelligence(cache_config.get('l1_max_size_mb', 512))
         self.circuit_breakers = ExchangeCircuitBreakers()
         self.kpi_manager = GerenciadorKPIs()
         
@@ -41,7 +42,6 @@ class GerenciadorExchange:
         """Inicializa conexões com exchanges e componentes de performance"""
         logger.info("Inicializando gerenciador de exchanges com alta performance")
         
-        await self.cache.initialize()
         
         exchange_config = self.config.get_exchange_config("binance")
         if exchange_config:
@@ -113,7 +113,7 @@ class GerenciadorExchange:
                     }
                     
                     cache_key = f"ticker_{symbol}"
-                    await self.cache.set(cache_key, ticker_data, 'ticker')
+                    await self.cache.set_intelligent(cache_key, ticker_data, 'ticker')
                     
         except Exception as e:
             logger.error(f"Erro ao processar mensagem WebSocket: {e}")
@@ -216,7 +216,7 @@ class GerenciadorExchange:
             self.performance_stats['total_requests'] += 1
             
             cache_key = f"ticker_{symbol}_{exchange or 'principal'}"
-            cached_data = await self.cache.get(cache_key, 'ticker')
+            cached_data = await self.cache.get_intelligent(cache_key, 'ticker')
             
             if cached_data:
                 self.performance_stats['cache_hits'] += 1
@@ -235,7 +235,7 @@ class GerenciadorExchange:
             )
             
             if result:
-                await self.cache.set(cache_key, result, 'ticker')
+                await self.cache.set_intelligent(cache_key, result, 'ticker')
             
             return result
             
@@ -251,7 +251,7 @@ class GerenciadorExchange:
             self.performance_stats['total_requests'] += 1
             
             cache_key = f"orderbook_{symbol}_{limit}_{exchange or 'principal'}"
-            cached_data = await self.cache.get(cache_key, 'orderbook')
+            cached_data = await self.cache.get_intelligent(cache_key, 'orderbook')
             
             if cached_data:
                 self.performance_stats['cache_hits'] += 1
@@ -270,7 +270,7 @@ class GerenciadorExchange:
             )
             
             if result:
-                await self.cache.set(cache_key, result, 'orderbook')
+                await self.cache.set_intelligent(cache_key, result, 'orderbook')
             
             return result
             
@@ -285,7 +285,7 @@ class GerenciadorExchange:
             self.performance_stats['total_requests'] += 1
             
             cache_key = f"ohlcv_{symbol}_{timeframe}_{limit}_{exchange or 'principal'}"
-            cached_data = await self.cache.get(cache_key, 'ohlcv')
+            cached_data = await self.cache.get_intelligent(cache_key, 'ohlcv')
             
             if cached_data:
                 self.performance_stats['cache_hits'] += 1
@@ -304,7 +304,7 @@ class GerenciadorExchange:
             )
             
             if result:
-                await self.cache.set(cache_key, result, 'ohlcv')
+                await self.cache.set_intelligent(cache_key, result, 'ohlcv')
             
             return result or []
             
@@ -367,7 +367,7 @@ class GerenciadorExchange:
         logger.info("Finalizando gerenciador de exchanges")
         
         await self.websocket_pool.close_all()
-        await self.cache.close()
+        await self.cache.shutdown_intelligence()
         
         for exchange in self.exchanges.values():
             if hasattr(exchange, 'close'):

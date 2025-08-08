@@ -18,6 +18,11 @@ from ..bots.swing import BotSwing
 from ..observabilidade.monitor import Monitor
 from ..ia.motor_ia import MotorIA
 from .engine.sinfonia_suprema import SinfoniaSuprema, get_sinfonia_suprema
+from .engine.ultra_fast_executor import UltraFastExecutor, ExecutionTask
+from .engine.websocket_manager_premium import WebSocketManagerPremium
+from .engine.cache_intelligence import CacheIntelligence
+from .engine.memory_optimizer import MemoryOptimizer
+from .engine.cryptobot_orchestrator import CryptoBotOrchestrator, BotConfig
 import time
 
 logger = logging.getLogger(__name__)
@@ -34,6 +39,16 @@ class GerenciadorBots:
         self._running = False
         
         self.sinfonia_suprema: Optional[SinfoniaSuprema] = None
+        
+        bot_config = BotConfig(
+            max_concurrent_trades=50,
+            risk_per_trade=0.02,
+            max_daily_risk=0.10,
+            min_confidence=0.75,
+            execution_speed_ms=15,
+            profit_target=0.15
+        )
+        self.cryptobot_orchestrator = CryptoBotOrchestrator(bot_config)
     
     async def inicializar(self):
         """🚀 Inicializa CRYPTOBOT SUPREMO GLOBAL - Gerenciador de Bots"""
@@ -42,6 +57,9 @@ class GerenciadorBots:
         logger.info("🎼 Inicializando Sinfonia Tecnológica Suprema...")
         self.sinfonia_suprema = await get_sinfonia_suprema()
         logger.info("✅ Sinfonia Tecnológica Suprema inicializada")
+        
+        await self.cryptobot_orchestrator.initialize_supreme_system()
+        logger.info("🚀 CryptoBotOrchestrator Quantum System inicializado")
         
         bot_classes = {
             "arbitragem": BotArbitragem,
@@ -294,6 +312,9 @@ class GerenciadorBots:
         if self.sinfonia_suprema:
             await self.sinfonia_suprema.finale_graceful_shutdown()
             logger.info("✅ Sinfonia Tecnológica Suprema finalizada")
+        
+        await self.cryptobot_orchestrator.shutdown()
+        logger.info("🚀 CryptoBotOrchestrator Quantum System finalizado")
         
         for bot in self.bots.values():
             await bot.finalizar()
