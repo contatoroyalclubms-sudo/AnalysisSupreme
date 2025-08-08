@@ -8,15 +8,15 @@ from typing import Dict, List, Optional, Any
 from datetime import datetime
 
 from .configuracao import Configuracao
-from ..bots.bot_base import BotBase
-from ..bots.arbitragem import BotArbitragem
-from ..bots.grid import BotGrid
-from ..bots.momentum import BotMomentum
-from ..bots.scalping import BotScalping
-from ..bots.mean_reversion import BotMeanReversion
-from ..bots.swing import BotSwing
-from ..observabilidade.monitor import Monitor
-from ..ia.motor_ia import MotorIA
+from src.bots.bot_base import BotBase
+from src.bots.arbitragem import BotArbitragem
+from src.bots.grid import BotGrid
+from src.bots.momentum import BotMomentum
+from src.bots.scalping import BotScalping
+from src.bots.mean_reversion import BotMeanReversion
+from src.bots.swing import BotSwing
+from src.observabilidade.monitor import Monitor
+from src.ia.motor_ia import MotorIA
 from .engine.sinfonia_suprema import SinfoniaSuprema, get_sinfonia_suprema
 from .engine.ultra_fast_executor import UltraFastExecutor, ExecutionTask
 from .engine.websocket_manager_premium import WebSocketManagerPremium

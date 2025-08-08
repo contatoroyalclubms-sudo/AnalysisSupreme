@@ -9,11 +9,11 @@ import secrets
 from typing import Dict, List, Optional, Any
 from datetime import datetime
 
-from ..core.configuracao import Configuracao
-from .websocket_pool import WebSocketPool
-from ..core.engine.cache_intelligence import CacheIntelligence
-from ..utils.circuit_breaker import ExchangeCircuitBreakers
-from ..utils.kpis import GerenciadorKPIs
+from src.core.configuracao import Configuracao
+from src.exchange.websocket_pool import WebSocketPool
+from src.core.engine.cache_intelligence import CacheIntelligence
+from src.utils.circuit_breaker import ExchangeCircuitBreakers
+from src.utils.kpis import GerenciadorKPIs
 
 logger = logging.getLogger(__name__)
 

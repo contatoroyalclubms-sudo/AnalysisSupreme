@@ -7,7 +7,7 @@ from typing import Dict, List, Any, Optional
 from datetime import datetime
 
 from .bot_base import BotBase
-from ..utils.kpis import GerenciadorKPIs
+from src.utils.kpis import GerenciadorKPIs
 
 
 class BotArbitragem(BotBase):

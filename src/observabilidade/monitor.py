@@ -10,8 +10,8 @@ from typing import Dict, List, Any, Optional, Set
 from datetime import datetime, timedelta
 from dataclasses import asdict
 
-from ..core.configuracao import Configuracao
-from ..models.trade import Trade
+from src.core.configuracao import Configuracao
+from src.models.trade import Trade
 
 logger = logging.getLogger(__name__)
 

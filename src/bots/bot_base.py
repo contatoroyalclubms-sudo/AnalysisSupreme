@@ -8,10 +8,10 @@ from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
 
-from ..core.configuracao import Configuracao
-from ..models.trade import Trade
-from ..exchange.gerenciador_exchange import GerenciadorExchange
-from ..utils.metricas import CalculadorMetricas
+from src.core.configuracao import Configuracao
+from src.models.trade import Trade
+from src.exchange.gerenciador_exchange import GerenciadorExchange
+from src.utils.metricas import CalculadorMetricas
 
 logger = logging.getLogger(__name__)
 

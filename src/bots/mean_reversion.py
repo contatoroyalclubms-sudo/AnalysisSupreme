@@ -8,7 +8,7 @@ from datetime import datetime
 import math
 
 from .bot_base import BotBase
-from ..utils.kpis import GerenciadorKPIs
+from src.utils.kpis import GerenciadorKPIs
 
 
 class BotMeanReversion(BotBase):

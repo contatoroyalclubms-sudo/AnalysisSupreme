@@ -10,8 +10,8 @@ from typing import Dict, List, Optional, Any, Union
 from dataclasses import dataclass
 import json
 from datetime import datetime
-from ..bots.bot_base import BotBase
-from ..core.configuracao import Configuracao
+from src.bots.bot_base import BotBase
+from src.core.configuracao import Configuracao
 
 
 @dataclass

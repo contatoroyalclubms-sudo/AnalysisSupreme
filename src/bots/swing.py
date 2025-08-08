@@ -10,8 +10,8 @@ from typing import Dict, List, Any, Optional
 from datetime import datetime, timedelta
 
 from .bot_base import BotBase
-from ..utils.kpis import GerenciadorKPIs
-from ..models.trade import Trade
+from src.utils.kpis import GerenciadorKPIs
+from src.models.trade import Trade
 
 logger = logging.getLogger(__name__)
 

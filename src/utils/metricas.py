@@ -7,7 +7,7 @@ import pandas as pd
 from typing import List, Dict, Any
 from datetime import datetime, timedelta
 
-from ..models.trade import Trade
+from src.models.trade import Trade
 
 
 class CalculadorMetricas:

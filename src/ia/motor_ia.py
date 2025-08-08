@@ -13,7 +13,7 @@ import pickle  # nosec
 import os
 import secrets
 
-from ..core.configuracao import Configuracao
+from src.core.configuracao import Configuracao
 
 logger = logging.getLogger(__name__)
 
