@@ -6,11 +6,12 @@ Performance: 5+ chains | Bridge automation | Cross-chain MEV protection
 
 import asyncio
 import time
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, Union
 from dataclasses import dataclass
 import json
 from datetime import datetime
 from ..bots.bot_base import BotBase
+from ..core.configuracao import Configuracao
 
 
 @dataclass
@@ -30,8 +31,8 @@ class CrossChainOpportunity:
 class CrossChainArbitrageBot(BotBase):
     """Arbitragem entre diferentes blockchains"""
 
-    def __init__(self, config: Dict):
-        super().__init__(config)
+    def __init__(self, config: Configuracao, monitor=None, motor_ia=None):
+        super().__init__(config, monitor, motor_ia)
         self.supported_chains = [
             "ethereum",
             "bsc",
@@ -42,9 +43,9 @@ class CrossChainArbitrageBot(BotBase):
             "optimism",
             "solana",
         ]
-        self.bridge_connectors = {}
-        self.price_feeds = {}
-        self.gas_trackers = {}
+        self.bridge_connectors: Dict[str, Any] = {}
+        self.price_feeds: Dict[str, Any] = {}
+        self.gas_trackers: Dict[str, Any] = {}
 
     async def initialize(self):
         """Inicializa conectores cross-chain"""
@@ -86,7 +87,7 @@ class CrossChainArbitrageBot(BotBase):
 
     async def execute_cross_chain_arbitrage(
         self, opportunity: CrossChainOpportunity
-    ) -> Dict:
+    ) -> Dict[str, Any]:
         """Executa arbitragem cross-chain"""
         execution_plan = await self._create_execution_plan(opportunity)
 
@@ -115,7 +116,7 @@ class CrossChainArbitrageBot(BotBase):
 
     async def monitor_bridge_status(
         self, bridge_tx_hash: str, source_chain: str, dest_chain: str
-    ) -> Dict:
+    ) -> Dict[str, Any]:
         """Monitora status de transferência bridge"""
         await asyncio.sleep(0.5)
 
@@ -158,7 +159,7 @@ class CrossChainArbitrageBot(BotBase):
         """Calcula custos de bridge entre chains"""
         await asyncio.sleep(0.005)
 
-        bridge_costs = {}
+        bridge_costs: Dict[str, Dict[str, float]] = {}
 
         for chain_a in self.supported_chains:
             bridge_costs[chain_a] = {}
@@ -176,9 +177,9 @@ class CrossChainArbitrageBot(BotBase):
         chain_a: str,
         chain_b: str,
         symbol: str,
-        chain_prices: Dict,
-        bridge_costs: Dict,
-    ) -> Dict:
+        chain_prices: Dict[str, float],
+        bridge_costs: Dict[str, Dict[str, float]],
+    ) -> Dict[str, Any]:
         """Analisa par de chains para arbitragem"""
         await asyncio.sleep(0.002)
 
@@ -205,7 +206,9 @@ class CrossChainArbitrageBot(BotBase):
             "price_diff": price_diff,
         }
 
-    async def _create_execution_plan(self, opportunity: CrossChainOpportunity) -> Dict:
+    async def _create_execution_plan(
+        self, opportunity: CrossChainOpportunity
+    ) -> Dict[str, Any]:
         """Cria plano de execução"""
         await asyncio.sleep(0.003)
 
@@ -231,7 +234,9 @@ class CrossChainArbitrageBot(BotBase):
             "total_gas_cost": opportunity.bridge_cost + 0.002,
         }
 
-    async def _execute_source_chain_trade(self, step1: Dict) -> Dict:
+    async def _execute_source_chain_trade(
+        self, step1: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Executa trade na chain de origem"""
         await asyncio.sleep(0.1)
 
@@ -242,7 +247,7 @@ class CrossChainArbitrageBot(BotBase):
             "gas_used": 0.001,
         }
 
-    async def _execute_bridge_transfer(self, bridge: Dict) -> Dict:
+    async def _execute_bridge_transfer(self, bridge: Dict[str, Any]) -> Dict[str, Any]:
         """Executa transferência bridge"""
         await asyncio.sleep(0.3)
 
@@ -253,7 +258,9 @@ class CrossChainArbitrageBot(BotBase):
             "cost": bridge["cost"],
         }
 
-    async def _execute_destination_chain_trade(self, step2: Dict) -> Dict:
+    async def _execute_destination_chain_trade(
+        self, step2: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Executa trade na chain de destino"""
         await asyncio.sleep(0.1)
 
@@ -267,7 +274,9 @@ class CrossChainArbitrageBot(BotBase):
             "gas_used": 0.001,
         }
 
-    async def _check_bridge_status(self, tx_hash: str, source: str, dest: str) -> Dict:
+    async def _check_bridge_status(
+        self, tx_hash: str, source: str, dest: str
+    ) -> Dict[str, Any]:
         """Verifica status do bridge"""
         await asyncio.sleep(0.01)
 
@@ -302,7 +311,9 @@ class CrossChainArbitrageBot(BotBase):
         for chain in self.supported_chains:
             self.gas_trackers[chain] = f"{chain}_gas_tracker_ready"
 
-    async def executar_estrategia(self, symbol: str, dados_mercado: Dict) -> Dict:
+    async def executar_estrategia(
+        self, symbol: str, dados_mercado: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Executa estratégia cross-chain"""
         opportunities = await self.find_cross_chain_opportunities(symbol)
 
@@ -331,7 +342,7 @@ class CrossChainArbitrageBot(BotBase):
 
         return {"action": "HOLD", "reason": "insufficient_profit_or_high_risk"}
 
-    def get_cross_chain_stats(self) -> Dict:
+    def get_cross_chain_stats(self) -> Dict[str, Any]:
         """Retorna estatísticas cross-chain"""
         return {
             "supported_chains": self.supported_chains,

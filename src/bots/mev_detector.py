@@ -6,11 +6,12 @@ Performance: Análise de mempool | Detecção de sandwich | Proteção anti-MEV
 
 import asyncio
 import time
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, Union
 from dataclasses import dataclass
 import json
 from datetime import datetime
 from ..bots.bot_base import BotBase
+from ..core.configuracao import Configuracao
 
 
 @dataclass
@@ -28,8 +29,8 @@ class MEVOpportunity:
 class MEVDetectorBot(BotBase):
     """Bot para detectar e capturar oportunidades MEV"""
 
-    def __init__(self, config: Dict):
-        super().__init__(config)
+    def __init__(self, config: Configuracao, monitor=None, motor_ia=None):
+        super().__init__(config, monitor, motor_ia)
         self.mempool_analyzer = None
         self.sandwich_detector = None
         self.liquidation_scanner = None

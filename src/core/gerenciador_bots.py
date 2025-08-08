@@ -269,7 +269,7 @@ class GerenciadorBots:
 
     def get_metricas_consolidadas(self) -> Dict[str, Any]:
         """Retorna métricas consolidadas de todos os bots"""
-        metricas = {
+        metricas: Dict[str, Any] = {
             "total_bots": len(self.bots),
             "bots_ativos": len([t for t in self.tasks.values() if not t.done()]),
             "total_trades": 0,
@@ -282,9 +282,9 @@ class GerenciadorBots:
         total_trades = 0
 
         for nome, bot in self.bots.items():
-            bot_trades = bot.get_total_trades()
-            bot_pnl = bot.get_pnl_total()
-            bot_wins = bot.get_total_wins()
+            bot_trades = int(bot.get_total_trades())
+            bot_pnl = float(bot.get_pnl_total())
+            bot_wins = int(bot.get_total_wins())
 
             metricas["total_trades"] += bot_trades
             metricas["pnl_total"] += bot_pnl
@@ -295,7 +295,7 @@ class GerenciadorBots:
                 "trades": bot_trades,
                 "pnl": bot_pnl,
                 "wins": bot_wins,
-                "win_rate": bot_wins / bot_trades if bot_trades > 0 else 0,
+                "win_rate": float(bot_wins) / float(bot_trades) if bot_trades > 0 else 0.0,
             }
 
         if total_trades > 0:

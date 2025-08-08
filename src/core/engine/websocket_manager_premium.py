@@ -24,7 +24,7 @@ class PremiumConnection:
 
     exchange: str
     url: str
-    websocket: Optional[websockets.WebSocketServerProtocol] = None
+    websocket: Optional[Any] = None
     connected: bool = False
     last_ping: float = 0.0
     last_pong: float = 0.0
@@ -65,12 +65,12 @@ class WebSocketManagerPremium:
         self.connection_pool = None
 
         self.total_messages = 0
-        self.total_reconnections = 0
+        self.total_reconnections = 0.0
         self.avg_latency_ms = 0.0
 
         self.connection_weights: Dict[str, Dict[int, float]] = {}
 
-        self.ultra_cache = {}
+        self.ultra_cache: Dict[str, Any] = {}
         self.cache_ttl_ms = 50  # 50ms TTL ultra baixo
 
     def _create_optimized_ssl_context(self) -> ssl.SSLContext:
@@ -185,9 +185,12 @@ class WebSocketManagerPremium:
         """Loop premium de mensagens com latência mínima"""
         while connection.connected:
             try:
-                message = await asyncio.wait_for(
-                    connection.websocket.recv(), timeout=0.1
-                )  # 100ms timeout
+                if connection.websocket is not None:
+                    message = await asyncio.wait_for(
+                        connection.websocket.recv(), timeout=0.1
+                    )  # 100ms timeout
+                else:
+                    continue
 
                 receive_time = time.time() * 1000
 
@@ -259,7 +262,7 @@ class WebSocketManagerPremium:
 
     async def _reconnect_premium(self, connection: PremiumConnection):
         """Reconexão premium com backoff inteligente"""
-        self.total_reconnections += 1
+        self.total_reconnections += 1.0
 
         base_delay = 1.0
         health_factor = (100 - connection.health_score) / 100
@@ -284,7 +287,7 @@ class WebSocketManagerPremium:
 
                 for exchange, connections in self.connections.items():
                     healthy_connections = 0
-                    total_latency = 0
+                    total_latency = 0.0
 
                     for i, conn in enumerate(connections):
                         health = conn.health_score
@@ -343,11 +346,11 @@ class WebSocketManagerPremium:
         weights = self.connection_weights.get(exchange, {})
 
         best_connection = None
-        best_weight = 0
+        best_weight = 0.0
 
         for i, conn in enumerate(connections):
             if conn.connected and weights.get(i, 0) > best_weight:
-                best_weight = weights[i]
+                best_weight = float(weights[i])
                 best_connection = conn
 
         return best_connection
@@ -360,15 +363,15 @@ class WebSocketManagerPremium:
         """Estatísticas premium do manager"""
         total_connections = self._total_connections()
         healthy_connections = 0
-        total_latency = 0
+        total_latency = 0.0
 
         for connections in self.connections.values():
             for conn in connections:
                 if conn.health_score > 70:
                     healthy_connections += 1
-                total_latency += conn.avg_latency_ms
+                total_latency += float(conn.avg_latency_ms)
 
-        avg_latency = total_latency / total_connections if total_connections > 0 else 0
+        avg_latency = float(total_latency / total_connections) if total_connections > 0 else 0.0
 
         return {
             "total_connections": total_connections,
