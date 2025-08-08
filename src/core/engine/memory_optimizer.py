@@ -44,7 +44,7 @@ class MemoryOptimizer:
         self.object_pools: Dict[str, List[Any]] = defaultdict(list)
         self.pool_limits = {"dict": 1000, "list": 1000, "set": 500, "tuple": 2000}
 
-        self.weak_refs: weakref.WeakSet = weakref.WeakSet()
+        self.weak_refs: weakref.WeakSet[Any] = weakref.WeakSet()
 
         self.gc_thresholds = (700, 10, 10)  # Mais agressivo
         self.cleanup_interval = 30  # 30s

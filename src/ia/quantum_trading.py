@@ -125,7 +125,7 @@ class QuantumTradingEngine:
         await asyncio.sleep(0.003)
 
         n_states = 2 ** circuit["qubits"]
-        amplitudes = np.random.random(n_states).astype(np.complex128)
+        amplitudes = np.random.random(n_states).astype(complex)
         amplitudes = amplitudes / np.linalg.norm(amplitudes)
 
         return {

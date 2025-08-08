@@ -56,10 +56,10 @@ class CacheIntelligence:
         self.max_memory_bytes = max_memory_mb * 1024 * 1024
         self.current_memory_bytes = 0
 
-        self.l1_cache: Dict[str, Any] = {}  # Ultra rápido - 10ms TTL
-        self.l2_cache: Dict[str, Any] = {}  # Rápido - 100ms TTL
-        self.l3_cache: Dict[str, Any] = {}  # Normal - 1s TTL
-        self.l4_cache: Dict[str, Any] = {}  # Longo prazo - 10s TTL
+        self.l1_cache: Dict[str, CacheEntry] = {}  # Ultra rápido - 10ms TTL
+        self.l2_cache: Dict[str, CacheEntry] = {}  # Rápido - 100ms TTL
+        self.l3_cache: Dict[str, CacheEntry] = {}  # Normal - 1s TTL
+        self.l4_cache: Dict[str, CacheEntry] = {}  # Longo prazo - 10s TTL
 
         self.ttl_config = {
             "ticker": {"l1": 10, "l2": 50, "l3": 200, "l4": 1000},
@@ -70,7 +70,7 @@ class CacheIntelligence:
             "signals": {"l1": 50, "l2": 200, "l3": 1000, "l4": 5000},
         }
 
-        self.access_patterns: Dict[str, List[Any]] = defaultdict(list)
+        self.access_patterns: Dict[str, List[float]] = defaultdict(list)
         self.hit_rates: Dict[str, float] = defaultdict(float)
         self.prediction_accuracy = 0.0
 

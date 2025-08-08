@@ -50,9 +50,9 @@ class CircuitBreaker:
                 logger.info("Circuit breaker mudou para HALF_OPEN")
             else:
                 time_remaining = (
-                    self.timeout - (time.time() - (self.last_failure_time or 0))
-                    if self.last_failure_time
-                    else 0
+                    self.timeout - (time.time() - self.last_failure_time)
+                    if self.last_failure_time is not None
+                    else self.timeout
                 )
                 raise CircuitBreakerOpenException(
                     f"Circuit breaker está OPEN. Próxima tentativa em "
