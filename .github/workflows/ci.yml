@@ -50,7 +50,7 @@ jobs:
     
     - name: Test with pytest
       run: |
-        pytest tests/ -v --cov=src --cov-report=xml --cov-report=html
+        PYTHONPATH=${{ github.workspace }} pytest tests/ -v --cov=src --cov-report=xml --cov-report=html
     
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
@@ -205,6 +205,8 @@ jobs:
       run: |
         if [ "${{ needs.build-and-deploy.result }}" == "success" ] && [ "${{ needs.docker-build.result }}" == "success" ]; then
           echo "✅ Deployment successful!"
+        elif [ "${{ needs.build-and-deploy.result }}" == "skipped" ] || [ "${{ needs.docker-build.result }}" == "skipped" ]; then
+          echo "⏭️ Deployment skipped (not on main branch)"
         else
           echo "❌ Deployment failed!"
           exit 1
