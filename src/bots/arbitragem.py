@@ -155,6 +155,21 @@ class BotArbitragem(BotBase):
                 trade_sell.pnl = pnl / 2
                 
                 self.logger.info(f"Arbitragem executada com sucesso. PnL: {pnl:.4f}")
+                
+                return {
+                    "success": True,
+                    "trade_buy": trade_buy,
+                    "trade_sell": trade_sell,
+                    "pnl": pnl,
+                    "symbol": symbol,
+                    "profit_percent": oportunidade["profit_percent"]
+                }
+        
+        return {
+            "success": False,
+            "error": "Failed to execute trades",
+            "symbol": symbol
+        }
     
     async def _arbitragem_triangular(self, parametros: Dict[str, Any]):
         """Caso de uso 2: Arbitragem triangular em uma exchange"""

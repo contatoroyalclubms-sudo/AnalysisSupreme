@@ -297,3 +297,23 @@ test-complete-integration:
 	@echo "🔗 Testing complete system integration..."
 	@make test-cryptobot-supremo-complete
 	@make benchmark-performance
+
+# Final verification commands
+verify-all-targets:
+	@echo "🎯 Verifying all CRYPTOBOT SUPREMO GLOBAL targets..."
+	@make verify-performance-targets
+	@make check-dificuldades
+	@python -m pytest tests/test_bot_coverage.py -v
+	@echo "✅ All targets verified successfully"
+
+final-status-report:
+	@echo "📊 CRYPTOBOT SUPREMO GLOBAL Final Status Report"
+	@make cryptobot-supremo-status
+	@make verify-all-targets
+
+# Local CI verification before push
+verify-ci-locally:
+	@echo "🔍 Verifying CI pipeline locally..."
+	@python -m pytest tests/ -v --tb=short
+	@bandit -r src/ -f json -o bandit-local-verification.json
+	@echo "✅ Local CI verification complete"

@@ -147,20 +147,36 @@ class TestBotArbitragem:
     @pytest.mark.asyncio
     async def test_executar_arbitragem(self, mock_config, mock_exchange, mock_monitor, mock_kpis):
         """Testa execução de arbitragem"""
-        bot = BotArbitragem(mock_config, mock_monitor, mock_exchange)
-        
-        oportunidade = {
-            "symbol": "BTC/USDT",
-            "spread": 0.4,
-            "volume": 0.01,
-            "preco_compra": 49999,
-            "preco_venda": 50001
-        }
-        
-        resultado = await bot._executar_arbitragem_simples(oportunidade)
-        
-        assert resultado is not None
-        mock_exchange.create_order.assert_called()
+        with patch('src.bots.bot_base.GerenciadorExchange') as mock_exchange_class:
+            mock_exchange_instance = AsyncMock()
+            mock_exchange_instance.create_order.return_value = {
+                'id': 'test_order_123',
+                'price': 50000,
+                'status': 'closed'
+            }
+            mock_exchange_class.return_value = mock_exchange_instance
+            
+            bot = BotArbitragem(mock_config, mock_monitor, mock_exchange)
+            
+            bot.config.paper_mode = False
+            
+            oportunidade = {
+                "symbol": "BTC/USDT",
+                "spread": 0.4,
+                "volume": 0.01,
+                "preco_compra": 49999,
+                "preco_venda": 50001,
+                "buy_price": 49999,
+                "sell_price": 50001,
+                "profit_percent": 0.004
+            }
+            
+            resultado = await bot._executar_arbitragem_simples(oportunidade)
+            
+            assert resultado is not None
+            assert resultado["success"] == True
+            assert "pnl" in resultado
+            mock_exchange_instance.create_order.assert_called()
 
 
 class TestBotGrid:
