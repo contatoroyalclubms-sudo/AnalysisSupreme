@@ -7,6 +7,7 @@ Performance: Real-time metrics | Predictive alerts | Enterprise reporting
 import asyncio
 import time
 import json
+import secrets
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, asdict
 from datetime import datetime, timedelta
@@ -134,16 +135,18 @@ class DashboardSupremo:
         """Calcula métricas de performance"""
         await asyncio.sleep(0.002)
 
-        execution_times = np.random.uniform(0.5, 2.0, 1000)
-        p99_latency = np.percentile(execution_times, 99)
+        execution_times = np.array(
+            [secrets.SystemRandom().uniform(0.5, 2.0) for _ in range(1000)]
+        )
+        p99_latency = float(np.percentile(execution_times, 99))
 
         return PerformanceMetrics(
             execution_time_p99=p99_latency,
-            throughput_ops_per_sec=15000 + np.random.uniform(-1000, 1000),
-            success_rate=0.998 + np.random.uniform(-0.005, 0.002),
-            profit_per_hour=250 + np.random.uniform(-50, 100),
-            latency_avg=np.mean(execution_times),
-            cache_hit_rate=0.998 + np.random.uniform(-0.002, 0.002),
+            throughput_ops_per_sec=15000 + secrets.SystemRandom().uniform(-1000, 1000),
+            success_rate=0.998 + secrets.SystemRandom().uniform(-0.005, 0.002),
+            profit_per_hour=250 + secrets.SystemRandom().uniform(-50, 100),
+            latency_avg=float(np.mean(execution_times)),
+            cache_hit_rate=0.998 + secrets.SystemRandom().uniform(-0.002, 0.002),
         )
 
     async def _calculate_ai_metrics(self) -> AIMetrics:
@@ -160,11 +163,11 @@ class DashboardSupremo:
         }
 
         return AIMetrics(
-            prediction_accuracy=0.952 + np.random.uniform(-0.01, 0.01),
-            model_confidence=0.89 + np.random.uniform(-0.05, 0.05),
+            prediction_accuracy=0.952 + secrets.SystemRandom().uniform(-0.01, 0.01),
+            model_confidence=0.89 + secrets.SystemRandom().uniform(-0.05, 0.05),
             feature_importance=feature_importance,
-            quantum_advantage=0.15 + np.random.uniform(-0.02, 0.02),
-            ensemble_score=0.94 + np.random.uniform(-0.02, 0.02),
+            quantum_advantage=0.15 + secrets.SystemRandom().uniform(-0.02, 0.02),
+            ensemble_score=0.94 + secrets.SystemRandom().uniform(-0.02, 0.02),
         )
 
     async def _calculate_risk_metrics(self) -> RiskMetrics:
@@ -174,11 +177,11 @@ class DashboardSupremo:
         exposure = {"BTC": 0.4, "ETH": 0.3, "USDT": 0.2, "BNB": 0.1}
 
         return RiskMetrics(
-            var_95=0.025 + np.random.uniform(-0.005, 0.005),
-            max_drawdown=0.018 + np.random.uniform(-0.003, 0.003),
-            sharpe_ratio=2.8 + np.random.uniform(-0.2, 0.3),
+            var_95=0.025 + secrets.SystemRandom().uniform(-0.005, 0.005),
+            max_drawdown=0.018 + secrets.SystemRandom().uniform(-0.003, 0.003),
+            sharpe_ratio=2.8 + secrets.SystemRandom().uniform(-0.2, 0.3),
             exposure_by_asset=exposure,
-            risk_score=0.15 + np.random.uniform(-0.05, 0.05),
+            risk_score=0.15 + secrets.SystemRandom().uniform(-0.05, 0.05),
         )
 
     async def _calculate_system_health(self) -> Dict:
@@ -186,12 +189,12 @@ class DashboardSupremo:
         await asyncio.sleep(0.001)
 
         return {
-            "cpu_usage": 45 + np.random.uniform(-10, 15),
-            "memory_usage": 60 + np.random.uniform(-15, 20),
-            "disk_usage": 30 + np.random.uniform(-5, 10),
-            "network_latency": 2.5 + np.random.uniform(-0.5, 1.0),
-            "active_connections": 150 + int(np.random.uniform(-20, 30)),
-            "error_rate": 0.001 + np.random.uniform(-0.0005, 0.0005),
+            "cpu_usage": 45 + secrets.SystemRandom().uniform(-10, 15),
+            "memory_usage": 60 + secrets.SystemRandom().uniform(-15, 20),
+            "disk_usage": 30 + secrets.SystemRandom().uniform(-5, 10),
+            "network_latency": 2.5 + secrets.SystemRandom().uniform(-0.5, 1.0),
+            "active_connections": 150 + int(secrets.SystemRandom().uniform(-20, 30)),
+            "error_rate": 0.001 + secrets.SystemRandom().uniform(-0.0005, 0.0005),
             "uptime_percentage": 99.99,
             "last_restart": "2025-08-07T10:30:00Z",
         }
