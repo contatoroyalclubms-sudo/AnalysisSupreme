@@ -5,7 +5,7 @@ Gerenciador de exchanges para trading com alta performance
 import ccxt
 import asyncio
 import logging
-import random
+import secrets
 from typing import Dict, List, Optional, Any
 from datetime import datetime
 
@@ -134,11 +134,11 @@ class GerenciadorExchange:
                 }
 
             async def fetch_ticker(self, symbol):
-                import random
+                import secrets
 
                 base_prices = {"BTC/USDT": 45000, "ETH/USDT": 3000, "ADA/USDT": 0.5}
                 base_price = base_prices.get(symbol, 100)
-                variation = random.uniform(-0.02, 0.02)  # nosec B311
+                variation = secrets.SystemRandom().uniform(-0.02, 0.02)  # nosec B311
                 price = base_price * (1 + variation)
 
                 return {
@@ -148,7 +148,7 @@ class GerenciadorExchange:
                     "ask": price * 1.001,
                     "high": price * 1.05,
                     "low": price * 0.95,
-                    "volume": random.uniform(1000, 10000),  # nosec B311
+                    "volume": secrets.SystemRandom().uniform(1000, 10000),  # nosec B311
                 }
 
             async def fetch_order_book(self, symbol, limit=10):
@@ -161,7 +161,7 @@ class GerenciadorExchange:
                 for i in range(limit):
                     bid_price = price * (1 - (i + 1) * 0.001)
                     ask_price = price * (1 + (i + 1) * 0.001)
-                    volume = random.uniform(0.1, 10)  # nosec B311
+                    volume = secrets.SystemRandom().uniform(0.1, 10)  # nosec B311
 
                     bids.append([bid_price, volume])
                     asks.append([ask_price, volume])
@@ -182,18 +182,20 @@ class GerenciadorExchange:
                 for i in range(limit):
                     timestamp = current_time - (limit - i) * 60000  # 1 minuto
 
-                    variation = random.uniform(-0.01, 0.01)  # nosec B311
+                    variation = secrets.SystemRandom().uniform(
+                        -0.01, 0.01
+                    )  # nosec B311
                     open_price = base_price * (1 + variation)
                     close_price = open_price * (
-                        1 + random.uniform(-0.005, 0.005)
-                    )  # nosec B311
+                        1 + secrets.SystemRandom().uniform(-0.005, 0.005)
+                    )
                     high_price = max(open_price, close_price) * (
-                        1 + random.uniform(0, 0.01)
-                    )  # nosec B311
+                        1 + secrets.SystemRandom().uniform(0, 0.01)
+                    )
                     low_price = min(open_price, close_price) * (
-                        1 - random.uniform(0, 0.01)
-                    )  # nosec B311
-                    volume = random.uniform(10, 1000)  # nosec B311
+                        1 - secrets.SystemRandom().uniform(0, 0.01)
+                    )
+                    volume = secrets.SystemRandom().uniform(10, 1000)  # nosec B311
 
                     ohlcv.append(
                         [
@@ -225,7 +227,9 @@ class GerenciadorExchange:
 
         return ExchangeSimulada()
 
-    async def get_ticker(self, symbol: str, exchange: str = None) -> Optional[Dict]:
+    async def get_ticker(
+        self, symbol: str, exchange: Optional[str] = None
+    ) -> Optional[Dict]:
         """Obtém ticker com cache e circuit breaker"""
         medicao_id = self.kpi_manager.iniciar_medicao_latencia("exchange", "get_ticker")
 
@@ -263,7 +267,7 @@ class GerenciadorExchange:
             latencia_ms = self.kpi_manager.finalizar_medicao_latencia(medicao_id)
 
     async def get_orderbook(
-        self, symbol: str, limit: int = 10, exchange: str = None
+        self, symbol: str, limit: int = 10, exchange: Optional[str] = None
     ) -> Optional[Dict]:
         """Obtém order book com cache e circuit breaker"""
         try:
@@ -300,7 +304,11 @@ class GerenciadorExchange:
             return None
 
     async def get_ohlcv(
-        self, symbol: str, timeframe: str = "1m", limit: int = 100, exchange: str = None
+        self,
+        symbol: str,
+        timeframe: str = "1m",
+        limit: int = 100,
+        exchange: Optional[str] = None,
     ) -> List[List]:
         """Obtém dados OHLCV com cache"""
         try:
@@ -344,8 +352,8 @@ class GerenciadorExchange:
         order_type: str,
         side: str,
         amount: float,
-        price: float = None,
-        exchange: str = None,
+        price: Optional[float] = None,
+        exchange: Optional[str] = None,
     ) -> Optional[Dict]:
         """Cria ordem com circuit breaker"""
         try:

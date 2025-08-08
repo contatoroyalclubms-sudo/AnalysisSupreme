@@ -144,7 +144,9 @@ class MFASystem:
         await asyncio.sleep(0.001)
         return totp_code == "123456"
 
-    async def _verify_biometric(self, user_id: str, biometric_data: Optional[str]) -> bool:
+    async def _verify_biometric(
+        self, user_id: str, biometric_data: Optional[str]
+    ) -> bool:
         """Verifica dados biométricos"""
         await asyncio.sleep(0.003)
         return biometric_data == "valid_biometric"

@@ -142,7 +142,10 @@ class SinfoniaSuprema:
         logger.info("🎼 Sinfonia Tecnológica Suprema inicializada com sucesso!")
 
     async def execute_movimento(
-        self, bot_name: str, execution_func: Callable, params: Dict[str, Any] = None
+        self,
+        bot_name: str,
+        execution_func: Callable,
+        params: Optional[Dict[str, Any]] = None,
     ) -> Any:
         """🎼 MOVIMENTO II: Andante - Execução de Movimento Sinfônico"""
         config = self.movimento_configs.get(bot_name)
@@ -218,7 +221,7 @@ class SinfoniaSuprema:
 
     def get_performance_symphony(self) -> Dict[str, Any]:
         """🎼 MOVIMENTO IV: Finale - Relatório da Sinfonia"""
-        symphony_report = {
+        symphony_report: Dict[str, Any] = {
             "timestamp": datetime.now().isoformat(),
             "movimentos": {},
             "performance_global": {},
@@ -265,24 +268,22 @@ class SinfoniaSuprema:
             }
 
         if self.ultra_executor:
-            symphony_report["componentes"][
-                "ultra_executor"
-            ] = self.ultra_executor.get_performance_stats()
+            componentes = symphony_report["componentes"]
+            componentes["ultra_executor"] = self.ultra_executor.get_performance_stats()
 
         if self.websocket_manager:
-            symphony_report["componentes"][
-                "websocket_manager"
-            ] = self.websocket_manager.get_premium_stats()
+            componentes = symphony_report["componentes"]
+            componentes["websocket_manager"] = (
+                self.websocket_manager.get_premium_stats()
+            )
 
         if self.cache_intelligence:
-            symphony_report["componentes"][
-                "cache_intelligence"
-            ] = self.cache_intelligence.get_stats()
+            componentes = symphony_report["componentes"]
+            componentes["cache_intelligence"] = self.cache_intelligence.get_stats()
 
         if self.memory_optimizer:
-            symphony_report["componentes"][
-                "memory_optimizer"
-            ] = self.memory_optimizer.get_stats()
+            componentes = symphony_report["componentes"]
+            componentes["memory_optimizer"] = self.memory_optimizer.get_stats()
 
         return symphony_report
 

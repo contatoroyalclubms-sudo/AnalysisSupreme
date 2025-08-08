@@ -371,7 +371,9 @@ class WebSocketManagerPremium:
                     healthy_connections += 1
                 total_latency += float(conn.avg_latency_ms)
 
-        avg_latency = float(total_latency / total_connections) if total_connections > 0 else 0.0
+        avg_latency = (
+            float(total_latency / total_connections) if total_connections > 0 else 0.0
+        )
 
         return {
             "total_connections": total_connections,

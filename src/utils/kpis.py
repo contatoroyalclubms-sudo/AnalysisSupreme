@@ -3,7 +3,7 @@ Sistema de KPIs específicos por bot
 """
 
 import time
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from dataclasses import dataclass, field
 from datetime import datetime
 import logging
@@ -89,8 +89,8 @@ class GerenciadorKPIs:
             "mean_reversion": KPIMeanReversion(),
             "swing": KPISwing(),
         }
-        self.historico: Dict[str, list] = {}
-        self.medicoes_ativas: Dict[str, Dict] = {}
+        self.historico: Dict[str, List[Dict[str, Any]]] = {}
+        self.medicoes_ativas: Dict[str, Dict[str, Any]] = {}
 
     def iniciar_medicao_latencia(self, bot: str, operacao: str) -> str:
         """Inicia medição de latência"""
@@ -119,7 +119,9 @@ class GerenciadorKPIs:
         del self.medicoes_ativas[medicao_id]
         return latencia_ms
 
-    def atualizar_kpi_arbitragem(self, spread: float, execucao_simultanea: float):
+    def atualizar_kpi_arbitragem(
+        self, spread: float, execucao_simultanea: float
+    ) -> None:
         """Atualiza KPIs específicos de arbitragem"""
         kpi = self.kpis["arbitragem"]
         kpi.spread_capturado = spread
@@ -131,7 +133,7 @@ class GerenciadorKPIs:
 
     def atualizar_kpi_grid(
         self, eficiencia: float, adaptabilidade: float, lucro_lateral: float
-    ):
+    ) -> None:
         """Atualiza KPIs específicos de grid trading"""
         kpi = self.kpis["grid"]
         kpi.range_eficiencia = eficiencia
@@ -144,7 +146,7 @@ class GerenciadorKPIs:
 
     def atualizar_kpi_momentum(
         self, precisao: float, false_signals: float, stop_eficiencia: float
-    ):
+    ) -> None:
         """Atualiza KPIs específicos de momentum"""
         kpi = self.kpis["momentum"]
         kpi.breakout_precisao = precisao
@@ -155,7 +157,9 @@ class GerenciadorKPIs:
             f"KPI Momentum - Precisão: {precisao:.1f}%, False Signals: {false_signals:.1f}%"
         )
 
-    def atualizar_kpi_scalping(self, throughput: float, fee_optimization: float):
+    def atualizar_kpi_scalping(
+        self, throughput: float, fee_optimization: float
+    ) -> None:
         """Atualiza KPIs específicos de scalping"""
         kpi = self.kpis["scalping"]
         kpi.throughput_ops = throughput
@@ -167,7 +171,7 @@ class GerenciadorKPIs:
 
     def atualizar_kpi_mean_reversion(
         self, timing: float, oversold: float, rsi_effectiveness: float
-    ):
+    ) -> None:
         """Atualiza KPIs específicos de mean reversion"""
         kpi = self.kpis["mean_reversion"]
         kpi.reversao_timing = timing
@@ -180,7 +184,7 @@ class GerenciadorKPIs:
 
     def atualizar_kpi_swing(
         self, trend_capture: float, hold_time: float, pattern_recognition: float
-    ):
+    ) -> None:
         """Atualiza KPIs específicos de swing"""
         kpi = self.kpis["swing"]
         kpi.trend_capture = trend_capture
@@ -228,13 +232,18 @@ class GerenciadorKPIs:
 
     def gerar_relatorio_kpis(self) -> Dict[str, Any]:
         """Gera relatório completo de KPIs"""
-        relatorio = {"timestamp": datetime.now().isoformat(), "bots": {}}
+        relatorio: Dict[str, Any] = {
+            "timestamp": datetime.now().isoformat(),
+            "bots": {},
+        }
 
         for bot_name, kpi in self.kpis.items():
             targets = self.verificar_targets(bot_name)
             targets_atingidos = sum(targets.values())
             total_targets = len(targets)
 
+            if "bots" not in relatorio:
+                relatorio["bots"] = {}
             relatorio["bots"][bot_name] = {
                 "kpis": kpi.__dict__,
                 "targets": targets,

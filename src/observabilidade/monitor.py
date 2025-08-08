@@ -6,7 +6,7 @@ import asyncio
 import logging
 import json
 import time
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Optional, Set
 from datetime import datetime, timedelta
 from dataclasses import asdict
 
@@ -22,14 +22,14 @@ class Monitor:
     def __init__(self, config: Configuracao):
         self.config = config
         self.obs_config = config.get_observabilidade_config()
-        self.metricas = {}
-        self.alertas = []
-        self.bots_registrados = set()
-        self.trades_por_bot = {}
-        self.metricas_sistema = {}
+        self.metricas: Dict[str, Any] = {}
+        self.alertas: List[Dict[str, Any]] = []
+        self.bots_registrados: Set[str] = set()
+        self.trades_por_bot: Dict[str, List[Trade]] = {}
+        self.metricas_sistema: Dict[str, float] = {}
         self._running = False
 
-    async def inicializar(self):
+    async def inicializar(self) -> None:
         """Inicializa sistema de monitoramento"""
         logger.info("Inicializando sistema de monitoramento")
 
@@ -56,7 +56,7 @@ class Monitor:
 
         logger.info("Sistema de monitoramento inicializado")
 
-    async def _inicializar_servidor_metricas(self):
+    async def _inicializar_servidor_metricas(self) -> None:
         """Inicializa servidor Prometheus"""
         try:
             from prometheus_client import start_http_server, Counter, Gauge, Histogram
@@ -85,7 +85,7 @@ class Monitor:
         except Exception as e:
             logger.error(f"Erro ao inicializar servidor de métricas: {e}")
 
-    async def registrar_bot(self, nome_bot: str):
+    async def registrar_bot(self, nome_bot: str) -> None:
         """Registra um bot no sistema de monitoramento"""
         self.bots_registrados.add(nome_bot)
         self.trades_por_bot[nome_bot] = []
@@ -101,7 +101,7 @@ class Monitor:
 
         logger.info(f"Bot {nome_bot} registrado no monitoramento")
 
-    async def registrar_trade(self, trade: Trade):
+    async def registrar_trade(self, trade: Trade) -> None:
         """Registra um trade no sistema"""
         bot_name = trade.bot
 
@@ -127,14 +127,29 @@ class Monitor:
         self.metricas["sistema"]["total_trades"] += 1
         self.metricas["sistema"]["pnl_total"] += trade.pnl
 
-        if hasattr(self, "prometheus_metrics"):
-            self.prometheus_metrics["trades_total"].labels(
-                bot=bot_name, symbol=trade.symbol, side=trade.side
-            ).inc()
+        if hasattr(self, "prometheus_metrics") and hasattr(
+            self.prometheus_metrics.get("trades_total", None), "labels"
+        ):
+            metric = self.prometheus_metrics["trades_total"]
+            try:
+                labeled_metric = metric.labels(
+                    bot=bot_name, symbol=trade.symbol, side=trade.side
+                )
+                if hasattr(labeled_metric, "inc"):
+                    labeled_metric.inc()
+            except AttributeError:
+                pass
 
-            self.prometheus_metrics["pnl_total"].labels(bot=bot_name).set(
-                self.metricas["por_bot"][bot_name]["pnl_total"]
-            )
+        if hasattr(self, "prometheus_metrics") and hasattr(
+            self.prometheus_metrics.get("pnl_total", None), "labels"
+        ):
+            metric = self.prometheus_metrics["pnl_total"]
+            try:
+                labeled_metric = metric.labels(bot=bot_name)
+                if hasattr(labeled_metric, "set"):
+                    labeled_metric.set(self.metricas["por_bot"][bot_name]["pnl_total"])
+            except AttributeError:
+                pass
 
         await self._verificar_alertas(trade)
 
@@ -142,7 +157,7 @@ class Monitor:
             f"Trade registrado: {bot_name} - {trade.symbol} - PnL: {trade.pnl:.4f}"
         )
 
-    async def _verificar_alertas(self, trade: Trade):
+    async def _verificar_alertas(self, trade: Trade) -> None:
         """Verifica condições de alerta"""
         try:
             if trade.pnl < -100:  # Perda maior que $100
@@ -175,7 +190,7 @@ class Monitor:
         except Exception as e:
             logger.error(f"Erro ao verificar alertas: {e}")
 
-    async def _criar_alerta(self, tipo: str, mensagem: str, severidade: str):
+    async def _criar_alerta(self, tipo: str, mensagem: str, severidade: str) -> None:
         """Cria um alerta"""
         alerta = {
             "tipo": tipo,
@@ -190,7 +205,7 @@ class Monitor:
 
         logger.warning(f"ALERTA [{severidade.upper()}]: {mensagem}")
 
-    async def executar_monitoramento(self):
+    async def executar_monitoramento(self) -> None:
         """Executa loop de monitoramento"""
         logger.info("Iniciando loop de monitoramento")
         self._running = True
@@ -208,7 +223,7 @@ class Monitor:
                 logger.error(f"Erro no loop de monitoramento: {e}")
                 await asyncio.sleep(60)
 
-    async def _atualizar_metricas_sistema(self):
+    async def _atualizar_metricas_sistema(self) -> None:
         """Atualiza métricas do sistema"""
         try:
             inicio = self.metricas["sistema"]["inicio"]
@@ -223,15 +238,17 @@ class Monitor:
                 ]
             )
 
-            if hasattr(self, "prometheus_metrics"):
-                self.prometheus_metrics["active_bots"].set(
-                    self.metricas["sistema"]["bots_ativos"]
-                )
+            if hasattr(self, "prometheus_metrics") and hasattr(
+                self.prometheus_metrics.get("active_bots", None), "set"
+            ):
+                metric = self.prometheus_metrics["active_bots"]
+                if hasattr(metric, "set"):
+                    metric.set(self.metricas["sistema"]["bots_ativos"])
 
         except Exception as e:
             logger.error(f"Erro ao atualizar métricas do sistema: {e}")
 
-    async def _calcular_metricas_performance(self):
+    async def _calcular_metricas_performance(self) -> None:
         """Calcula métricas de performance"""
         try:
             todos_trades = []
@@ -241,14 +258,24 @@ class Monitor:
             if not todos_trades:
                 return
 
-            trades_vencedores = len([t for t in todos_trades if t.pnl > 0])
+            trades_vencedores = len(
+                [t for t in todos_trades if getattr(t, "pnl", 0) > 0]
+            )
             win_rate_global = trades_vencedores / len(todos_trades)
 
-            total_wins = sum(t.pnl for t in todos_trades if t.pnl > 0)
-            total_losses = abs(sum(t.pnl for t in todos_trades if t.pnl < 0))
+            total_wins = sum(
+                getattr(t, "pnl", 0) for t in todos_trades if getattr(t, "pnl", 0) > 0
+            )
+            total_losses = abs(
+                sum(
+                    getattr(t, "pnl", 0)
+                    for t in todos_trades
+                    if getattr(t, "pnl", 0) < 0
+                )
+            )
             profit_factor = total_wins / total_losses if total_losses > 0 else 0
 
-            returns = [t.pnl for t in todos_trades]
+            returns = [getattr(t, "pnl", 0) for t in todos_trades]
             if len(returns) > 1:
                 mean_return = sum(returns) / len(returns)
                 std_return = (
@@ -258,17 +285,18 @@ class Monitor:
             else:
                 sharpe_ratio = 0
 
-            cumulative_pnl = 0
-            peak = 0
-            max_drawdown = 0
+            cumulative_pnl = 0.0
+            peak = 0.0
+            max_drawdown = 0.0
 
             for trade in todos_trades:
-                cumulative_pnl += trade.pnl
+                trade_pnl = getattr(trade, "pnl", 0)
+                cumulative_pnl += trade_pnl
                 if cumulative_pnl > peak:
                     peak = cumulative_pnl
                 drawdown = (peak - cumulative_pnl) / peak if peak > 0 else 0
                 if drawdown > max_drawdown:
-                    max_drawdown = drawdown
+                    max_drawdown = float(drawdown)
 
             self.metricas["performance"].update(
                 {
@@ -282,7 +310,7 @@ class Monitor:
         except Exception as e:
             logger.error(f"Erro ao calcular métricas de performance: {e}")
 
-    async def _verificar_saude_sistema(self):
+    async def _verificar_saude_sistema(self) -> None:
         """Verifica saúde geral do sistema"""
         try:
             if self.metricas["sistema"]["bots_ativos"] == 0:
@@ -311,7 +339,7 @@ class Monitor:
         except Exception as e:
             logger.error(f"Erro ao verificar saúde do sistema: {e}")
 
-    async def _gerar_relatorio_periodico(self):
+    async def _gerar_relatorio_periodico(self) -> None:
         """Gera relatório periódico"""
         try:
             agora = datetime.now()
@@ -393,7 +421,9 @@ class Monitor:
             logger.error(f"Erro ao gerar relatório completo: {e}")
             return {}
 
-    async def salvar_metricas_bot(self, nome_bot: str, metricas_finais: Dict):
+    async def salvar_metricas_bot(
+        self, nome_bot: str, metricas_finais: Dict[str, Any]
+    ) -> None:
         """Salva métricas finais de um bot"""
         try:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -429,7 +459,7 @@ class Monitor:
             "alertas_recentes": self.alertas[-10:],  # Últimos 10 alertas
         }
 
-    async def finalizar(self):
+    async def finalizar(self) -> None:
         """Finaliza sistema de monitoramento"""
         logger.info("Finalizando sistema de monitoramento")
 

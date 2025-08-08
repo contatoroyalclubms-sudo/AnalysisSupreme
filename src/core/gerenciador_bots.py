@@ -295,7 +295,9 @@ class GerenciadorBots:
                 "trades": bot_trades,
                 "pnl": bot_pnl,
                 "wins": bot_wins,
-                "win_rate": float(bot_wins) / float(bot_trades) if bot_trades > 0 else 0.0,
+                "win_rate": (
+                    float(bot_wins) / float(bot_trades) if bot_trades > 0 else 0.0
+                ),
             }
 
         if total_trades > 0:
