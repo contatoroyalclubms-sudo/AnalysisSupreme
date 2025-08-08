@@ -456,7 +456,9 @@ class AutoTuner:
             },
         }
         result = parametros_map.get(estrategia, {})
-        return dict(result)
+        if isinstance(result, dict):
+            return result
+        return {}
 
     def _mutar_parametros(self, parametros: dict) -> dict:
         """Aplica mutação nos parâmetros"""
@@ -962,7 +964,9 @@ class MotorIA:
             logger.error(f"Erro na predição de volatilidade: {e}")
             return 0.02
 
-    def _calcular_confianca(self, features: Optional[np.ndarray], symbol: str = "") -> float:
+    def _calcular_confianca(
+        self, features: Optional[np.ndarray], symbol: str = ""
+    ) -> float:
         """Calcula confiança da predição"""
         try:
             if features is None:
