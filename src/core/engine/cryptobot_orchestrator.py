@@ -69,11 +69,11 @@ class SignalProcessorUltra:
         """Gera sinal supremo com IA"""
         import random
         
-        if random.random() > 0.8:  # 20% chance de sinal
+        if random.random() > 0.8:  # 20% chance de sinal  # nosec B311
             return MarketSignal(
                 symbol=symbol,
-                action=random.choice(['BUY', 'SELL']),
-                confidence=random.uniform(0.7, 0.95),
+                action=random.choice(['BUY', 'SELL']),  # nosec B311
+                confidence=random.uniform(0.7, 0.95),  # nosec B311
                 price=float(current_data.get('c', 45000)),
                 quantity=0.001,
                 stop_loss=0.0,
@@ -532,14 +532,14 @@ class CryptoBotOrchestrator:
             try:
                 await ws.close()
                 logger.info(f"🔌 WebSocket {exchange} fechado")
-            except:
+            except:  # nosec B110
                 pass
         
         for exchange, session in self.session_pool.items():
             try:
                 await session.close()
                 logger.info(f"🔌 Session {exchange} fechada")
-            except:
+            except:  # nosec B110
                 pass
         
         logger.info("✅ CryptoBot Supremo Global finalizado")

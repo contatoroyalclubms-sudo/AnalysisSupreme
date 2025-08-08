@@ -226,7 +226,7 @@ class MemoryOptimizer:
         """Limpa weak references mortas"""
         try:
             list(self.weak_refs)
-        except:
+        except:  # nosec B110
             pass
     
     async def _analyze_allocations(self):

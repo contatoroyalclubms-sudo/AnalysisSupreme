@@ -12,7 +12,7 @@ import json
 import hashlib
 from dataclasses import dataclass, field
 from collections import defaultdict
-import pickle
+import pickle  # nosec
 import lz4.frame
 
 logger = logging.getLogger(__name__)

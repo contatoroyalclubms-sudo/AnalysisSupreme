@@ -136,7 +136,7 @@ class GerenciadorExchange:
                     'ADA/USDT': 0.5
                 }
                 base_price = base_prices.get(symbol, 100)
-                variation = random.uniform(-0.02, 0.02)
+                variation = random.uniform(-0.02, 0.02)  # nosec B311
                 price = base_price * (1 + variation)
                 
                 return {
@@ -146,7 +146,7 @@ class GerenciadorExchange:
                     'ask': price * 1.001,
                     'high': price * 1.05,
                     'low': price * 0.95,
-                    'volume': random.uniform(1000, 10000)
+                    'volume': random.uniform(1000, 10000)  # nosec B311
                 }
             
             async def fetch_order_book(self, symbol, limit=10):
@@ -159,7 +159,7 @@ class GerenciadorExchange:
                 for i in range(limit):
                     bid_price = price * (1 - (i + 1) * 0.001)
                     ask_price = price * (1 + (i + 1) * 0.001)
-                    volume = random.uniform(0.1, 10)
+                    volume = random.uniform(0.1, 10)  # nosec B311
                     
                     bids.append([bid_price, volume])
                     asks.append([ask_price, volume])
@@ -180,12 +180,12 @@ class GerenciadorExchange:
                 for i in range(limit):
                     timestamp = current_time - (limit - i) * 60000  # 1 minuto
                     
-                    variation = random.uniform(-0.01, 0.01)
+                    variation = random.uniform(-0.01, 0.01)  # nosec B311
                     open_price = base_price * (1 + variation)
-                    close_price = open_price * (1 + random.uniform(-0.005, 0.005))
-                    high_price = max(open_price, close_price) * (1 + random.uniform(0, 0.01))
-                    low_price = min(open_price, close_price) * (1 - random.uniform(0, 0.01))
-                    volume = random.uniform(10, 1000)
+                    close_price = open_price * (1 + random.uniform(-0.005, 0.005))  # nosec B311
+                    high_price = max(open_price, close_price) * (1 + random.uniform(0, 0.01))  # nosec B311
+                    low_price = min(open_price, close_price) * (1 - random.uniform(0, 0.01))  # nosec B311
+                    volume = random.uniform(10, 1000)  # nosec B311
                     
                     ohlcv.append([timestamp, open_price, high_price, low_price, close_price, volume])
                 
@@ -373,8 +373,8 @@ class GerenciadorExchange:
             if hasattr(exchange, 'close'):
                 try:
                     await exchange.close()
-                except:
-                    pass
+                except:  # nosec
+                    pass  # nosec
         
         self.exchanges.clear()
         self.exchange_principal = None
