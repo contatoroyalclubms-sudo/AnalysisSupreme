@@ -24,21 +24,21 @@ class AuthenticationResult:
     user_id: str
     auth_methods_used: List[str]
     risk_score: float
-    session_token: str
-    expires_at: str
-    additional_verification_required: bool
+    session_token: Optional[str] = None
+    expires_at: Optional[str] = None
+    additional_verification_required: bool = False
 
 
 class MFASystem:
     """Sistema de autenticação multi-fator"""
 
     def __init__(self):
-        self.user_profiles = {}
-        self.active_sessions = {}
-        self.biometric_templates = {}
-        self.totp_secrets = {}
-        self.location_history = {}
-        self.risk_engine = None
+        self.user_profiles: Dict[str, Dict[str, Any]] = {}
+        self.active_sessions: Dict[str, Dict[str, Any]] = {}
+        self.biometric_templates: Dict[str, str] = {}
+        self.totp_secrets: Dict[str, str] = {}
+        self.location_history: Dict[str, List[Dict[str, Any]]] = {}
+        self.risk_engine: Optional[str] = None
 
     async def initialize(self):
         """Inicializa sistema MFA"""
@@ -48,13 +48,15 @@ class MFASystem:
         await self._initialize_totp_system()
 
     async def authenticate_user(
-        self, user_id: str, credentials: Dict
+        self, user_id: str, credentials: Dict[str, Any]
     ) -> AuthenticationResult:
         """Autentica usuário com múltiplos fatores"""
         auth_methods = []
         risk_score = await self._calculate_initial_risk(user_id, credentials)
 
-        password_ok = await self._verify_password(user_id, credentials.get("password"))
+        password_ok = await self._verify_password(
+            user_id, credentials.get("password", "")
+        )
         if not password_ok:
             return AuthenticationResult(
                 success=False,
@@ -72,7 +74,9 @@ class MFASystem:
 
         for method in required_methods:
             if method == "totp":
-                totp_ok = await self._verify_totp(user_id, credentials.get("totp_code"))
+                totp_ok = await self._verify_totp(
+                    user_id, credentials.get("totp_code", "")
+                )
                 if totp_ok:
                     auth_methods.append("totp")
                     risk_score *= 0.3
@@ -116,7 +120,9 @@ class MFASystem:
             additional_verification_required=False,
         )
 
-    async def _calculate_initial_risk(self, user_id: str, credentials: Dict) -> float:
+    async def _calculate_initial_risk(
+        self, user_id: str, credentials: Dict[str, Any]
+    ) -> float:
         """Calcula risco inicial baseado em contexto"""
         await asyncio.sleep(0.002)
         return 0.3
@@ -128,17 +134,17 @@ class MFASystem:
         await asyncio.sleep(0.001)
         return ["totp"] if risk_score < 0.5 else ["totp", "biometric"]
 
-    async def _verify_password(self, user_id: str, password: str) -> bool:
+    async def _verify_password(self, user_id: str, password: Optional[str]) -> bool:
         """Verifica senha do usuário"""
         await asyncio.sleep(0.001)
         return password == os.getenv("TEST_PASSWORD", "secure_test_password")
 
-    async def _verify_totp(self, user_id: str, totp_code: str) -> bool:
+    async def _verify_totp(self, user_id: str, totp_code: Optional[str]) -> bool:
         """Verifica código TOTP"""
         await asyncio.sleep(0.001)
         return totp_code == "123456"
 
-    async def _verify_biometric(self, user_id: str, biometric_data: str) -> bool:
+    async def _verify_biometric(self, user_id: str, biometric_data: Optional[str]) -> bool:
         """Verifica dados biométricos"""
         await asyncio.sleep(0.003)
         return biometric_data == "valid_biometric"
@@ -170,7 +176,7 @@ class MFASystem:
         await asyncio.sleep(0.006)
         self.totp_secrets = {"admin": "secret123"}
 
-    def get_mfa_stats(self) -> Dict:
+    def get_mfa_stats(self) -> Dict[str, Any]:
         """Retorna estatísticas do sistema MFA"""
         return {
             "risk_engine": self.risk_engine,

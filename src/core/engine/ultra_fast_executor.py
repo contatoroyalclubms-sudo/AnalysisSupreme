@@ -35,28 +35,28 @@ class ExecutionTask:
 class UltraFastExecutor:
     """Engine de execução ultra rápida - 15ms target"""
 
-    def __init__(self, max_workers: int = None):
+    def __init__(self, max_workers: Optional[int] = None):
         if hasattr(uvloop, "install"):
             uvloop.install()
 
         self.max_workers = max_workers or min(32, (mp.cpu_count() or 1) + 4)
         self.thread_pool = ThreadPoolExecutor(max_workers=self.max_workers)
 
-        self.high_priority_queue = asyncio.Queue(maxsize=1000)
-        self.normal_priority_queue = asyncio.Queue(maxsize=5000)
-        self.low_priority_queue = asyncio.Queue(maxsize=10000)
+        self.high_priority_queue: asyncio.Queue = asyncio.Queue(maxsize=1000)
+        self.normal_priority_queue: asyncio.Queue = asyncio.Queue(maxsize=5000)
+        self.low_priority_queue: asyncio.Queue = asyncio.Queue(maxsize=10000)
 
-        self.execution_times = []
+        self.execution_times: List[float] = []
         self.total_executions = 0
         self.failed_executions = 0
 
-        self.workers = []
+        self.workers: List[Any] = []
         self.running = False
 
-        self.function_cache = {}
+        self.function_cache: Dict[str, Callable] = {}
 
-        self.memory_pool = []
-        self.reusable_objects = {}
+        self.memory_pool: List[Any] = []
+        self.reusable_objects: Dict[str, Any] = {}
 
     async def initialize(self):
         """Inicializa o engine ultra rápido"""

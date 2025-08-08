@@ -6,11 +6,12 @@ import asyncio
 import logging
 import numpy as np
 import pandas as pd
+import secrets
 from typing import Dict, List, Any, Optional
 from datetime import datetime, timedelta
 import pickle  # nosec
 import os
-import random
+import secrets
 
 from ..core.configuracao import Configuracao
 
@@ -24,9 +25,9 @@ class Sinal:
         self,
         acao: str,
         confidence: float,
-        preco_entrada: float = None,
-        stop_loss: float = None,
-        take_profit: float = None,
+        preco_entrada: Optional[float] = None,
+        stop_loss: Optional[float] = None,
+        take_profit: Optional[float] = None,
     ):
         self.acao = acao  # 'comprar', 'vender', 'parar'
         self.confidence = confidence  # 0.0 a 1.0
@@ -401,12 +402,12 @@ class AutoTuner:
         epsilon = 0.1
         alpha = 0.1
 
-        q_table = {}
+        q_table: Dict[str, float] = {}
         melhor_reward = 0
         melhores_parametros = parametros_base.copy()
 
         for episodio in range(episodios):
-            if random.random() < epsilon:  # nosec
+            if secrets.SystemRandom().random() < epsilon:  # nosec
                 parametros_acao = self._mutar_parametros(parametros_base)
             else:
                 parametros_acao = self._selecionar_melhor_acao(q_table, parametros_base)
@@ -462,12 +463,14 @@ class AutoTuner:
 
         for key, value in parametros_mutados.items():
             if isinstance(value, (int, float)):
-                mutacao = random.uniform(-0.1, 0.1)  # nosec
+                mutacao = secrets.SystemRandom().uniform(-0.1, 0.1)  # nosec
                 parametros_mutados[key] = value * (1 + mutacao)
             elif isinstance(value, list):
                 for i in range(len(value)):
                     if isinstance(value[i], (int, float)):
-                        mutacao = random.uniform(-0.1, 0.1)  # nosec  # nosec
+                        mutacao = secrets.SystemRandom().uniform(
+                            -0.1, 0.1
+                        )  # nosec  # nosec
                         value[i] = value[i] * (1 + mutacao)
 
         return parametros_mutados
@@ -548,19 +551,19 @@ class SentimentAnalyzer:
 
     async def _analisar_twitter(self, symbol: str) -> float:
         """Analisa sentimento no Twitter"""
-        return random.uniform(-0.5, 0.5)  # nosec B311
+        return secrets.SystemRandom().uniform(-0.5, 0.5)  # nosec B311
 
     async def _analisar_telegram(self, symbol: str) -> float:
         """Analisa sentimento no Telegram"""
-        return random.uniform(-0.3, 0.3)  # nosec B311
+        return secrets.SystemRandom().uniform(-0.3, 0.3)  # nosec B311
 
     async def _analisar_reddit(self, symbol: str) -> float:
         """Analisa sentimento no Reddit"""
-        return random.uniform(-0.4, 0.4)  # nosec B311
+        return secrets.SystemRandom().uniform(-0.4, 0.4)  # nosec B311
 
     async def _analisar_noticias(self, symbol: str) -> float:
         """Analisa sentimento em notícias"""
-        return random.uniform(-0.6, 0.6)  # nosec B311
+        return secrets.SystemRandom().uniform(-0.6, 0.6)  # nosec B311
 
 
 class AprendizadoContinuo:
@@ -669,9 +672,9 @@ class MotorIA:
     def __init__(self, config: Configuracao):
         self.config = config
         self.ia_config = config.get_ia_config()
-        self.modelos = {}
-        self.historico_predicoes = {}
-        self.metricas_performance = {}
+        self.modelos: Dict[str, Any] = {}
+        self.historico_predicoes: Dict[str, Any] = {}
+        self.metricas_performance: Dict[str, Any] = {}
 
         self.gerador_sinais = GeradorSinais()
         self.auto_tuner = AutoTuner()
@@ -750,20 +753,29 @@ class MotorIA:
                 self.treinado = True
 
             def predict(self, X):
-                import random
+                import secrets
 
                 if self.tipo == "preco":
                     return np.array(
-                        [random.uniform(-0.02, 0.02) for _ in range(len(X))]
-                    )  # nosec B311
+                        [
+                            secrets.SystemRandom().uniform(-0.02, 0.02)
+                            for _ in range(len(X))
+                        ]
+                    )
                 elif self.tipo == "tendencia":
                     return np.array(
-                        [random.choice([0, 1, 2]) for _ in range(len(X))]
-                    )  # nosec B311
+                        [
+                            secrets.SystemRandom().choice([0, 1, 2])
+                            for _ in range(len(X))
+                        ]
+                    )
                 else:  # volatilidade
                     return np.array(
-                        [random.uniform(0.01, 0.05) for _ in range(len(X))]
-                    )  # nosec B311
+                        [
+                            secrets.SystemRandom().uniform(0.01, 0.05)
+                            for _ in range(len(X))
+                        ]
+                    )
 
             def fit(self, X, y):
                 pass
