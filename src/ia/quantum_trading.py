@@ -10,6 +10,7 @@ from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
 import json
 import time
+import secrets
 from datetime import datetime
 
 
@@ -114,7 +115,9 @@ class QuantumTradingEngine:
             "qubits": n_qubits,
             "depth": circuit_depth,
             "gates": ["hadamard", "cnot", "rotation"],
-            "parameters": np.random.uniform(0, 2 * np.pi, n_qubits),
+            "parameters": np.array(
+                [secrets.SystemRandom().uniform(0, 2 * np.pi) for _ in range(n_qubits)]
+            ),
         }
 
     async def _simulate_superposition(self, circuit: Dict, market_data: Dict) -> Dict:
@@ -122,7 +125,7 @@ class QuantumTradingEngine:
         await asyncio.sleep(0.003)
 
         n_states = 2 ** circuit["qubits"]
-        amplitudes = np.random.complex128(n_states)
+        amplitudes = np.random.random(n_states).astype(np.complex128)
         amplitudes = amplitudes / np.linalg.norm(amplitudes)
 
         return {
@@ -137,7 +140,9 @@ class QuantumTradingEngine:
         await asyncio.sleep(0.004)
 
         amplitudes = superposition["amplitudes"]
-        energies = np.random.uniform(-1, 1, len(amplitudes))
+        energies = np.array(
+            [secrets.SystemRandom().uniform(-1, 1) for _ in range(len(amplitudes))]
+        )
 
         ground_state_idx = np.argmin(energies)
         ground_energy = energies[ground_state_idx]
@@ -157,11 +162,13 @@ class QuantumTradingEngine:
         await asyncio.sleep(0.002)
 
         n_assets = len(assets)
-        raw_weights = np.random.uniform(0, 1, n_assets)
+        raw_weights = np.array(
+            [secrets.SystemRandom().uniform(0, 1) for _ in range(n_assets)]
+        )
         normalized_weights = raw_weights / np.sum(raw_weights)
 
-        expected_return = np.random.uniform(0.08, 0.15)
-        risk = np.random.uniform(0.05, 0.12)
+        expected_return = secrets.SystemRandom().uniform(0.08, 0.15)
+        risk = secrets.SystemRandom().uniform(0.05, 0.12)
 
         quantum_advantage = (
             self.quantum_advantage_factor * optimal_state["entanglement"]
@@ -181,7 +188,9 @@ class QuantumTradingEngine:
         await asyncio.sleep(0.001)
 
         n_exchanges = len(exchanges)
-        prices = np.random.uniform(45000, 46000, n_exchanges)
+        prices = np.array(
+            [secrets.SystemRandom().uniform(45000, 46000) for _ in range(n_exchanges)]
+        )
 
         return {
             "exchanges": exchanges,
@@ -198,7 +207,14 @@ class QuantumTradingEngine:
         entanglement_strength = 0.8
 
         entangled_prices = prices * (
-            1 + entanglement_strength * np.random.uniform(-0.01, 0.01, len(prices))
+            1
+            + entanglement_strength
+            * np.array(
+                [
+                    secrets.SystemRandom().uniform(-0.01, 0.01)
+                    for _ in range(len(prices))
+                ]
+            )
         )
 
         return {
@@ -240,7 +256,12 @@ class QuantumTradingEngine:
     async def _prepare_entanglement_matrix(self):
         """Prepara matriz de emaranhamento"""
         await asyncio.sleep(0.005)
-        self.entanglement_matrix = np.random.uniform(0, 1, (10, 10))
+        self.entanglement_matrix = np.array(
+            [
+                [secrets.SystemRandom().uniform(0, 1) for _ in range(10)]
+                for _ in range(10)
+            ]
+        )
 
     async def _calibrate_quantum_gates(self):
         """Calibra portas quânticas"""

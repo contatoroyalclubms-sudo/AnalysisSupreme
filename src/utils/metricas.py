@@ -138,10 +138,10 @@ class CalculadorMetricas:
 
         trades_ordenados = sorted(trades, key=lambda t: t.timestamp)
 
-        equity = 0
-        peak = 0
-        max_drawdown = 0
-        max_drawdown_percent = 0
+        equity = 0.0
+        peak = 0.0
+        max_drawdown = 0.0
+        max_drawdown_percent = 0.0
 
         for trade in trades_ordenados:
             equity += trade.pnl
@@ -237,7 +237,7 @@ class CalculadorMetricas:
         if not trades:
             return {}
 
-        trades_por_symbol = {}
+        trades_por_symbol: Dict[str, List[Trade]] = {}
         for trade in trades:
             if trade.symbol not in trades_por_symbol:
                 trades_por_symbol[trade.symbol] = []
@@ -266,12 +266,12 @@ class CalculadorMetricas:
             for trade in trades:
                 dia = trade.timestamp.date()
                 if dia not in trades_por_dia:
-                    trades_por_dia[dia] = 0
-                trades_por_dia[dia] += trade.pnl
+                    trades_por_dia[dia] = 0.0
+                trades_por_dia[dia] += float(trade.pnl)
 
             bot_returns[bot_name] = trades_por_dia
 
-        correlacoes = {}
+        correlacoes: Dict[str, Dict[str, float]] = {}
         bot_names = list(bot_returns.keys())
 
         for i, bot1 in enumerate(bot_names):
@@ -326,7 +326,7 @@ class CalculadorMetricas:
         if std_return == 0:
             return 0.0
 
-        return mean_return / std_return
+        return float(mean_return / std_return)
 
     def calcular_sortino_ratio(self, returns: List[float]) -> float:
         """Calcula Sortino ratio simplificado"""
@@ -346,19 +346,19 @@ class CalculadorMetricas:
         if downside_deviation == 0:
             return 0.0
 
-        return mean_return / downside_deviation
+        return float(mean_return / downside_deviation)
 
     def calcular_drawdown(self, returns: List[float]) -> float:
         """Calcula drawdown máximo simplificado"""
         if not returns:
             return 0.0
 
-        cumulative = 0
-        peak = 0
-        max_drawdown = 0
+        cumulative = 0.0
+        peak = 0.0
+        max_drawdown = 0.0
 
         for ret in returns:
-            cumulative += ret
+            cumulative += float(ret)
             if cumulative > peak:
                 peak = cumulative
             drawdown = peak - cumulative

@@ -16,16 +16,21 @@ logger = logging.getLogger(__name__)
 class PerformanceBenchmark:
     """Sistema de benchmark para medir performance do sistema"""
 
-    def __init__(self, exchange_manager, bot_manager):
+    def __init__(self, exchange_manager: Any, bot_manager: Any):
         self.exchange_manager = exchange_manager
         self.bot_manager = bot_manager
-        self.benchmark_results = {}
+        self.benchmark_results: Dict[str, Any] = {}
+        self.ticker_latencies: List[float] = []
+        self.orderbook_latencies: List[float] = []
+        self.ohlcv_latencies: List[float] = []
+        self.metrics: Dict[str, float] = {}
+        self.timestamps: List[float] = []
 
     async def run_latency_benchmark(self, iterations: int = 100) -> Dict[str, Any]:
         """Executa benchmark de latência para operações de exchange"""
         logger.info(f"Iniciando benchmark de latência com {iterations} iterações")
 
-        results = {
+        results: Dict[str, Any] = {
             "ticker_latencies": [],
             "orderbook_latencies": [],
             "ohlcv_latencies": [],
@@ -79,7 +84,7 @@ class PerformanceBenchmark:
         logger.info("Benchmark de latência concluído")
         return results
 
-    def _calculate_latency_stats(self, results: Dict) -> Dict[str, Any]:
+    def _calculate_latency_stats(self, results: Dict[str, Any]) -> Dict[str, Any]:
         """Calcula estatísticas de latência"""
         stats = {}
 
@@ -160,7 +165,9 @@ class PerformanceBenchmark:
         )
         return results
 
-    async def _continuous_ticker_requests(self, end_time: float, counters: Dict):
+    async def _continuous_ticker_requests(
+        self, end_time: float, counters: Dict[str, int]
+    ):
         """Executa requisições contínuas de ticker"""
         symbols = ["BTC/USDT", "ETH/USDT"]
 
@@ -175,7 +182,9 @@ class PerformanceBenchmark:
             except Exception as e:
                 logger.error(f"Erro em benchmark ticker: {e}")
 
-    async def _continuous_orderbook_requests(self, end_time: float, counters: Dict):
+    async def _continuous_orderbook_requests(
+        self, end_time: float, counters: Dict[str, int]
+    ):
         """Executa requisições contínuas de orderbook"""
         symbols = ["BTC/USDT"]
 
@@ -230,7 +239,7 @@ class PerformanceBenchmark:
         logger.info(f"Relatório de performance salvo: {report_path}")
         return report
 
-    def _check_performance_targets(self, report: Dict) -> Dict[str, bool]:
+    def _check_performance_targets(self, report: Dict[str, Any]) -> Dict[str, bool]:
         """Verifica se targets de performance foram atingidos"""
         targets = report["performance_targets"]
         latency_stats = report["latency_benchmark"]

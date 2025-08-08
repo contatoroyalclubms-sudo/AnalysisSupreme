@@ -41,10 +41,10 @@ class MemoryOptimizer:
         self.snapshots: List[MemorySnapshot] = []
         self.max_snapshots = 100
 
-        self.object_pools = defaultdict(list)
+        self.object_pools: Dict[str, List[Any]] = defaultdict(list)
         self.pool_limits = {"dict": 1000, "list": 1000, "set": 500, "tuple": 2000}
 
-        self.weak_refs = weakref.WeakSet()
+        self.weak_refs: weakref.WeakSet = weakref.WeakSet()
 
         self.gc_thresholds = (700, 10, 10)  # Mais agressivo
         self.cleanup_interval = 30  # 30s
@@ -55,7 +55,7 @@ class MemoryOptimizer:
         self.gc_forced_collections = 0
 
         self.trace_enabled = False
-        self.allocation_stats = defaultdict(int)
+        self.allocation_stats: Dict[str, int] = defaultdict(int)
 
     async def initialize_optimizer(self):
         """Inicializa otimizador de memória"""

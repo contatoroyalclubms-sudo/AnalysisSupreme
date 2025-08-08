@@ -167,7 +167,7 @@ class BotSwing(BotBase):
         if not pivots:
             return []
 
-        niveis = []
+        niveis: List[Dict[str, Any]] = []
         tolerance = 0.02  # 2% de tolerância para agrupar
 
         for pivot in pivots:

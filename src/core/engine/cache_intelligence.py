@@ -56,10 +56,10 @@ class CacheIntelligence:
         self.max_memory_bytes = max_memory_mb * 1024 * 1024
         self.current_memory_bytes = 0
 
-        self.l1_cache = {}  # Ultra rápido - 10ms TTL
-        self.l2_cache = {}  # Rápido - 100ms TTL
-        self.l3_cache = {}  # Normal - 1s TTL
-        self.l4_cache = {}  # Longo prazo - 10s TTL
+        self.l1_cache: Dict[str, Any] = {}  # Ultra rápido - 10ms TTL
+        self.l2_cache: Dict[str, Any] = {}  # Rápido - 100ms TTL
+        self.l3_cache: Dict[str, Any] = {}  # Normal - 1s TTL
+        self.l4_cache: Dict[str, Any] = {}  # Longo prazo - 10s TTL
 
         self.ttl_config = {
             "ticker": {"l1": 10, "l2": 50, "l3": 200, "l4": 1000},
@@ -70,15 +70,15 @@ class CacheIntelligence:
             "signals": {"l1": 50, "l2": 200, "l3": 1000, "l4": 5000},
         }
 
-        self.access_patterns = defaultdict(list)
-        self.hit_rates = defaultdict(float)
+        self.access_patterns: Dict[str, List[Any]] = defaultdict(list)
+        self.hit_rates: Dict[str, float] = defaultdict(float)
         self.prediction_accuracy = 0.0
 
-        self.prediction_model = {}
-        self.access_history = defaultdict(list)
+        self.prediction_model: Dict[str, Any] = {}
+        self.access_history: Dict[str, List[float]] = defaultdict(list)
 
         self.compression_threshold = 1024  # 1KB
-        self.compression_stats = defaultdict(int)
+        self.compression_stats: Dict[str, int] = defaultdict(int)
 
         self.optimization_interval = 60  # 60s
         self.last_optimization = time.time()
@@ -445,6 +445,10 @@ class CacheIntelligence:
         self.current_memory_bytes = 0
 
         logger.info("✅ Cache Intelligence finalizado")
+
+    def get_stats(self) -> Dict[str, Any]:
+        """Alias para compatibilidade - retorna estatísticas do cache"""
+        return self.get_intelligence_stats()
 
 
 cache_intelligence = CacheIntelligence()

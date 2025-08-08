@@ -142,7 +142,7 @@ class WebSocketPool:
             logger.info(f"Conexão WebSocket adicionada: {exchange}")
 
     async def get_cached_data(
-        self, exchange: str, symbol: str = None
+        self, exchange: str, symbol: Optional[str] = None
     ) -> Optional[dict]:
         """Obtém dados do cache se ainda válidos"""
         cache_key = f"{exchange}_{symbol or 'general'}"

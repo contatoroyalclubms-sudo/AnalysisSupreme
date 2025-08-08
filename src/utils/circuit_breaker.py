@@ -37,7 +37,7 @@ class CircuitBreaker:
         self.expected_exception = expected_exception
 
         self.failure_count = 0
-        self.last_failure_time = None
+        self.last_failure_time: Optional[float] = None
         self.state = CircuitState.CLOSED
         self.success_count = 0
 
@@ -49,9 +49,14 @@ class CircuitBreaker:
                 self.success_count = 0
                 logger.info("Circuit breaker mudou para HALF_OPEN")
             else:
+                time_remaining = (
+                    self.timeout - (time.time() - (self.last_failure_time or 0))
+                    if self.last_failure_time
+                    else 0
+                )
                 raise CircuitBreakerOpenException(
                     f"Circuit breaker está OPEN. Próxima tentativa em "
-                    f"{self.timeout - (time.time() - self.last_failure_time):.1f}s"
+                    f"{time_remaining:.1f}s"
                 )
 
         try:
@@ -59,12 +64,14 @@ class CircuitBreaker:
             self._on_success()
             return result
 
-        except self.expected_exception as e:
+        except Exception as e:
             self._on_failure()
             raise e
 
     def _should_attempt_reset(self) -> bool:
         """Verifica se deve tentar resetar o circuit breaker"""
+        if self.last_failure_time is None:
+            return False
         return (time.time() - self.last_failure_time) >= self.timeout
 
     def _on_success(self):
@@ -104,7 +111,7 @@ class CircuitBreaker:
             "last_failure_time": self.last_failure_time,
             "time_until_retry": (
                 max(0, self.timeout - (time.time() - self.last_failure_time))
-                if self.last_failure_time
+                if self.last_failure_time is not None
                 else 0
             ),
         }
