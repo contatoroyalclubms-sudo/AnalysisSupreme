@@ -120,7 +120,9 @@ class QuantumTradingEngine:
             ),
         }
 
-    async def _simulate_superposition(self, circuit: Dict[str, Any], market_data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _simulate_superposition(
+        self, circuit: Dict[str, Any], market_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Simula superposição quântica"""
         await asyncio.sleep(0.003)
 
@@ -199,7 +201,9 @@ class QuantumTradingEngine:
             "coherence_time": self.coherence_time,
         }
 
-    async def _entangle_price_states(self, quantum_state: Dict[str, Any]) -> Dict[str, Any]:
+    async def _entangle_price_states(
+        self, quantum_state: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Emaranha estados de preços"""
         await asyncio.sleep(0.002)
 
@@ -223,7 +227,9 @@ class QuantumTradingEngine:
             "correlation_matrix": np.corrcoef(entangled_prices.reshape(1, -1)),
         }
 
-    async def _measure_arbitrage_opportunities(self, entangled_prices: Dict[str, Any]) -> Dict[str, Any]:
+    async def _measure_arbitrage_opportunities(
+        self, entangled_prices: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Mede oportunidades de arbitragem"""
         await asyncio.sleep(0.001)
 
@@ -272,7 +278,9 @@ class QuantumTradingEngine:
         await asyncio.sleep(0.002)
         return {"risk_qubits": len(portfolio), "calibrated": True}
 
-    async def _superpose_market_states(self, market_conditions: Dict[str, Any]) -> Dict[str, Any]:
+    async def _superpose_market_states(
+        self, market_conditions: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Superpõe estados de mercado"""
         await asyncio.sleep(0.003)
         return {"market_superposition": True, "states": 16}
@@ -284,7 +292,9 @@ class QuantumTradingEngine:
         await asyncio.sleep(0.004)
         return {"entangled": True, "strength": 0.9}
 
-    async def _measure_quantum_risk(self, entangled_risk: Dict[str, Any]) -> Dict[str, Any]:
+    async def _measure_quantum_risk(
+        self, entangled_risk: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Mede risco quântico"""
         await asyncio.sleep(0.002)
         return {"var": 0.05, "es": 0.08, "tail": 0.12, "confidence": 0.95}
