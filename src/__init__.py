@@ -14,9 +14,9 @@ for path in [str(project_root), str(current_dir)]:
     if path not in sys.path:
         sys.path.insert(0, path)
 
-current_pythonpath = os.environ.get('PYTHONPATH', '')
+current_pythonpath = os.environ.get("PYTHONPATH", "")
 new_pythonpath = f"{project_root}:{current_dir}:{current_pythonpath}"
-os.environ['PYTHONPATH'] = new_pythonpath
+os.environ["PYTHONPATH"] = new_pythonpath
 
 __all__ = ["models", "bots", "core", "ia", "exchange", "utils", "observabilidade"]
 
