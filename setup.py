@@ -8,7 +8,7 @@ setup(
     author="AnalysisSupreme Team",
     packages=find_packages(),
     package_dir={"": "."},  # Root como source
-    python_requires=">=3.11",
+    python_requires=">=3.9",
     install_requires=[
         "requests>=2.28.0",
         "pandas>=1.5.0",
