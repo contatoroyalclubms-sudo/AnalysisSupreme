@@ -21,3 +21,16 @@ wheels/
 test_*.txt
 *_backup.py
 test_motor_ia_import.py
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# Virtual environment
+venv/
+env/
+
+# Logs
+logs/
+*.log
