@@ -58,6 +58,7 @@ class MotorIA:
 
     def __init__(self, configuracao: Optional[Dict] = None):
         self.configuracao = configuracao or {}
+        self.config = self.configuracao  # Add config attribute for compatibility
         self.sentiment_analyzer = None
         self.aprendizado_continuo = None
         self.gerador_sinais = None

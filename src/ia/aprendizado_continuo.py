@@ -386,3 +386,41 @@ class AprendizadoContinuo:
     def historico_acoes(self):
         """Propriedade para compatibilidade com testes"""
         return self.historico_trades
+    
+    def prever_resultado(self, features: Dict) -> float:
+        """Prevê resultado de trade baseado em features"""
+        try:
+            if not hasattr(self, 'modelo_treinado') or not self.modelo_treinado:
+                return 0.0
+            
+            feature_array = np.array([[
+                features.get('rsi', 50),
+                features.get('macd', 0),
+                features.get('bb_position', 0.5),
+                features.get('volume_ratio', 1.0),
+                features.get('price_change', 0),
+                features.get('sentiment_score', 0)
+            ]])
+            
+            if hasattr(self, 'modelo') and self.modelo:
+                try:
+                    from sklearn.preprocessing import StandardScaler
+                    if hasattr(self, 'scaler') and self.scaler:
+                        feature_scaled = self.scaler.transform(feature_array)
+                        predicao = self.modelo.predict(feature_scaled)[0]
+                        return float(predicao)
+                except:
+                    pass
+            
+            predicao = (
+                (features.get('rsi', 50) - 50) / 50 * 0.3 +
+                features.get('macd', 0) * 100 * 0.3 +
+                (features.get('bb_position', 0.5) - 0.5) * 2 * 0.2 +
+                (features.get('volume_ratio', 1.0) - 1.0) * 0.2
+            )
+            
+            return float(predicao)
+            
+        except Exception as e:
+            logging.error(f"Erro na previsão: {e}")
+            return 0.0

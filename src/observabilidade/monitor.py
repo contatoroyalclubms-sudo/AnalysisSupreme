@@ -34,8 +34,10 @@ class Monitor:
         self.alertas: List[Dict[str, Any]] = []
         self.bots_registrados: Set[str] = set()
         self.trades_por_bot: Dict[str, List[Trade]] = {}
+        self.trades: List[Trade] = []  # Add trades attribute for compatibility
         self.metricas_sistema: Dict[str, float] = {}
         self._running = False
+        self.inicializado = False  # Add inicializado attribute
 
     async def inicializar(self) -> None:
         """Inicializa sistema de monitoramento"""
@@ -63,6 +65,7 @@ class Monitor:
             await self._inicializar_servidor_metricas()
 
         logger.info("Sistema de monitoramento inicializado")
+        self.inicializado = True
 
     async def _inicializar_servidor_metricas(self) -> None:
         """Inicializa servidor Prometheus"""
