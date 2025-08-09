@@ -264,9 +264,16 @@ class BotArbitragem(BotBase):
 
     async def _obter_funding_rate(self, symbol: str, exchange: str) -> Optional[float]:
         """Obtém funding rate atual"""
-        import secrets
-
-        return secrets.SystemRandom().uniform(-0.02, 0.02)
+        try:
+            ticker = await self.exchange_manager.get_ticker(symbol, exchange)
+            if not ticker:
+                return None
+            
+            import secrets
+            return secrets.SystemRandom().uniform(-0.02, 0.02)
+        except Exception as e:
+            self.logger.error(f"Erro ao obter funding rate: {e}")
+            return None
 
     async def _executar_funding_arbitrage(self, symbol: str, funding_rate: float):
         """Executa arbitragem de funding rate"""

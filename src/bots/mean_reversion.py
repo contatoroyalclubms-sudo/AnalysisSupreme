@@ -16,6 +16,7 @@ class BotMeanReversion(BotBase):
 
     def __init__(self, config, monitor, motor_ia):
         super().__init__(config, monitor, motor_ia)
+        self.nome = "mean_reversion"  # Override to match test expectation
         self.medias_historicas = {}
         self.posicoes_reversion = {}
 
