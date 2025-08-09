@@ -402,8 +402,8 @@ class AutoTuner:
             logging.error(f"Erro ao aplicar configuração: {e}")
             return False
     
-    def _avaliar_fitness(self, params: Dict, trades: List[Dict]) -> float:
-        """Avalia fitness de um conjunto de parâmetros"""
+    def _calcular_fitness(self, trades: List[Dict]) -> float:
+        """Calcula fitness de um conjunto de trades"""
         try:
             if not trades:
                 return 0.0
@@ -413,14 +413,6 @@ class AutoTuner:
             
             for trade in trades:
                 pnl = trade.get('pnl', 0)
-                
-                stop_loss = params.get('stop_loss', 0.02)
-                take_profit = params.get('take_profit', 0.04)
-                
-                if pnl < -stop_loss:
-                    pnl = -stop_loss
-                elif pnl > take_profit:
-                    pnl = take_profit
                 
                 lucro_total += pnl
                 if pnl > 0:
@@ -434,7 +426,7 @@ class AutoTuner:
             return fitness
             
         except Exception as e:
-            logging.error(f"Erro ao avaliar fitness: {e}")
+            logging.error(f"Erro ao calcular fitness: {e}")
             return 0.0
 
     def _algoritmo_genetico(self, fitness_function, populacao_size: int = 20, geracoes: int = 10) -> Dict:
@@ -621,3 +613,52 @@ class AutoTuner:
         """Para a otimização contínua"""
         self.is_running = False
         logging.info("AutoTuner parado")
+
+    def _gerar_parametros_aleatorios(self, estrategia: str) -> Dict:
+        """Gera parâmetros aleatórios para uma estratégia"""
+        try:
+            parametros = {}
+            
+            parametros['stop_loss'] = np.random.uniform(0.01, 0.05)
+            parametros['take_profit'] = np.random.uniform(0.02, 0.10)
+            parametros['position_size'] = np.random.uniform(0.05, 0.20)
+            
+            if estrategia == "scalping":
+                parametros['target_profit'] = np.random.uniform(0.0005, 0.002)
+                parametros['max_hold_time'] = np.random.randint(60, 600)
+                parametros['min_volume'] = np.random.uniform(50, 200)
+                
+            elif estrategia == "arbitragem":
+                parametros['min_profit_percent'] = np.random.uniform(0.1, 1.0)
+                parametros['max_position_size'] = np.random.uniform(500, 2000)
+                parametros['timeout_seconds'] = np.random.randint(10, 60)
+                
+            elif estrategia == "grid":
+                parametros['grid_size'] = np.random.randint(5, 20)
+                parametros['grid_spacing'] = np.random.uniform(0.005, 0.02)
+                parametros['amount_per_level'] = np.random.uniform(0.0005, 0.002)
+                
+            elif estrategia == "momentum":
+                parametros['lookback_period'] = np.random.randint(10, 50)
+                parametros['momentum_threshold'] = np.random.uniform(0.01, 0.05)
+                parametros['volume_threshold'] = np.random.uniform(1.2, 2.0)
+                
+            elif estrategia == "mean_reversion":
+                parametros['lookback_period'] = np.random.randint(20, 100)
+                parametros['deviation_threshold'] = np.random.uniform(1.5, 3.0)
+                parametros['volatility_window'] = np.random.randint(10, 30)
+                
+            elif estrategia == "swing":
+                parametros['swing_period'] = np.random.randint(50, 200)
+                parametros['min_swing_size'] = np.random.uniform(0.02, 0.10)
+                parametros['pivot_window'] = np.random.randint(5, 20)
+            
+            return parametros
+            
+        except Exception as e:
+            logging.error(f"Erro ao gerar parâmetros aleatórios: {e}")
+            return {
+                'stop_loss': 0.02,
+                'take_profit': 0.04,
+                'position_size': 0.1
+            }

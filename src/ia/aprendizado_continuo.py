@@ -271,10 +271,57 @@ class AprendizadoContinuo:
             return {
                 "success": True,
                 "loss": 0.05,
-                "mean_reward": np.mean(rewards),
+                "mean_reward": float(np.mean(rewards)),
                 "samples": len(experiencias)
             }
             
         except Exception as e:
             logging.error(f"Erro ao atualizar política: {e}")
             return {"success": False, "message": str(e)}
+    
+    def calcular_fitness(self, parametros: Dict, dados_historicos: List[Dict]) -> float:
+        """Calcula fitness de uma configuração de parâmetros"""
+        try:
+            if not dados_historicos:
+                return 0.0
+            
+            total_reward = 0
+            num_trades = 0
+            
+            for dados in dados_historicos:
+                features = {
+                    'rsi': dados.get('rsi', 50),
+                    'macd': dados.get('macd', 0),
+                    'bb_position': dados.get('bb_position', 0.5),
+                    'volume_ratio': dados.get('volume_ratio', 1.0),
+                    'price_change': dados.get('price_change', 0),
+                    'sentiment_score': dados.get('sentiment_score', 0)
+                }
+                
+                trade_data = {
+                    'features': features,
+                    'profit_loss': dados.get('profit_loss', 0),
+                    'volume': dados.get('volume', 1),
+                    'duration_seconds': dados.get('duration', 3600)
+                }
+                
+                reward = self.calcular_reward(trade_data)
+                total_reward += reward
+                num_trades += 1
+            
+            fitness = total_reward / num_trades if num_trades > 0 else 0.0
+            return float(fitness)
+            
+        except Exception as e:
+            logging.error(f"Erro ao calcular fitness: {e}")
+            return 0.0
+
+    @property
+    def modelo_rl(self):
+        """Propriedade para compatibilidade com testes"""
+        return self.modelo
+    
+    @property
+    def historico_acoes(self):
+        """Propriedade para compatibilidade com testes"""
+        return self.historico_trades

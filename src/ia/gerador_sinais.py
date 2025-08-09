@@ -2,6 +2,7 @@ import numpy as np
 from typing import Dict, List, Optional, Tuple
 import logging
 from dataclasses import dataclass
+from datetime import datetime
 
 @dataclass
 class Sinal:
@@ -106,7 +107,7 @@ class GeradorSinais:
             logging.error(f"Erro no cálculo MACD: {e}")
             return 0.0, 0.0
     
-    def _calcular_ema(self, precos: List[float], periodo: int) -> float:
+    def calcular_ema(self, precos: List[float], periodo: int = 20) -> float:
         """Calcula EMA (Exponential Moving Average)"""
         try:
             if len(precos) < periodo:
@@ -118,23 +119,31 @@ class GeradorSinais:
             for i in range(-periodo+1, 0):
                 ema = alpha * precos[i] + (1 - alpha) * ema
             
-            return ema
+            return float(ema)
             
         except Exception as e:
             logging.error(f"Erro no cálculo EMA: {e}")
             return precos[-1] if precos else 0.0
     
-    def _calcular_sma(self, precos: List[float], periodo: int) -> float:
+    def _calcular_ema(self, precos: List[float], periodo: int) -> float:
+        """Calcula EMA (Exponential Moving Average) - método privado"""
+        return self.calcular_ema(precos, periodo)
+    
+    def calcular_sma(self, precos: List[float], periodo: int = 20) -> float:
         """Calcula SMA (Simple Moving Average)"""
         try:
             if len(precos) < periodo:
                 return precos[-1] if precos else 0.0
             
-            return np.mean(precos[-periodo:])
+            return float(np.mean(precos[-periodo:]))
             
         except Exception as e:
             logging.error(f"Erro no cálculo SMA: {e}")
             return precos[-1] if precos else 0.0
+    
+    def _calcular_sma(self, precos: List[float], periodo: int) -> float:
+        """Calcula SMA (Simple Moving Average) - método privado"""
+        return self.calcular_sma(precos, periodo)
     
     def calcular_bandas_bollinger(self, precos: List[float], periodo: int = 20, desvios: float = 2) -> Dict:
         """Calcula Bandas de Bollinger"""
@@ -169,6 +178,100 @@ class GeradorSinais:
             logging.error(f"Erro no cálculo Bandas Bollinger: {e}")
             return {'upper': 0, 'middle': 0, 'lower': 0, 'position': 0.5}
     
+    def analisar_mercado_completo(self, symbol: str, dados_mercado: Dict) -> Dict:
+        """Análise completa do mercado incluindo todos os indicadores"""
+        try:
+            precos = dados_mercado.get('precos', [])
+            volumes = dados_mercado.get('volumes', [])
+            
+            if not precos or len(precos) < 20:
+                return {
+                    'symbol': symbol,
+                    'indicadores': {},
+                    'sinal': {'tipo': 'hold', 'forca': 0.0},
+                    'confianca': 0.0
+                }
+            
+            # Calcular todos os indicadores
+            indicadores = self.calcular_indicadores_basicos(precos, volumes)
+            
+            # Gerar sinal baseado nos indicadores
+            sinal = self.gerar_sinal(symbol, dados_mercado)
+            
+            # Calcular confiança baseada na convergência dos indicadores
+            confianca = self._calcular_confianca_sinais(indicadores)
+            
+            return {
+                'symbol': symbol,
+                'indicadores': indicadores,
+                'sinal': {
+                    'tipo': sinal.tipo,
+                    'forca': sinal.forca,
+                    'preco_entrada': sinal.preco_entrada,
+                    'stop_loss': sinal.stop_loss,
+                    'take_profit': sinal.take_profit,
+                    'razao': sinal.razao
+                },
+                'confianca': confianca,
+                'timestamp': datetime.now().isoformat()
+            }
+            
+        except Exception as e:
+            logging.error(f"Erro na análise completa do mercado: {e}")
+            return {
+                'symbol': symbol,
+                'indicadores': {},
+                'sinal': {'tipo': 'hold', 'forca': 0.0},
+                'confianca': 0.0,
+                'erro': str(e)
+            }
+    
+    def _calcular_confianca_sinais(self, indicadores: Dict) -> float:
+        """Calcula confiança baseada na convergência dos indicadores"""
+        try:
+            if not indicadores:
+                return 0.0
+            
+            sinais_compra = 0
+            sinais_venda = 0
+            total_indicadores = 0
+            
+            rsi = indicadores.get('rsi', 50)
+            if rsi < 30:
+                sinais_compra += 1
+            elif rsi > 70:
+                sinais_venda += 1
+            total_indicadores += 1
+            
+            macd = indicadores.get('macd', 0)
+            macd_signal = indicadores.get('macd_signal', 0)
+            if macd > macd_signal:
+                sinais_compra += 1
+            elif macd < macd_signal:
+                sinais_venda += 1
+            total_indicadores += 1
+            
+            bb_position = indicadores.get('bb_position', 0.5)
+            if bb_position < 0.2:
+                sinais_compra += 1
+            elif bb_position > 0.8:
+                sinais_venda += 1
+            total_indicadores += 1
+            
+            # Calcular confiança baseada na convergência
+            if sinais_compra > sinais_venda:
+                confianca = sinais_compra / total_indicadores
+            elif sinais_venda > sinais_compra:
+                confianca = sinais_venda / total_indicadores
+            else:
+                confianca = 0.0
+            
+            return min(confianca, 1.0)
+            
+        except Exception as e:
+            logging.error(f"Erro ao calcular confiança: {e}")
+            return 0.0
+
     def gerar_sinal(self, symbol: str, dados_mercado: Dict) -> Sinal:
         """Gera sinal de trading baseado em análise técnica"""
         try:

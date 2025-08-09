@@ -15,38 +15,8 @@ class SentimentAnalyzer:
         ]
         self.cache_sentiment = {}
         
-    def _analisar_twitter(self, symbol: str) -> float:
-        """Analisa sentimento no Twitter"""
-        return random.uniform(-0.5, 0.8)
-        
-    def _analisar_telegram(self, symbol: str) -> float:
-        """Analisa sentimento em grupos Telegram"""
-        return random.uniform(-0.3, 0.7)
-        
-    def _analisar_reddit(self, symbol: str) -> float:
-        """Analisa sentimento no Reddit"""
-        return random.uniform(-0.6, 0.6)
-        
-    def _analisar_noticias(self, symbol: str = "BTC") -> float:
-        """Analisa sentimento em notícias"""
-        try:
-            noticias = self._obter_noticias(symbol)
-            if not noticias:
-                return 0.0
-            
-            total_sentiment = 0
-            for noticia in noticias:
-                texto = f"{noticia.get('title', '')} {noticia.get('content', '')}"
-                features = self.extrair_features(texto)
-                total_sentiment += features['sentiment_score']
-            
-            return total_sentiment / len(noticias)
-        except Exception as e:
-            logging.error(f"Erro ao analisar notícias: {e}")
-            return random.uniform(-0.4, 0.9)
-    
     def _obter_noticias(self, symbol: str = "BTC") -> List[Dict]:
-        """Obtém notícias sobre criptomoeda específica (método privado para testes)"""
+        """Obtém notícias sobre criptomoeda específica"""
         try:
             noticias = []
             
@@ -66,7 +36,7 @@ class SentimentAnalyzer:
             return []
     
     def _obter_tweets(self, symbol: str = "BTC") -> List[str]:
-        """Obtém tweets sobre criptomoeda específica (método privado para testes)"""
+        """Obtém tweets sobre criptomoeda específica"""
         try:
             tweets = [
                 f"{symbol} to the moon! 🚀",
@@ -81,7 +51,7 @@ class SentimentAnalyzer:
             return []
     
     def _obter_posts_reddit(self, symbol: str = "BTC") -> List[Dict]:
-        """Obtém posts do Reddit sobre criptomoeda específica (método privado para testes)"""
+        """Obtém posts do Reddit sobre criptomoeda específica"""
         try:
             posts = [
                 {"title": f"{symbol} analysis - very bullish", "score": 150},
@@ -96,7 +66,7 @@ class SentimentAnalyzer:
             return []
         
     def obter_noticias(self, symbol: str, limit: int = 50) -> List[Dict]:
-        """Obtém notícias sobre criptomoeda específica"""
+        """Obtém notícias sobre criptomoeda específica (método público)"""
         try:
             noticias = []
             
@@ -151,7 +121,7 @@ class SentimentAnalyzer:
             }
     
     def _analisar_twitter(self, symbol: str = "BTC") -> float:
-        """Analisa sentimento no Twitter (método público para testes)"""
+        """Analisa sentimento no Twitter"""
         try:
             tweets = self._obter_tweets(symbol)
             if not tweets:
@@ -168,7 +138,7 @@ class SentimentAnalyzer:
             return 0.0
 
     def _analisar_reddit(self, symbol: str = "BTC") -> float:
-        """Analisa sentimento no Reddit (método público para testes)"""
+        """Analisa sentimento no Reddit"""
         try:
             posts = self._obter_posts_reddit(symbol)
             if not posts:
@@ -186,8 +156,12 @@ class SentimentAnalyzer:
             logging.error(f"Erro ao analisar Reddit: {e}")
             return 0.0
 
+    def _analisar_telegram(self, symbol: str = "BTC") -> float:
+        """Analisa sentimento em grupos Telegram"""
+        return random.uniform(-0.3, 0.7)
+
     def _analisar_noticias(self, symbol: str = "BTC") -> float:
-        """Analisa sentimento em notícias (método público para testes)"""
+        """Analisa sentimento em notícias"""
         try:
             noticias = self._obter_noticias(symbol)
             if not noticias:
@@ -203,6 +177,35 @@ class SentimentAnalyzer:
         except Exception as e:
             logging.error(f"Erro ao analisar notícias: {e}")
             return 0.0
+    
+    def _processar_textos(self, textos: List[str]) -> float:
+        """Processa lista de textos e retorna score de sentimento"""
+        try:
+            if not textos:
+                return 0.0
+            
+            total_score = 0
+            for texto in textos:
+                features = self.extrair_features(texto)
+                total_score += features['sentiment_score']
+            
+            return total_score / len(textos)
+            
+        except Exception as e:
+            logging.error(f"Erro ao processar textos: {e}")
+            return 0.0
+    
+    def _obter_cache_sentiment(self, symbol: str) -> Optional[float]:
+        """Obtém sentimento do cache"""
+        try:
+            cache_entry = self.cache_sentiment.get(symbol)
+            if cache_entry:
+                return cache_entry.get('score', 0.0)
+            return None
+            
+        except Exception as e:
+            logging.error(f"Erro ao obter cache: {e}")
+            return None
 
     def analisar_sentimento(self, symbol: str = "BTC") -> float:
         """Análise completa de sentimento para símbolo"""
