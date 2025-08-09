@@ -7,13 +7,11 @@ from unittest.mock import Mock, AsyncMock, patch
 import numpy as np
 from datetime import datetime
 
-from src.ia.motor_ia import (
-    MotorIA,
-    GeradorSinais,
-    AutoTuner,
-    SentimentAnalyzer,
-    AprendizadoContinuo,
-)
+from src.ia.motor_ia import MotorIA
+from src.ia.gerador_sinais import GeradorSinais
+from src.optimization.autotuner import AutoTuner
+from src.ia.sentiment_analyzer import SentimentAnalyzer
+from src.ia.aprendizado_continuo import AprendizadoContinuo
 from src.core.configuracao import Configuracao
 from src.models.trade import Trade
 
@@ -338,7 +336,8 @@ class TestAprendizadoContinuoAbrangente:
         assert hasattr(aprendizado, "modelo_rl")
         assert hasattr(aprendizado, "historico_acoes")
 
-    def test_treinar_modelo_com_trades(self, mock_config):
+    @pytest.mark.asyncio
+    async def test_treinar_modelo_com_trades(self, mock_config):
         """Testa treinamento do modelo com trades"""
         aprendizado = AprendizadoContinuo()
 
@@ -369,7 +368,7 @@ class TestAprendizadoContinuoAbrangente:
 
         metricas = {"win_rate": 0.5, "profit_factor": 1.5, "sharpe_ratio": 0.8}
 
-        resultado = aprendizado.treinar_modelo(trades, metricas)
+        resultado = await aprendizado.treinar_modelo(trades, metricas)
 
         assert resultado is not None
         assert isinstance(resultado, dict)
