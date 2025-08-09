@@ -1,12 +1,14 @@
 from setuptools import setup, find_packages
+import os
 
 setup(
-    name="analysissupreme",
+    name="cryptobot-supremo",
     version="1.0.0",
     description="Sistema completo de trading automatizado com IA",
     author="AnalysisSupreme Team",
     packages=find_packages(),
-    python_requires=">=3.9",
+    package_dir={"": "."},  # Root como source
+    python_requires=">=3.11",
     install_requires=[
         "requests>=2.28.0",
         "pandas>=1.5.0",
@@ -44,4 +46,6 @@ setup(
             "analysissupreme=main:main",
         ],
     },
+    zip_safe=False,
+    include_package_data=True,
 )

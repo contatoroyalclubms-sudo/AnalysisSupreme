@@ -2,11 +2,21 @@
 Classe base para todos os bots de trading
 """
 
+import sys
+import os
+from pathlib import Path
+
+project_root = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(project_root))
+sys.path.insert(0, str(project_root / "src"))
+
 import asyncio
 import logging
 from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
+
+import src
 
 from src.core.configuracao import Configuracao
 from src.models.trade import Trade
