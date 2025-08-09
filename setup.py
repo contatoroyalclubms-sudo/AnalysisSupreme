@@ -6,8 +6,8 @@ setup(
     version="1.0.0",
     description="Sistema completo de trading automatizado com IA",
     author="AnalysisSupreme Team",
-    packages=find_packages(),
-    package_dir={"": "."},  # Root como source
+    packages=find_packages(where="src"),
+    package_dir={"": "src"},  # Src-layout configuration
     python_requires=">=3.9",
     install_requires=[
         "requests>=2.28.0",
