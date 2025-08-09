@@ -1,8 +1,7 @@
-# Python
 __pycache__/
-*.py[cod]
-*$py.class
-*.so
+*.pyc
+*.pyo
+*.pyd
 .Python
 build/
 develop-eggs/
@@ -19,56 +18,6 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-MANIFEST
-
-# Virtual environments
-venv/
-env/
-ENV/
-env.bak/
-venv.bak/
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# Configuration files with secrets
-config/config.json
-.env
-
-# Logs
-logs/
-*.log
-
-# Database
-*.db
-*.sqlite
-*.sqlite3
-
-# AI Models
-models/
-*.pkl
-*.joblib
-*.h5
-*.pt
-
-# Data
-data/
-backtest_results/
-trading_data/
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Monitoring
-prometheus_data/
-grafana_data/
-
-# Testing
-.coverage
-htmlcov/
-.pytest_cache/
+test_*.txt
+*_backup.py
+test_motor_ia_import.py
