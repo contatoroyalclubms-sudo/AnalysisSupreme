@@ -52,16 +52,16 @@ class CacheEntry:
 class CacheIntelligence:
     """Sistema de cache inteligente multi-layer"""
 
-    def __init__(self, max_memory_mb: int = 512):
-        self.max_memory_bytes = max_memory_mb * 1024 * 1024
-        self.current_memory_bytes = 0
+    def __init__(self, max_memory_mb: int = 512) -> None:
+        self.max_memory_bytes: int = max_memory_mb * 1024 * 1024
+        self.current_memory_bytes: int = 0
 
         self.l1_cache: Dict[str, CacheEntry] = {}  # Ultra rápido - 10ms TTL
         self.l2_cache: Dict[str, CacheEntry] = {}  # Rápido - 100ms TTL
         self.l3_cache: Dict[str, CacheEntry] = {}  # Normal - 1s TTL
         self.l4_cache: Dict[str, CacheEntry] = {}  # Longo prazo - 10s TTL
 
-        self.ttl_config = {
+        self.ttl_config: Dict[str, Dict[str, int]] = {
             "ticker": {"l1": 10, "l2": 50, "l3": 200, "l4": 1000},
             "orderbook": {"l1": 5, "l2": 25, "l3": 100, "l4": 500},
             "trades": {"l1": 20, "l2": 100, "l3": 500, "l4": 2000},
@@ -72,18 +72,18 @@ class CacheIntelligence:
 
         self.access_patterns: Dict[str, List[float]] = defaultdict(list)
         self.hit_rates: Dict[str, float] = defaultdict(float)
-        self.prediction_accuracy = 0.0
+        self.prediction_accuracy: float = 0.0
 
         self.prediction_model: Dict[str, Any] = {}
         self.access_history: Dict[str, List[float]] = defaultdict(list)
 
-        self.compression_threshold = 1024  # 1KB
+        self.compression_threshold: int = 1024  # 1KB
         self.compression_stats: Dict[str, int] = defaultdict(int)
 
-        self.optimization_interval = 60  # 60s
-        self.last_optimization = time.time()
+        self.optimization_interval: int = 60  # 60s
+        self.last_optimization: float = time.time()
 
-    async def initialize_intelligence(self):
+    async def initialize_intelligence(self) -> None:
         """Inicializa sistema de cache inteligente"""
         logger.info("🧠 Inicializando Cache Intelligence")
 

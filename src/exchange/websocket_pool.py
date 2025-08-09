@@ -6,7 +6,7 @@ import asyncio
 import json
 import logging
 import time
-from typing import Dict, List, Optional, Callable
+from typing import Dict, List, Optional, Callable, Any
 from datetime import datetime
 import websockets
 from websockets.exceptions import ConnectionClosed, WebSocketException
@@ -17,17 +17,17 @@ logger = logging.getLogger(__name__)
 class WebSocketConnection:
     """Conexão WebSocket individual com reconexão automática"""
 
-    def __init__(self, exchange: str, url: str, on_message: Callable):
-        self.exchange = exchange
-        self.url = url
-        self.on_message = on_message
-        self.websocket = None
-        self.connected = False
-        self.last_heartbeat = time.time()
-        self.reconnect_attempts = 0
-        self.max_reconnect_attempts = 5
+    def __init__(self, exchange: str, url: str, on_message: Callable) -> None:
+        self.exchange: str = exchange
+        self.url: str = url
+        self.on_message: Callable = on_message
+        self.websocket: Optional[Any] = None
+        self.connected: bool = False
+        self.last_heartbeat: float = time.time()
+        self.reconnect_attempts: int = 0
+        self.max_reconnect_attempts: int = 5
 
-    async def connect(self):
+    async def connect(self) -> None:
         """Conecta ao WebSocket"""
         try:
             self.websocket = await websockets.connect(
@@ -44,9 +44,11 @@ class WebSocketConnection:
             logger.error(f"Erro ao conectar WebSocket {self.exchange}: {e}")
             self.connected = False
 
-    async def _message_loop(self):
+    async def _message_loop(self) -> None:
         """Loop principal de recebimento de mensagens"""
         try:
+            if self.websocket is None:
+                return
             async for message in self.websocket:
                 self.last_heartbeat = time.time()
                 try:
@@ -68,7 +70,7 @@ class WebSocketConnection:
             self.connected = False
             await self._reconnect()
 
-    async def _reconnect(self):
+    async def _reconnect(self) -> None:
         """Reconecta automaticamente"""
         if self.reconnect_attempts >= self.max_reconnect_attempts:
             logger.error(
@@ -85,7 +87,7 @@ class WebSocketConnection:
         await asyncio.sleep(wait_time)
         await self.connect()
 
-    async def send(self, message: dict):
+    async def send(self, message: dict) -> None:
         """Envia mensagem via WebSocket"""
         if not self.connected or not self.websocket:
             raise Exception(f"WebSocket não conectado: {self.exchange}")
@@ -97,7 +99,7 @@ class WebSocketConnection:
             self.connected = False
             raise
 
-    async def close(self):
+    async def close(self) -> None:
         """Fecha conexão WebSocket"""
         self.connected = False
         if self.websocket:
@@ -107,18 +109,18 @@ class WebSocketConnection:
 class WebSocketPool:
     """Pool de conexões WebSocket para múltiplas exchanges"""
 
-    def __init__(self, max_connections_per_exchange: int = 5):
-        self.max_connections_per_exchange = max_connections_per_exchange
+    def __init__(self, max_connections_per_exchange: int = 5) -> None:
+        self.max_connections_per_exchange: int = max_connections_per_exchange
         self.connections: Dict[str, List[WebSocketConnection]] = {}
         self.message_handlers: Dict[str, Callable] = {}
-        self.data_cache: Dict[str, Dict] = {}
-        self.cache_ttl = 100
+        self.data_cache: Dict[str, Dict[str, Any]] = {}
+        self.cache_ttl: int = 100
 
-    def register_handler(self, exchange: str, handler: Callable):
+    def register_handler(self, exchange: str, handler: Callable) -> None:
         """Registra handler para mensagens de uma exchange"""
         self.message_handlers[exchange] = handler
 
-    async def add_connection(self, exchange: str, url: str):
+    async def add_connection(self, exchange: str, url: str) -> None:
         """Adiciona nova conexão WebSocket"""
         if exchange not in self.connections:
             self.connections[exchange] = []
@@ -127,7 +129,7 @@ class WebSocketPool:
             logger.warning(f"Máximo de conexões atingido para {exchange}")
             return
 
-        async def on_message(exchange_name: str, data: dict):
+        async def on_message(exchange_name: str, data: dict) -> None:
             cache_key = f"{exchange_name}_{data.get('symbol', 'general')}"
             self.data_cache[cache_key] = {"data": data, "timestamp": time.time() * 1000}
 
@@ -143,7 +145,7 @@ class WebSocketPool:
 
     async def get_cached_data(
         self, exchange: str, symbol: Optional[str] = None
-    ) -> Optional[dict]:
+    ) -> Optional[Dict[str, Any]]:
         """Obtém dados do cache se ainda válidos"""
         cache_key = f"{exchange}_{symbol or 'general'}"
 
@@ -158,7 +160,7 @@ class WebSocketPool:
 
         return None
 
-    async def send_to_exchange(self, exchange: str, message: dict):
+    async def send_to_exchange(self, exchange: str, message: dict) -> None:
         """Envia mensagem para exchange via WebSocket"""
         if exchange not in self.connections or not self.connections[exchange]:
             raise Exception(f"Nenhuma conexão WebSocket disponível para {exchange}")
@@ -170,7 +172,7 @@ class WebSocketPool:
 
         raise Exception(f"Nenhuma conexão WebSocket ativa para {exchange}")
 
-    async def close_all(self):
+    async def close_all(self) -> None:
         """Fecha todas as conexões WebSocket"""
         for exchange_connections in self.connections.values():
             for connection in exchange_connections:

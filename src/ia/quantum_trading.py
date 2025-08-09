@@ -29,14 +29,14 @@ class QuantumOptimizationResult:
 class QuantumTradingEngine:
     """Simulação de computação quântica para otimização de portfolio"""
 
-    def __init__(self):
-        self.quantum_circuits = {}
-        self.superposition_states = {}
-        self.entanglement_matrix = None
-        self.coherence_time = 1000
-        self.quantum_advantage_factor = 0.15
+    def __init__(self) -> None:
+        self.quantum_circuits: Dict[str, Any] = {}
+        self.superposition_states: Dict[str, Any] = {}
+        self.entanglement_matrix: Optional[np.ndarray] = None
+        self.coherence_time: int = 1000
+        self.quantum_advantage_factor: float = 0.15
 
-    async def initialize_quantum_system(self):
+    async def initialize_quantum_system(self) -> None:
         """Inicializa sistema quântico"""
         await self._initialize_quantum_circuits()
         await self._prepare_entanglement_matrix()
@@ -65,7 +65,7 @@ class QuantumTradingEngine:
 
     async def quantum_arbitrage_detection(
         self, exchanges: List[str], symbol: str
-    ) -> Dict:
+    ) -> Dict[str, Any]:
         """Detecção quântica de arbitragem usando superposição"""
         quantum_state = await self._create_arbitrage_superposition(exchanges, symbol)
 
@@ -83,8 +83,8 @@ class QuantumTradingEngine:
         }
 
     async def quantum_risk_assessment(
-        self, portfolio: Dict, market_conditions: Dict
-    ) -> Dict:
+        self, portfolio: Dict[str, Any], market_conditions: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Avaliação quântica de risco usando estados emaranhados"""
         risk_circuit = await self._create_risk_circuit(portfolio)
 
@@ -104,7 +104,7 @@ class QuantumTradingEngine:
             "advantage_factor": self.quantum_advantage_factor,
         }
 
-    async def _create_optimization_circuit(self, assets: List[str]) -> Dict:
+    async def _create_optimization_circuit(self, assets: List[str]) -> Dict[str, Any]:
         """Cria circuito quântico para otimização"""
         await asyncio.sleep(0.002)
 
@@ -120,7 +120,7 @@ class QuantumTradingEngine:
             ),
         }
 
-    async def _simulate_superposition(self, circuit: Dict, market_data: Dict) -> Dict:
+    async def _simulate_superposition(self, circuit: Dict[str, Any], market_data: Dict[str, Any]) -> Dict[str, Any]:
         """Simula superposição quântica"""
         await asyncio.sleep(0.003)
 
@@ -135,7 +135,7 @@ class QuantumTradingEngine:
             "entanglement": self._calculate_entanglement(amplitudes),
         }
 
-    async def _find_ground_state(self, superposition: Dict) -> Dict:
+    async def _find_ground_state(self, superposition: Dict[str, Any]) -> Dict[str, Any]:
         """Encontra estado fundamental usando VQE"""
         await asyncio.sleep(0.004)
 
@@ -156,8 +156,8 @@ class QuantumTradingEngine:
         }
 
     async def _extract_portfolio_weights(
-        self, optimal_state: Dict, assets: List[str]
-    ) -> Dict:
+        self, optimal_state: Dict[str, Any], assets: List[str]
+    ) -> Dict[str, Any]:
         """Extrai pesos do portfolio do estado quântico"""
         await asyncio.sleep(0.002)
 
@@ -183,7 +183,7 @@ class QuantumTradingEngine:
 
     async def _create_arbitrage_superposition(
         self, exchanges: List[str], symbol: str
-    ) -> Dict:
+    ) -> Dict[str, Any]:
         """Cria superposição para arbitragem"""
         await asyncio.sleep(0.001)
 
@@ -199,7 +199,7 @@ class QuantumTradingEngine:
             "coherence_time": self.coherence_time,
         }
 
-    async def _entangle_price_states(self, quantum_state: Dict) -> Dict:
+    async def _entangle_price_states(self, quantum_state: Dict[str, Any]) -> Dict[str, Any]:
         """Emaranha estados de preços"""
         await asyncio.sleep(0.002)
 
@@ -223,7 +223,7 @@ class QuantumTradingEngine:
             "correlation_matrix": np.corrcoef(entangled_prices.reshape(1, -1)),
         }
 
-    async def _measure_arbitrage_opportunities(self, entangled_prices: Dict) -> Dict:
+    async def _measure_arbitrage_opportunities(self, entangled_prices: Dict[str, Any]) -> Dict[str, Any]:
         """Mede oportunidades de arbitragem"""
         await asyncio.sleep(0.001)
 
@@ -244,7 +244,7 @@ class QuantumTradingEngine:
         """Calcula fator de emaranhamento"""
         return np.abs(np.sum(amplitudes * np.conj(amplitudes))) * 0.8
 
-    async def _initialize_quantum_circuits(self):
+    async def _initialize_quantum_circuits(self) -> None:
         """Inicializa circuitos quânticos"""
         await asyncio.sleep(0.01)
         self.quantum_circuits = {
@@ -253,7 +253,7 @@ class QuantumTradingEngine:
             "risk": "initialized",
         }
 
-    async def _prepare_entanglement_matrix(self):
+    async def _prepare_entanglement_matrix(self) -> None:
         """Prepara matriz de emaranhamento"""
         await asyncio.sleep(0.005)
         self.entanglement_matrix = np.array(
@@ -263,33 +263,33 @@ class QuantumTradingEngine:
             ]
         )
 
-    async def _calibrate_quantum_gates(self):
+    async def _calibrate_quantum_gates(self) -> None:
         """Calibra portas quânticas"""
         await asyncio.sleep(0.008)
 
-    async def _create_risk_circuit(self, portfolio: Dict) -> Dict:
+    async def _create_risk_circuit(self, portfolio: Dict[str, Any]) -> Dict[str, Any]:
         """Cria circuito para avaliação de risco"""
         await asyncio.sleep(0.002)
         return {"risk_qubits": len(portfolio), "calibrated": True}
 
-    async def _superpose_market_states(self, market_conditions: Dict) -> Dict:
+    async def _superpose_market_states(self, market_conditions: Dict[str, Any]) -> Dict[str, Any]:
         """Superpõe estados de mercado"""
         await asyncio.sleep(0.003)
         return {"market_superposition": True, "states": 16}
 
     async def _entangle_portfolio_market(
-        self, risk_circuit: Dict, market_superposition: Dict
-    ) -> Dict:
+        self, risk_circuit: Dict[str, Any], market_superposition: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Emaranha portfolio com mercado"""
         await asyncio.sleep(0.004)
         return {"entangled": True, "strength": 0.9}
 
-    async def _measure_quantum_risk(self, entangled_risk: Dict) -> Dict:
+    async def _measure_quantum_risk(self, entangled_risk: Dict[str, Any]) -> Dict[str, Any]:
         """Mede risco quântico"""
         await asyncio.sleep(0.002)
         return {"var": 0.05, "es": 0.08, "tail": 0.12, "confidence": 0.95}
 
-    def get_quantum_stats(self) -> Dict:
+    def get_quantum_stats(self) -> Dict[str, Any]:
         """Retorna estatísticas do sistema quântico"""
         return {
             "quantum_circuits": self.quantum_circuits,
