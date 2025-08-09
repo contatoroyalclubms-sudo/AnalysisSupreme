@@ -35,7 +35,9 @@ app.add_middleware(
 dashboard = DashboardSupremo()
 logger = logging.getLogger(__name__)
 
-app_state: Dict[str, Union[GerenciadorBots, Monitor, MotorIA, Configuracao, bool, None]] = {
+app_state: Dict[
+    str, Union[GerenciadorBots, Monitor, MotorIA, Configuracao, bool, None]
+] = {
     "gerenciador": None,
     "monitor": None,
     "motor_ia": None,
