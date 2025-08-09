@@ -21,7 +21,7 @@ app = FastAPI(
     description="Sistema de Trading Automatizado com IA Avançada",
     version="1.0.0",
     docs_url="/docs",
-    redoc_url="/redoc"
+    redoc_url="/redoc",
 )
 
 app.add_middleware(
@@ -40,28 +40,30 @@ app_state = {
     "monitor": None,
     "motor_ia": None,
     "config": None,
-    "initialized": False
+    "initialized": False,
 }
+
 
 @app.on_event("startup")
 async def startup_event():
     """Initialize the API without starting trading system"""
     try:
         logger.info("Initializing CryptoBot Supremo Global API...")
-        
+
         try:
             config = Configuracao("config/config.json")
             app_state["config"] = config
         except Exception as e:
             logger.warning(f"Could not load config: {e}")
             app_state["config"] = None
-        
+
         app_state["initialized"] = True
         logger.info("CryptoBot Supremo Global API initialized successfully")
-        
+
     except Exception as e:
         logger.error(f"Failed to initialize API: {e}")
         app_state["initialized"] = False
+
 
 @app.on_event("shutdown")
 async def shutdown_event():
@@ -77,6 +79,7 @@ async def shutdown_event():
     except Exception as e:
         logger.error(f"Error during shutdown: {e}")
 
+
 @app.get("/health")
 async def health_check():
     """Health check endpoint for Docker and load balancers"""
@@ -85,15 +88,16 @@ async def health_check():
         "service": "CryptoBot Supremo Global",
         "version": "1.0.0",
         "initialized": app_state["initialized"],
-        "timestamp": dashboard.real_time_data.get("timestamp", "unknown")
+        "timestamp": dashboard.real_time_data.get("timestamp", "unknown"),
     }
+
 
 @app.get("/api/status")
 async def get_system_status():
     """Get detailed system status"""
     if not app_state["initialized"]:
         raise HTTPException(status_code=503, detail="System not initialized")
-    
+
     try:
         metrics = await dashboard.generate_realtime_metrics()
         return {
@@ -101,13 +105,14 @@ async def get_system_status():
             "components": {
                 "gerenciador_bots": app_state["gerenciador"] is not None,
                 "monitor": app_state["monitor"] is not None,
-                "motor_ia": app_state["motor_ia"] is not None
+                "motor_ia": app_state["motor_ia"] is not None,
             },
-            "metrics": metrics
+            "metrics": metrics,
         }
     except Exception as e:
         logger.error(f"Error getting system status: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.get("/api/dashboard/metrics")
 async def get_dashboard_metrics():
@@ -118,25 +123,22 @@ async def get_dashboard_metrics():
                 "execution_time_p99": 15.2,
                 "throughput_ops_per_sec": 1250,
                 "success_rate": 0.987,
-                "profit_per_hour": 245.50
+                "profit_per_hour": 245.50,
             },
             "portfolio": {
                 "total_balance": 50000.00,
                 "available_balance": 45000.00,
                 "pnl_today": 1250.75,
-                "win_rate": 0.78
+                "win_rate": 0.78,
             },
-            "bots": {
-                "active_count": 0,
-                "total_trades": 0,
-                "avg_trade_duration": 0
-            },
-            "timestamp": "2025-08-09T11:28:00Z"
+            "bots": {"active_count": 0, "total_trades": 0, "avg_trade_duration": 0},
+            "timestamp": "2025-08-09T11:28:00Z",
         }
         return metrics
     except Exception as e:
         logger.error(f"Error getting dashboard metrics: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.get("/api/dashboard/competitive")
 async def get_competitive_analysis():
@@ -148,6 +150,7 @@ async def get_competitive_analysis():
         logger.error(f"Error getting competitive analysis: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @app.get("/api/dashboard/executive")
 async def get_executive_summary():
     """Get executive summary for stakeholders"""
@@ -158,101 +161,135 @@ async def get_executive_summary():
         logger.error(f"Error getting executive summary: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @app.get("/api/bots")
 async def list_bots():
     """List all available bots and their status"""
     if not app_state["initialized"]:
         raise HTTPException(status_code=503, detail="System not initialized")
-    
+
     try:
         bots_info = {
             "available_bots": [
-                "arbitragem", "grid", "momentum", 
-                "scalping", "mean_reversion", "swing"
+                "arbitragem",
+                "grid",
+                "momentum",
+                "scalping",
+                "mean_reversion",
+                "swing",
             ],
             "active_bots": [],
-            "total_bots": 6
+            "total_bots": 6,
         }
         return bots_info
     except Exception as e:
         logger.error(f"Error listing bots: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @app.post("/api/bots/{bot_name}/start")
-async def start_bot(bot_name: str, caso_uso: Optional[int] = None, background_tasks: BackgroundTasks = None):
+async def start_bot(
+    bot_name: str,
+    caso_uso: Optional[int] = None,
+    background_tasks: BackgroundTasks = None,
+):
     """Start a specific bot"""
     if not app_state["initialized"]:
         raise HTTPException(status_code=503, detail="System not initialized")
-    
-    valid_bots = ["arbitragem", "grid", "momentum", "scalping", "mean_reversion", "swing"]
+
+    valid_bots = [
+        "arbitragem",
+        "grid",
+        "momentum",
+        "scalping",
+        "mean_reversion",
+        "swing",
+    ]
     if bot_name not in valid_bots:
-        raise HTTPException(status_code=400, detail=f"Invalid bot name. Valid options: {valid_bots}")
-    
+        raise HTTPException(
+            status_code=400, detail=f"Invalid bot name. Valid options: {valid_bots}"
+        )
+
     try:
         gerenciador = app_state["gerenciador"]
         if background_tasks:
             background_tasks.add_task(gerenciador.executar_bot, bot_name, caso_uso)
-        
+
         return {
             "message": f"Bot {bot_name} started successfully",
             "bot": bot_name,
             "caso_uso": caso_uso,
-            "status": "starting"
+            "status": "starting",
         }
     except Exception as e:
         logger.error(f"Error starting bot {bot_name}: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.post("/api/bots/start-all")
 async def start_all_bots(background_tasks: BackgroundTasks):
     """Start all bots"""
     if not app_state["initialized"]:
         raise HTTPException(status_code=503, detail="System not initialized")
-    
+
     try:
         gerenciador = app_state["gerenciador"]
         background_tasks.add_task(gerenciador.executar_todos)
-        
+
         return {
             "message": "All bots started successfully",
             "status": "starting",
-            "total_bots": 6
+            "total_bots": 6,
         }
     except Exception as e:
         logger.error(f"Error starting all bots: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.get("/metrics")
 async def prometheus_metrics():
     """Prometheus metrics endpoint"""
     try:
         metrics = await dashboard.generate_realtime_metrics()
-        
+
         prometheus_output = []
-        prometheus_output.append("# HELP cryptobot_execution_time_p99 Execution time 99th percentile")
+        prometheus_output.append(
+            "# HELP cryptobot_execution_time_p99 Execution time 99th percentile"
+        )
         prometheus_output.append("# TYPE cryptobot_execution_time_p99 gauge")
-        prometheus_output.append(f"cryptobot_execution_time_p99 {metrics['performance']['execution_time_p99']}")
-        
-        prometheus_output.append("# HELP cryptobot_throughput_ops_per_sec Throughput operations per second")
+        prometheus_output.append(
+            f"cryptobot_execution_time_p99 {metrics['performance']['execution_time_p99']}"
+        )
+
+        prometheus_output.append(
+            "# HELP cryptobot_throughput_ops_per_sec Throughput operations per second"
+        )
         prometheus_output.append("# TYPE cryptobot_throughput_ops_per_sec gauge")
-        prometheus_output.append(f"cryptobot_throughput_ops_per_sec {metrics['performance']['throughput_ops_per_sec']}")
-        
+        prometheus_output.append(
+            f"cryptobot_throughput_ops_per_sec {metrics['performance']['throughput_ops_per_sec']}"
+        )
+
         prometheus_output.append("# HELP cryptobot_success_rate Success rate")
         prometheus_output.append("# TYPE cryptobot_success_rate gauge")
-        prometheus_output.append(f"cryptobot_success_rate {metrics['performance']['success_rate']}")
-        
+        prometheus_output.append(
+            f"cryptobot_success_rate {metrics['performance']['success_rate']}"
+        )
+
         prometheus_output.append("# HELP cryptobot_profit_per_hour Profit per hour")
         prometheus_output.append("# TYPE cryptobot_profit_per_hour gauge")
-        prometheus_output.append(f"cryptobot_profit_per_hour {metrics['performance']['profit_per_hour']}")
-        
+        prometheus_output.append(
+            f"cryptobot_profit_per_hour {metrics['performance']['profit_per_hour']}"
+        )
+
         return JSONResponse(
-            content="\n".join(prometheus_output),
-            media_type="text/plain"
+            content="\n".join(prometheus_output), media_type="text/plain"
         )
     except Exception as e:
         logger.error(f"Error generating Prometheus metrics: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+
+    uvicorn.run(app, host="0.0.0.0", port=8000)  # nosec B104
