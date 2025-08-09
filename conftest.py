@@ -2,6 +2,7 @@
 Configuração global para pytest - CRYPTOBOT SUPREMO GLOBAL
 Garante resolução de paths antes da coleta de testes
 """
+
 import sys
 import os
 from pathlib import Path
@@ -19,6 +20,7 @@ if str(src_path) not in sys.modules:
 
 import pytest
 import asyncio
+
 
 @pytest.fixture(scope="session")
 def event_loop():

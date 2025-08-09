@@ -14,7 +14,7 @@ for path in [str(project_root), str(current_dir)]:
     if path not in sys.path:
         sys.path.insert(0, path)
 
-os.environ.setdefault('PYTHONPATH', f"{project_root}:{current_dir}")
+os.environ.setdefault("PYTHONPATH", f"{project_root}:{current_dir}")
 
 __all__ = ["models", "bots", "core", "ia", "exchange", "utils", "observabilidade"]
 
