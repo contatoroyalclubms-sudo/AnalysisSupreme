@@ -5,7 +5,7 @@ Provides REST API endpoints for health checks, metrics, and bot control
 
 import asyncio
 import logging
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Union, cast
 from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -35,7 +35,7 @@ app.add_middleware(
 dashboard = DashboardSupremo()
 logger = logging.getLogger(__name__)
 
-app_state = {
+app_state: Dict[str, Union[GerenciadorBots, Monitor, MotorIA, Configuracao, bool, None]] = {
     "gerenciador": None,
     "monitor": None,
     "motor_ia": None,
@@ -190,8 +190,8 @@ async def list_bots():
 @app.post("/api/bots/{bot_name}/start")
 async def start_bot(
     bot_name: str,
+    background_tasks: BackgroundTasks,
     caso_uso: Optional[int] = None,
-    background_tasks: BackgroundTasks = None,
 ):
     """Start a specific bot"""
     if not app_state["initialized"]:
@@ -211,8 +211,8 @@ async def start_bot(
         )
 
     try:
-        gerenciador = app_state["gerenciador"]
-        if background_tasks:
+        gerenciador = cast(Optional[GerenciadorBots], app_state["gerenciador"])
+        if gerenciador:
             background_tasks.add_task(gerenciador.executar_bot, bot_name, caso_uso)
 
         return {
@@ -233,8 +233,9 @@ async def start_all_bots(background_tasks: BackgroundTasks):
         raise HTTPException(status_code=503, detail="System not initialized")
 
     try:
-        gerenciador = app_state["gerenciador"]
-        background_tasks.add_task(gerenciador.executar_todos)
+        gerenciador = cast(Optional[GerenciadorBots], app_state["gerenciador"])
+        if gerenciador:
+            background_tasks.add_task(gerenciador.executar_todos)
 
         return {
             "message": "All bots started successfully",
