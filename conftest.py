@@ -18,6 +18,8 @@ for path in paths_to_add:
 if str(src_path) not in sys.modules:
     sys.path.insert(0, str(src_path))
 
+os.environ.setdefault('PYTHONPATH', f"{project_root}:{src_path}")
+
 import pytest
 import asyncio
 
