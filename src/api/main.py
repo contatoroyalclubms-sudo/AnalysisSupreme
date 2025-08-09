@@ -8,7 +8,8 @@ import logging
 from typing import Dict, Any, Optional, Union, cast
 from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from src.observabilidade.dashboard_supremo import DashboardSupremo
 from src.core.configuracao import Configuracao
@@ -23,6 +24,8 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
 )
+
+app.mount("/static", StaticFiles(directory="public"), name="static")
 
 app.add_middleware(
     CORSMiddleware,
@@ -81,6 +84,16 @@ async def shutdown_event():
     except Exception as e:
         logger.error(f"Error during shutdown: {e}")
 
+
+@app.get("/")
+async def landing_page():
+    """Landing page for the CryptoBot Supremo Global"""
+    return FileResponse("public/index.html")
+
+@app.get("/demo")
+async def demo_page():
+    """Demo page for the CryptoBot Supremo Global"""
+    return FileResponse("public/index.html")
 
 @app.get("/health")
 async def health_check():

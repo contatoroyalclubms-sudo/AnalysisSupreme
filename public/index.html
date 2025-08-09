@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 CryptoBot Supremo Global - Demo</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; padding: 20px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 40px; }
+        .header h1 { font-size: 3em; margin-bottom: 10px; }
+        .status { display: flex; justify-content: center; gap: 20px; margin-bottom: 40px; }
+        .status-card { 
+            background: rgba(255,255,255,0.1); padding: 20px; border-radius: 10px;
+            backdrop-filter: blur(10px); text-align: center; min-width: 200px;
+        }
+        .links { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .link-card { 
+            background: rgba(255,255,255,0.1); padding: 30px; border-radius: 15px;
+            backdrop-filter: blur(10px); text-decoration: none; color: white;
+            transition: transform 0.3s ease; text-align: center;
+        }
+        .link-card:hover { transform: translateY(-5px); }
+        .link-card h3 { font-size: 1.5em; margin-bottom: 10px; }
+        .emoji { font-size: 2em; margin-bottom: 15px; }
+        .footer { text-align: center; margin-top: 40px; opacity: 0.8; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 CryptoBot Supremo Global</h1>
+            <p>Sistema de Trading Automatizado com IA - Demonstração Completa</p>
+        </div>
+        
+        <div class="status">
+            <div class="status-card">
+                <div class="emoji">⚡</div>
+                <h3>Status Sistema</h3>
+                <p id="system-status">Verificando...</p>
+            </div>
+            <div class="status-card">
+                <div class="emoji">📊</div>
+                <h3>Serviços Ativos</h3>
+                <p id="services-count">Carregando...</p>
+            </div>
+            <div class="status-card">
+                <div class="emoji">💰</div>
+                <h3>Performance</h3>
+                <p id="performance">Calculando...</p>
+            </div>
+        </div>
+        
+        <div class="links">
+            <a href="/docs" class="link-card" target="_blank">
+                <div class="emoji">📚</div>
+                <h3>API Documentation</h3>
+                <p>Documentação interativa da API FastAPI com todos os endpoints disponíveis</p>
+            </a>
+            
+            <a href="DASHBOARD_URL" class="link-card" target="_blank">
+                <div class="emoji">🎨</div>
+                <h3>Dashboard Real-Time</h3>
+                <p>Interface visual com gráficos e métricas em tempo real do sistema</p>
+            </a>
+            
+            <a href="GRAFANA_URL" class="link-card" target="_blank">
+                <div class="emoji">📈</div>
+                <h3>Grafana Monitoring</h3>
+                <p>Monitoramento avançado com dashboards profissionais de performance</p>
+            </a>
+            
+            <a href="PROMETHEUS_URL" class="link-card" target="_blank">
+                <div class="emoji">🔍</div>
+                <h3>Prometheus Metrics</h3>
+                <p>Métricas detalhadas do sistema e queries de monitoramento</p>
+            </a>
+            
+            <a href="/api/dashboard/metrics" class="link-card" target="_blank">
+                <div class="emoji">⚙️</div>
+                <h3>System Metrics API</h3>
+                <p>Endpoint JSON com todas as métricas do sistema em tempo real</p>
+            </a>
+            
+            <a href="/health" class="link-card" target="_blank">
+                <div class="emoji">💚</div>
+                <h3>Health Check</h3>
+                <p>Status de saúde de todos os componentes do sistema</p>
+            </a>
+        </div>
+        
+        <div class="footer">
+            <p>© 2024 CryptoBot Supremo Global - Sistema Enterprise de Trading Automatizado</p>
+            <p>Última atualização: <span id="last-update"></span></p>
+        </div>
+    </div>
+    
+    <script>
+        // Atualizar status em tempo real
+        async function updateStatus() {
+            try {
+                const response = await fetch('/health');
+                const data = await response.json();
+                
+                document.getElementById('system-status').textContent = 
+                    data.status === 'healthy' ? '✅ Online' : '❌ Offline';
+                
+                const metricsResponse = await fetch('/api/dashboard/metrics');
+                const metrics = await metricsResponse.json();
+                
+                document.getElementById('services-count').textContent = 
+                    `${Object.keys(metrics).length} Ativos`;
+                document.getElementById('performance').textContent = 
+                    metrics.performance_score ? `${metrics.performance_score}%` : 'N/A';
+                    
+            } catch (error) {
+                document.getElementById('system-status').textContent = '⚠️ Verificando...';
+            }
+        }
+        
+        // Atualizar timestamp
+        document.getElementById('last-update').textContent = new Date().toLocaleString('pt-BR');
+        
+        // Atualizar a cada 30 segundos
+        updateStatus();
+        setInterval(updateStatus, 30000);
+    </script>
+</body>
+</html>
