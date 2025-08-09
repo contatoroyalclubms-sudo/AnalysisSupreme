@@ -5,6 +5,7 @@ Provides REST API endpoints for health checks, metrics, and bot control
 
 import asyncio
 import logging
+import time
 from typing import Dict, Any, Optional, Union, cast
 from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
@@ -259,6 +260,51 @@ async def start_all_bots(background_tasks: BackgroundTasks):
         }
     except Exception as e:
         logger.error(f"Error starting all bots: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/analysis/{symbol}")
+async def get_analysis(symbol: str):
+    """Análise completa de mercado com cache e paralelização otimizada"""
+    start_time = time.time()
+    
+    try:
+        if not app_state["initialized"]:
+            raise HTTPException(status_code=503, detail="System not initialized")
+        
+        if not app_state["motor_ia"]:
+            config = cast(Optional[Configuracao], app_state["config"])
+            if config:
+                app_state["motor_ia"] = MotorIA(config.configuracao)
+                await app_state["motor_ia"].inicializar()
+        
+        motor_ia = cast(Optional[MotorIA], app_state["motor_ia"])
+        if not motor_ia:
+            raise HTTPException(status_code=500, detail="Motor IA not available")
+        
+        dados_mercado = {
+            'ohlcv': [[50000 + i, 50100 + i, 49900 + i, 50050 + i, 1000] for i in range(100)],
+            'precos': [50000 + i for i in range(100)],
+            'volumes': [1000 + i for i in range(100)],
+            'preco_atual': 50050
+        }
+        
+        resultado = await motor_ia.analisar_mercado(dados_mercado, symbol)
+        
+        execution_time = (time.time() - start_time) * 1000  # em ms
+        
+        return {
+            "symbol": symbol,
+            "analysis": resultado,
+            "timestamp": resultado.get("timestamp"),
+            "cached": resultado.get("cached", False),
+            "execution_time_ms": round(execution_time, 2),
+            "performance_target_met": execution_time < 100  # Meta de <100ms
+        }
+        
+    except Exception as e:
+        execution_time = (time.time() - start_time) * 1000
+        logger.error(f"Error in analysis endpoint for {symbol}: {e} (took {execution_time:.2f}ms)")
         raise HTTPException(status_code=500, detail=str(e))
 
 

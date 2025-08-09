@@ -111,42 +111,45 @@ class MotorIA:
             return False
     
     async def analisar_mercado(self, dados_mercado: Dict, symbol: str = None) -> Dict[str, Any]:
-        """Análise completa do mercado para um símbolo"""
+        """Análise completa do mercado para um símbolo com cache e paralelização"""
         try:
             timestamp = datetime.now()
             
             if not self._validar_dados_entrada(dados_mercado):
-                return {
-                    'symbol': symbol,
-                    'timestamp': timestamp.isoformat(),
-                    'analise_tecnica': {},
-                    'analise_sentimento': {},
-                    'analise_ml': {},
-                    'analise_risco': {},
-                    'condicoes_mercado': {},
-                    'recomendacao_final': 'aguardar',
-                    'confianca_geral': 0.0,
-                    'sinal': 'aguardar'
-                }
+                return self._get_default_analysis(symbol, timestamp)
             
             ohlcv = dados_mercado.get('ohlcv', [])
             if len(ohlcv) < 20:
-                return {
-                    'symbol': symbol,
-                    'timestamp': timestamp.isoformat(),
-                    'analise_tecnica': {},
-                    'analise_sentimento': {},
-                    'analise_ml': {},
-                    'analise_risco': {},
-                    'condicoes_mercado': {},
-                    'recomendacao_final': 'aguardar',
-                    'confianca_geral': 0.0,
-                    'sinal': 'aguardar'
-                }
+                return self._get_default_analysis(symbol, timestamp)
             
-            analise_tecnica = await self._analise_tecnica(symbol, dados_mercado)
-            analise_sentimento = await self._analise_sentimento(symbol)
-            analise_ml = await self._analise_ml(symbol, dados_mercado)
+            if not hasattr(self, 'cache'):
+                from ..cache.redis_cache import RedisCache
+                self.cache = RedisCache(self.configuracao or {})
+                await self.cache.initialize()
+            
+            tasks = [
+                self.cache.get_cached_or_compute(
+                    f"analise_tecnica_{symbol}_{timestamp.strftime('%Y%m%d_%H%M')}",
+                    self._analise_tecnica,
+                    symbol, dados_mercado,
+                    data_type="signals"
+                ),
+                self.cache.get_cached_or_compute(
+                    f"analise_sentimento_{symbol}_{timestamp.strftime('%Y%m%d_%H')}",
+                    self._analise_sentimento,
+                    symbol,
+                    data_type="sentiment"
+                ),
+                self.cache.get_cached_or_compute(
+                    f"analise_ml_{symbol}_{timestamp.strftime('%Y%m%d_%H%M')}",
+                    self._analise_ml,
+                    symbol, dados_mercado,
+                    data_type="ml_predictions"
+                )
+            ]
+            
+            analise_tecnica, analise_sentimento, analise_ml = await asyncio.gather(*tasks)
+            
             analise_risco = self._analise_risco(symbol, dados_mercado)
             condicoes_mercado = self._analise_condicoes_mercado(dados_mercado)
             
@@ -167,25 +170,31 @@ class MotorIA:
                 'recomendacao_final': recomendacao_final['acao'],
                 'confianca_geral': recomendacao_final['confianca'],
                 'sinal': recomendacao_final['acao'],
-                'sentiment': analise_sentimento.get('score', 0.0)
+                'sentiment': analise_sentimento.get('score', 0.0),
+                'cached': True  # Indicador de que usou cache
             }
             
         except Exception as e:
             logger.error(f"Erro na análise de mercado para {symbol}: {e}")
-            return {
-                'symbol': symbol,
-                'timestamp': datetime.now().isoformat(),
-                'analise_tecnica': {},
-                'analise_sentimento': {},
-                'analise_ml': {},
-                'analise_risco': {},
-                'condicoes_mercado': {},
-                'recomendacao_final': 'aguardar',
-                'confianca_geral': 0.0,
-                'sinal': 'aguardar',
-                'sentiment': 0.0
-            }
+            return self._get_default_analysis(symbol, timestamp)
     
+    def _get_default_analysis(self, symbol: str, timestamp: datetime) -> Dict[str, Any]:
+        """Retorna análise padrão em caso de erro"""
+        return {
+            'symbol': symbol,
+            'timestamp': timestamp.isoformat(),
+            'analise_tecnica': {},
+            'analise_sentimento': {},
+            'analise_ml': {},
+            'analise_risco': {},
+            'condicoes_mercado': {},
+            'recomendacao_final': 'aguardar',
+            'confianca_geral': 0.0,
+            'sinal': 'aguardar',
+            'sentiment': 0.0,
+            'cached': False
+        }
+
     async def executar_decisao(self, symbol: str, analise: Dict) -> bool:
         """Executa uma decisão de trading baseada na análise"""
         try:

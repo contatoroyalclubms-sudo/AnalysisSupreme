@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import requests
 from typing import Dict, List, Optional
@@ -207,17 +208,21 @@ class SentimentAnalyzer:
             logging.error(f"Erro ao obter cache: {e}")
             return None
 
-    def analisar_sentimento(self, symbol: str = "BTC") -> float:
-        """Análise completa de sentimento para símbolo"""
+    async def analisar_sentimento(self, symbol: str = "BTC") -> float:
+        """Análise completa de sentimento para símbolo com cache otimizado"""
         try:
-            cache_key = f"{symbol}_{datetime.now().strftime('%Y%m%d_%H')}"
+            cache_key = f"sentiment_{symbol}_{datetime.now().strftime('%Y%m%d_%H')}"
             if cache_key in self.cache_sentiment:
                 return self.cache_sentiment[cache_key]
-                
-            twitter_score = self._analisar_twitter(symbol)
-            telegram_score = self._analisar_telegram(symbol)
-            reddit_score = self._analisar_reddit(symbol)
-            noticias_score = self._analisar_noticias(symbol)
+            
+            tasks = [
+                asyncio.create_task(asyncio.to_thread(self._analisar_twitter, symbol)),
+                asyncio.create_task(asyncio.to_thread(self._analisar_telegram, symbol)),
+                asyncio.create_task(asyncio.to_thread(self._analisar_reddit, symbol)),
+                asyncio.create_task(asyncio.to_thread(self._analisar_noticias, symbol))
+            ]
+            
+            twitter_score, telegram_score, reddit_score, noticias_score = await asyncio.gather(*tasks)
             
             sentiment_score = (
                 twitter_score * 0.3 +
@@ -229,6 +234,9 @@ class SentimentAnalyzer:
             sentiment_score = max(min(sentiment_score, 1.0), -1.0)
             
             self.cache_sentiment[cache_key] = sentiment_score
+            if len(self.cache_sentiment) > 100:  # Limitar tamanho do cache
+                oldest_key = min(self.cache_sentiment.keys())
+                del self.cache_sentiment[oldest_key]
             
             return sentiment_score
             
