@@ -11,6 +11,8 @@ services:
       - PROMETHEUS_PORT=8000
       - DATABASE_URL=postgresql://trader:password@postgres:5432/analysissupreme
       - REDIS_URL=redis://redis:6379/0
+      - ENV=production
+      - PYTHONPATH=/app
     volumes:
       - ./logs:/app/logs
       - ./models:/app/models
@@ -23,6 +25,28 @@ services:
       - redis
     networks:
       - trading-network
+    command: ["uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+  dashboard:
+    build: .
+    container_name: analysissupreme-dashboard
+    restart: unless-stopped
+    environment:
+      - PAPER_MODE=true
+      - LOG_LEVEL=INFO
+      - ENV=production
+    volumes:
+      - ./logs:/app/logs
+      - ./config/config.json:/app/config/config.json:ro
+    ports:
+      - "8050:8050"
+    depends_on:
+      - analysissupreme
+      - postgres
+      - redis
+    networks:
+      - trading-network
+    command: python src/web/dashboard_app.py
 
   postgres:
     image: postgres:15-alpine
@@ -64,6 +88,7 @@ services:
       - '--web.enable-lifecycle'
     volumes:
       - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./monitoring/alert_rules.yml:/etc/prometheus/alert_rules.yml
       - prometheus_data:/prometheus
     ports:
       - "9090:9090"

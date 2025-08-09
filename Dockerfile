@@ -39,5 +39,8 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 # Expor porta de métricas
 EXPOSE 8000
 
-# Comando padrão
-CMD ["python", "main.py"]
+# Instalar uvicorn para FastAPI
+RUN pip install uvicorn
+
+# Comando padrão - FastAPI server
+CMD ["uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8000"]

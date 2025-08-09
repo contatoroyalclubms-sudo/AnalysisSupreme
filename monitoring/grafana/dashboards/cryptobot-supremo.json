@@ -1,0 +1,184 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "CryptoBot Supremo Global - Performance Dashboard",
+    "tags": ["cryptobot", "trading", "performance"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "API Response Time (P99)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "cryptobot_execution_time_p99",
+            "legendFormat": "P99 Latency (ms)"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 30},
+                {"color": "red", "value": 50}
+              ]
+            },
+            "unit": "ms"
+          }
+        },
+        "gridPos": {"h": 8, "w": 6, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "Throughput (Ops/sec)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "cryptobot_throughput_ops_per_sec",
+            "legendFormat": "Throughput"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": null},
+                {"color": "yellow", "value": 5000},
+                {"color": "green", "value": 10000}
+              ]
+            },
+            "unit": "ops"
+          }
+        },
+        "gridPos": {"h": 8, "w": 6, "x": 6, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "Success Rate",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "cryptobot_success_rate * 100",
+            "legendFormat": "Success Rate"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": null},
+                {"color": "yellow", "value": 90},
+                {"color": "green", "value": 95}
+              ]
+            },
+            "unit": "percent",
+            "max": 100,
+            "min": 0
+          }
+        },
+        "gridPos": {"h": 8, "w": 6, "x": 12, "y": 0}
+      },
+      {
+        "id": 4,
+        "title": "Profit per Hour",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "cryptobot_profit_per_hour",
+            "legendFormat": "Profit/Hour"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": null},
+                {"color": "yellow", "value": 100},
+                {"color": "green", "value": 200}
+              ]
+            },
+            "unit": "currencyUSD"
+          }
+        },
+        "gridPos": {"h": 8, "w": 6, "x": 18, "y": 0}
+      },
+      {
+        "id": 5,
+        "title": "Trading Performance Over Time",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "cryptobot_profit_per_hour",
+            "legendFormat": "Profit/Hour"
+          },
+          {
+            "expr": "cryptobot_success_rate * 100",
+            "legendFormat": "Success Rate %"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "USD / Percentage",
+            "min": 0
+          }
+        ],
+        "gridPos": {"h": 9, "w": 12, "x": 0, "y": 8}
+      },
+      {
+        "id": 6,
+        "title": "System Health",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "cpu_usage_percent",
+            "legendFormat": "CPU Usage %"
+          },
+          {
+            "expr": "memory_usage_percent",
+            "legendFormat": "Memory Usage %"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Percentage",
+            "min": 0,
+            "max": 100
+          }
+        ],
+        "gridPos": {"h": 9, "w": 12, "x": 12, "y": 8}
+      },
+      {
+        "id": 7,
+        "title": "Active Bots Status",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "cryptobot_bot_status",
+            "legendFormat": "{{bot_name}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 17}
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "refresh": "5s",
+    "schemaVersion": 27,
+    "version": 1
+  }
+}

@@ -1,0 +1,81 @@
+# Alert rules for CryptoBot Supremo Global
+groups:
+  - name: cryptobot_alerts
+    rules:
+      # High latency alert
+      - alert: HighAPILatency
+        expr: cryptobot_execution_time_p99 > 50
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "CryptoBot API high latency detected"
+          description: "API P99 latency is {{ $value }}ms, above 50ms threshold"
+
+      # Low success rate alert
+      - alert: LowSuccessRate
+        expr: cryptobot_success_rate < 0.95
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "CryptoBot low success rate"
+          description: "Success rate is {{ $value }}, below 95% threshold"
+
+      # High drawdown alert
+      - alert: HighDrawdown
+        expr: cryptobot_max_drawdown > 0.05
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High drawdown detected"
+          description: "Max drawdown is {{ $value }}, above 5% threshold"
+
+      # Low profit alert
+      - alert: LowProfitPerHour
+        expr: cryptobot_profit_per_hour < 100
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Low profit per hour"
+          description: "Profit per hour is {{ $value }}, below $100 threshold"
+
+      # System health alerts
+      - alert: HighCPUUsage
+        expr: cpu_usage_percent > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage"
+          description: "CPU usage is {{ $value }}%, above 80% threshold"
+
+      - alert: HighMemoryUsage
+        expr: memory_usage_percent > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage"
+          description: "Memory usage is {{ $value }}%, above 85% threshold"
+
+      # Trading system alerts
+      - alert: NoRecentTrades
+        expr: increase(cryptobot_trades_total[1h]) == 0
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: "No recent trades"
+          description: "No trades executed in the last hour"
+
+      - alert: APIDown
+        expr: up{job="cryptobot-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "CryptoBot API is down"
+          description: "CryptoBot API is not responding"
