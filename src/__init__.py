@@ -2,6 +2,7 @@
 CRYPTOBOT SUPREMO GLOBAL - Package Initialization
 Garante imports funcionem em qualquer ambiente
 """
+
 import sys
 import os
 from pathlib import Path
