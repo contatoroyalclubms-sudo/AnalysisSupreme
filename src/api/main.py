@@ -275,8 +275,18 @@ async def get_analysis(symbol: str):
         if not app_state["motor_ia"]:
             config = cast(Optional[Configuracao], app_state["config"])
             if config:
-                app_state["motor_ia"] = MotorIA(config.configuracao)
-                await app_state["motor_ia"].inicializar()
+                try:
+                    simple_config = {
+                        "modelo_path": "models/",
+                        "treinamento_ativo": True,
+                        "intervalo_retreino": 24,
+                        "parametros": {}
+                    }
+                    app_state["motor_ia"] = MotorIA(simple_config)
+                    await app_state["motor_ia"].inicializar()
+                except Exception as e:
+                    logger.error(f"Error initializing MotorIA: {e}")
+                    raise
         
         motor_ia = cast(Optional[MotorIA], app_state["motor_ia"])
         if not motor_ia:

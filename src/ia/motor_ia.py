@@ -124,7 +124,13 @@ class MotorIA:
             
             if not hasattr(self, 'cache'):
                 from ..cache.redis_cache import RedisCache
-                self.cache = RedisCache(self.configuracao or {})
+                config_dict = {}
+                if hasattr(self, 'configuracao') and self.configuracao:
+                    if hasattr(self.configuracao, '__dict__'):
+                        config_dict = self.configuracao.__dict__
+                    elif isinstance(self.configuracao, dict):
+                        config_dict = self.configuracao
+                self.cache = RedisCache(config_dict)
                 await self.cache.initialize()
             
             tasks = [
