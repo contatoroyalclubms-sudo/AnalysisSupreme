@@ -7,14 +7,11 @@ from unittest.mock import Mock, AsyncMock, patch
 import numpy as np
 from datetime import datetime
 
-from src.ia.motor_ia import (
-    MotorIA,
-    GeradorSinais,
-    AutoTuner,
-    SentimentAnalyzer,
-    AprendizadoContinuo,
-    Sinal,
-)
+from src.ia.motor_ia import MotorIA, Sinal
+from src.ia.gerador_sinais import GeradorSinais
+from src.optimization.autotuner import AutoTuner
+from src.ia.sentiment_analyzer import SentimentAnalyzer
+from src.ia.aprendizado_continuo import AprendizadoContinuo
 
 
 class TestGeradorSinais:

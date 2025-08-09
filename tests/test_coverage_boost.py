@@ -12,14 +12,11 @@ from src.core.configuracao import Configuracao
 from src.core.gerenciador_bots import GerenciadorBots
 from src.exchange.gerenciador_exchange import GerenciadorExchange
 from src.observabilidade.monitor import Monitor
-from src.ia.motor_ia import (
-    MotorIA,
-    GeradorSinais,
-    AutoTuner,
-    SentimentAnalyzer,
-    AprendizadoContinuo,
-    Sinal,
-)
+from src.ia.motor_ia import MotorIA, Sinal
+from src.ia.gerador_sinais import GeradorSinais
+from src.optimization.autotuner import AutoTuner
+from src.ia.sentiment_analyzer import SentimentAnalyzer
+from src.ia.aprendizado_continuo import AprendizadoContinuo
 from src.utils.kpis import GerenciadorKPIs
 from src.utils.metricas import CalculadorMetricas
 from src.utils.logger import configurar_logger

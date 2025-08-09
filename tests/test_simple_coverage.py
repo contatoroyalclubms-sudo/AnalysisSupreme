@@ -12,7 +12,9 @@ from src.utils.kpis import GerenciadorKPIs
 from src.utils.metricas import CalculadorMetricas
 from src.utils.logger import configurar_logger
 from src.models.trade import Trade
-from src.ia.motor_ia import Sinal, GeradorSinais, AutoTuner
+from src.ia.motor_ia import Sinal
+from src.ia.gerador_sinais import GeradorSinais
+from src.optimization.autotuner import AutoTuner
 
 
 class TestSimpleCoverage:
