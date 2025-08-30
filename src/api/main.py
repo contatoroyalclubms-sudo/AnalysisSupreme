@@ -17,6 +17,7 @@ from src.core.configuracao import Configuracao
 from src.core.gerenciador_bots import GerenciadorBots
 from src.observabilidade.monitor import Monitor
 from src.ia.motor_ia import MotorIA
+from src.api.railway_endpoints import railway_router, initialize_railway_integration
 
 app = FastAPI(
     title="CryptoBot Supremo Global API",
@@ -36,6 +37,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(railway_router)
+
 dashboard = DashboardSupremo()
 logger = logging.getLogger(__name__)
 
@@ -46,6 +49,7 @@ app_state: Dict[
     "monitor": None,
     "motor_ia": None,
     "config": None,
+    "railway_integration": None,
     "initialized": False,
 }
 
@@ -62,6 +66,27 @@ async def startup_event():
         except Exception as e:
             logger.warning(f"Could not load config: {e}")
             app_state["config"] = None
+
+        try:
+            import os
+            railway_token = os.getenv("RAILWAY_API_TOKEN")
+            project_id = os.getenv("RAILWAY_PROJECT_ID")
+            
+            if railway_token and project_id:
+                railway_integration = initialize_railway_integration(
+                    railway_token, project_id, app_state["config"]
+                )
+                await railway_integration.initialize(app_state["config"])
+                
+                app_state["railway_integration"] = railway_integration
+                logger.info("Railway integration initialized successfully")
+            else:
+                logger.warning("Railway API token or project ID not found in environment variables")
+                app_state["railway_integration"] = None
+            
+        except Exception as e:
+            logger.warning(f"Could not initialize Railway integration: {e}")
+            app_state["railway_integration"] = None
 
         app_state["initialized"] = True
         logger.info("CryptoBot Supremo Global API initialized successfully")
