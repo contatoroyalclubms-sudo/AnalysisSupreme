@@ -503,7 +503,9 @@ class AutoTuner:
                 individuo = {}
                 for nome, param in self.parametros_otimizacao.items():
                     if param.tipo == "int":
-                        valor = np.random.randint(int(param.min_valor), int(param.max_valor) + 1)
+                        valor = np.random.randint(
+                            int(param.min_valor), int(param.max_valor) + 1
+                        )
                     elif param.tipo == "bool":
                         valor = np.random.choice([True, False])
                     else:

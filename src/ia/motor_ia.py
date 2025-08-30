@@ -213,7 +213,9 @@ class MotorIA:
             logger.error(f"Erro na análise de mercado para {symbol}: {e}")
             return self._get_default_analysis(symbol, timestamp)
 
-    def _get_default_analysis(self, symbol: Optional[str], timestamp: datetime) -> Dict[str, Any]:
+    def _get_default_analysis(
+        self, symbol: Optional[str], timestamp: datetime
+    ) -> Dict[str, Any]:
         """Retorna análise padrão em caso de erro"""
         return {
             "symbol": symbol or "UNKNOWN",
@@ -270,9 +272,7 @@ class MotorIA:
 
             autotuner = AutoTuner()
 
-            resultado = await autotuner.otimizar_parametros(
-                dados_historicos, iteracoes
-            )
+            resultado = await autotuner.otimizar_parametros(dados_historicos, iteracoes)
 
             return {
                 "symbol": symbol,
@@ -293,7 +293,9 @@ class MotorIA:
             }
 
     async def treinar_modelo_continuo(
-        self, logs_trades: List[Dict[str, Any]], metricas: Optional[Dict[str, Any]] = None
+        self,
+        logs_trades: List[Dict[str, Any]],
+        metricas: Optional[Dict[str, Any]] = None,
     ) -> bool:
         """Treina modelo de aprendizado contínuo"""
         try:
@@ -302,9 +304,11 @@ class MotorIA:
 
             try:
                 resultado = True
-                if hasattr(self.aprendizado_continuo, 'treinar_modelo'):
+                if hasattr(self.aprendizado_continuo, "treinar_modelo"):
                     try:
-                        treinar_func = getattr(self.aprendizado_continuo, 'treinar_modelo', None)
+                        treinar_func = getattr(
+                            self.aprendizado_continuo, "treinar_modelo", None
+                        )
                         if treinar_func:
                             resultado = await treinar_func(logs_trades, metricas)
                     except (AttributeError, TypeError):
@@ -327,34 +331,46 @@ class MotorIA:
                 return {"erro": "Gerador de sinais não disponível"}
 
             try:
-                if hasattr(self.gerador_sinais, 'gerar_sinal'):
-                    gerar_func = getattr(self.gerador_sinais, 'gerar_sinal', None)
+                if hasattr(self.gerador_sinais, "gerar_sinal"):
+                    gerar_func = getattr(self.gerador_sinais, "gerar_sinal", None)
                     if gerar_func:
                         sinal = gerar_func(symbol or "BTC", dados_mercado)
                     else:
-                        sinal = type('MockSinal', (), {
-                            'tipo': 'hold',
-                            'forca': 0.0,
-                            'indicadores': {},
-                            'stop_loss': None,
-                            'take_profit': None
-                        })()
+                        sinal = type(
+                            "MockSinal",
+                            (),
+                            {
+                                "tipo": "hold",
+                                "forca": 0.0,
+                                "indicadores": {},
+                                "stop_loss": None,
+                                "take_profit": None,
+                            },
+                        )()
                 else:
-                    sinal = type('MockSinal', (), {
-                        'tipo': 'hold',
-                        'forca': 0.0,
-                        'indicadores': {},
-                        'stop_loss': None,
-                        'take_profit': None
-                    })()
+                    sinal = type(
+                        "MockSinal",
+                        (),
+                        {
+                            "tipo": "hold",
+                            "forca": 0.0,
+                            "indicadores": {},
+                            "stop_loss": None,
+                            "take_profit": None,
+                        },
+                    )()
             except (AttributeError, TypeError):
-                sinal = type('MockSinal', (), {
-                    'tipo': 'hold',
-                    'forca': 0.0,
-                    'indicadores': {},
-                    'stop_loss': None,
-                    'take_profit': None
-                })()
+                sinal = type(
+                    "MockSinal",
+                    (),
+                    {
+                        "tipo": "hold",
+                        "forca": 0.0,
+                        "indicadores": {},
+                        "stop_loss": None,
+                        "take_profit": None,
+                    },
+                )()
 
             return {
                 "sinal": getattr(sinal, "tipo", "hold"),
@@ -378,15 +394,21 @@ class MotorIA:
 
             try:
                 score = 0.0
-                if hasattr(self.sentiment_analyzer, 'analisar_sentimento'):
+                if hasattr(self.sentiment_analyzer, "analisar_sentimento"):
                     try:
-                        analisar_func = getattr(self.sentiment_analyzer, 'analisar_sentimento', None)
+                        analisar_func = getattr(
+                            self.sentiment_analyzer, "analisar_sentimento", None
+                        )
                         if analisar_func:
                             score_result = analisar_func(symbol or "BTC")
-                            if hasattr(score_result, '__await__'):
+                            if hasattr(score_result, "__await__"):
                                 score_result = await score_result
                             try:
-                                score = float(score_result) if score_result is not None else 0.0
+                                score = (
+                                    float(score_result)
+                                    if score_result is not None
+                                    else 0.0
+                                )
                             except (ValueError, TypeError):
                                 score = 0.0
                     except (AttributeError, TypeError):
@@ -408,7 +430,9 @@ class MotorIA:
             logger.error(f"Erro na análise de sentimento: {e}")
             return {"erro": str(e), "score": 0.0, "classificacao": "neutro"}
 
-    async def _analise_ml(self, symbol: Optional[str], dados_mercado: Dict) -> Dict[str, Any]:
+    async def _analise_ml(
+        self, symbol: Optional[str], dados_mercado: Dict
+    ) -> Dict[str, Any]:
         """Análise usando machine learning"""
         try:
             if not self.aprendizado_continuo:
@@ -418,12 +442,18 @@ class MotorIA:
 
             try:
                 predicao = 0.0
-                if hasattr(self.aprendizado_continuo, 'prever_resultado'):
+                if hasattr(self.aprendizado_continuo, "prever_resultado"):
                     try:
-                        prever_func = getattr(self.aprendizado_continuo, 'prever_resultado', None)
+                        prever_func = getattr(
+                            self.aprendizado_continuo, "prever_resultado", None
+                        )
                         if prever_func:
                             predicao_result = prever_func(features)
-                            predicao = float(predicao_result) if predicao_result is not None else 0.0
+                            predicao = (
+                                float(predicao_result)
+                                if predicao_result is not None
+                                else 0.0
+                            )
                     except (AttributeError, TypeError, ValueError):
                         predicao = 0.0
             except (AttributeError, TypeError):
@@ -439,7 +469,9 @@ class MotorIA:
             logger.error(f"Erro na análise ML: {e}")
             return {"erro": str(e), "predicao": 0.0, "probabilidade_sucesso": 0.5}
 
-    def _analise_risco(self, symbol: Optional[str], dados_mercado: Dict) -> Dict[str, Any]:
+    def _analise_risco(
+        self, symbol: Optional[str], dados_mercado: Dict
+    ) -> Dict[str, Any]:
         """Análise de risco do trade"""
         try:
             preco_atual = dados_mercado.get("preco_atual", 0)
@@ -859,9 +891,11 @@ class MotorIA:
                 }
 
                 try:
-                    if hasattr(self.aprendizado_continuo, 'adicionar_trade'):
+                    if hasattr(self.aprendizado_continuo, "adicionar_trade"):
                         try:
-                            adicionar_func = getattr(self.aprendizado_continuo, 'adicionar_trade', None)
+                            adicionar_func = getattr(
+                                self.aprendizado_continuo, "adicionar_trade", None
+                            )
                             if adicionar_func:
                                 adicionar_func(trade_data)
                         except (AttributeError, TypeError):
@@ -888,7 +922,9 @@ class MotorIA:
                 self.performance_metrics["total_vender"] += 1.0
             else:
                 self.performance_metrics["total_aguardar"] += 1.0
-            self.performance_metrics["ultima_atualizacao_timestamp"] = datetime.now().timestamp()
+            self.performance_metrics["ultima_atualizacao_timestamp"] = (
+                datetime.now().timestamp()
+            )
 
         except Exception as e:
             logger.error(f"Erro ao atualizar métricas: {e}")

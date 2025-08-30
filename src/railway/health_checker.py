@@ -352,17 +352,17 @@ class HealthChecker:
 
             if isinstance(report["services"], dict):
                 report["services"][service_name] = {
-                "uptime_percentage": round(stats.get("uptime_percentage", 0), 2),
-                "total_checks": stats.get("total_checks", 0),
-                "successful_checks": stats.get("successful_checks", 0),
-                "average_response_time": round(
-                    stats.get("average_response_time", 0), 3
-                ),
-                "total_downtime_minutes": stats.get(
-                    "total_downtime", timedelta(0)
-                ).total_seconds()
-                / 60,
-                "currently_down": stats.get("last_downtime") is not None,
+                    "uptime_percentage": round(stats.get("uptime_percentage", 0), 2),
+                    "total_checks": stats.get("total_checks", 0),
+                    "successful_checks": stats.get("successful_checks", 0),
+                    "average_response_time": round(
+                        stats.get("average_response_time", 0), 3
+                    ),
+                    "total_downtime_minutes": stats.get(
+                        "total_downtime", timedelta(0)
+                    ).total_seconds()
+                    / 60,
+                    "currently_down": stats.get("last_downtime") is not None,
                 }
 
         return report

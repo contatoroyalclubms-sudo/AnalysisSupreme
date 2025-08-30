@@ -446,7 +446,9 @@ class AprendizadoContinuo:
                     from sklearn.preprocessing import StandardScaler
 
                     if hasattr(self, "scaler") and getattr(self, "scaler", None):
-                        feature_scaled = getattr(self, "scaler").transform(feature_array)
+                        feature_scaled = getattr(self, "scaler").transform(
+                            feature_array
+                        )
                         predicao = getattr(self, "modelo").predict(feature_scaled)[0]
                         return float(predicao)
                 except:  # nosec B110

@@ -77,10 +77,14 @@ class GeradorSinais:
             if volumes and len(volumes) >= 20:
                 indicadores["volume_atual"] = volumes[-1]
                 indicadores["volume_avg"] = float(np.mean(volumes[-20:]))
-                indicadores["volume_ratio"] = float(volumes[-1] / np.mean(volumes[-20:]))
+                indicadores["volume_ratio"] = float(
+                    volumes[-1] / np.mean(volumes[-20:])
+                )
             else:
                 indicadores["volume_atual"] = volumes[-1] if volumes else 100
-                indicadores["volume_avg"] = float(np.mean(volumes)) if volumes else 100.0
+                indicadores["volume_avg"] = (
+                    float(np.mean(volumes)) if volumes else 100.0
+                )
                 indicadores["volume_ratio"] = 1.0
 
             return indicadores
@@ -414,7 +418,7 @@ class GeradorSinais:
             if not ohlcv or len(ohlcv) < 20:
 
                 from dataclasses import dataclass
-                
+
                 @dataclass
                 class MockSinalInsuficiente:
                     acao: str = "parar"
@@ -463,7 +467,7 @@ class GeradorSinais:
             preco_atual = precos[-1]
 
             from dataclasses import dataclass
-            
+
             @dataclass
             class MockSinalFinal:
                 acao: str = sinal_final["acao"]
@@ -489,7 +493,7 @@ class GeradorSinais:
             logging.error(f"Erro ao analisar mercado: {e}")
 
             from dataclasses import dataclass
-            
+
             @dataclass
             class MockSinalErro:
                 acao: str = "parar"
@@ -527,7 +531,7 @@ class GeradorSinais:
 
             bb_result = self.calcular_bandas_bollinger(precos)
             indicadores["bb_upper"] = bb_result.get("upper", 0.0)
-            indicadores["bb_middle"] = bb_result.get("middle", 0.0) 
+            indicadores["bb_middle"] = bb_result.get("middle", 0.0)
             indicadores["bb_lower"] = bb_result.get("lower", 0.0)
             indicadores["bb_position"] = bb_result.get("position", 0.5)
 
@@ -567,7 +571,6 @@ class GeradorSinais:
         except Exception as e:
             logging.error(f"Erro ao combinar sinais: {e}")
             return {"acao": "parar", "confidence": 0.0}
-
 
     def atualizar_configuracao(self, nova_config: Dict) -> None:
         """Atualiza configuração dos indicadores"""
