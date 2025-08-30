@@ -495,19 +495,23 @@ class Monitor:
 
         logger.info("Sistema de monitoramento finalizado")
 
-    async def registrar_metrica(self, bot_name: str, metrica_name: str, valor: float) -> None:
+    async def registrar_metrica(
+        self, bot_name: str, metrica_name: str, valor: float
+    ) -> None:
         """Registra uma métrica específica para um bot"""
         try:
             if bot_name not in self.metricas["por_bot"]:
                 self.metricas["por_bot"][bot_name] = {}
-            
+
             if metrica_name not in self.metricas["por_bot"][bot_name]:
                 self.metricas["por_bot"][bot_name][metrica_name] = []
-            
+
             self.metricas["por_bot"][bot_name][metrica_name].append(valor)
             logger.info(f"Métrica registrada: {bot_name}.{metrica_name} = {valor}")
         except Exception as e:
-            logger.error(f"Erro ao registrar métrica {metrica_name} para {bot_name}: {e}")
+            logger.error(
+                f"Erro ao registrar métrica {metrica_name} para {bot_name}: {e}"
+            )
 
     async def gerar_alerta(self, alerta: Dict[str, Any]) -> None:
         """Gera um alerta no sistema"""
@@ -521,11 +525,13 @@ class Monitor:
                 "timestamp": datetime.now(),
                 "resolvido": False,
             }
-            
+
             self.alertas.append(alerta_completo)
             self.metricas["alertas"].append(alerta_completo)
-            
-            logger.warning(f"ALERTA [{alerta_completo['severidade'].upper()}]: {alerta_completo['tipo']} - {alerta_completo['bot']}")
+
+            logger.warning(
+                f"ALERTA [{alerta_completo['severidade'].upper()}]: {alerta_completo['tipo']} - {alerta_completo['bot']}"
+            )
         except Exception as e:
             logger.error(f"Erro ao gerar alerta: {e}")
 
@@ -535,12 +541,12 @@ class Monitor:
             todos_trades = []
             for trades_bot in self.trades_por_bot.values():
                 todos_trades.extend(trades_bot)
-            
-            if hasattr(self, 'trades') and self.trades:
+
+            if hasattr(self, "trades") and self.trades:
                 for trade_data in self.trades:
                     if isinstance(trade_data, dict):
-                        todos_trades.append(type('MockTrade', (), trade_data)())
-            
+                        todos_trades.append(type("MockTrade", (), trade_data)())
+
             if not todos_trades:
                 return {
                     "pnl_total": 0.0,
@@ -549,16 +555,26 @@ class Monitor:
                     "trades_vencedores": 0,
                     "profit_factor": 0.0,
                 }
-            
+
             pnl_total = sum(getattr(t, "pnl", 0) for t in todos_trades)
-            trades_vencedores = len([t for t in todos_trades if getattr(t, "pnl", 0) > 0])
+            trades_vencedores = len(
+                [t for t in todos_trades if getattr(t, "pnl", 0) > 0]
+            )
             total_trades = len(todos_trades)
             win_rate = trades_vencedores / total_trades if total_trades > 0 else 0.0
-            
-            total_wins = sum(getattr(t, "pnl", 0) for t in todos_trades if getattr(t, "pnl", 0) > 0)
-            total_losses = abs(sum(getattr(t, "pnl", 0) for t in todos_trades if getattr(t, "pnl", 0) < 0))
+
+            total_wins = sum(
+                getattr(t, "pnl", 0) for t in todos_trades if getattr(t, "pnl", 0) > 0
+            )
+            total_losses = abs(
+                sum(
+                    getattr(t, "pnl", 0)
+                    for t in todos_trades
+                    if getattr(t, "pnl", 0) < 0
+                )
+            )
             profit_factor = total_wins / total_losses if total_losses > 0 else 0.0
-            
+
             return {
                 "pnl_total": pnl_total,
                 "win_rate": win_rate,
@@ -581,7 +597,7 @@ class Monitor:
         try:
             trades_bot = self.trades_por_bot.get(bot_name, [])
             metricas_bot = self.metricas["por_bot"].get(bot_name, {})
-            
+
             return {
                 "bot": bot_name,
                 "metricas": metricas_bot,
@@ -603,13 +619,15 @@ class Monitor:
                     if isinstance(latencias, list) and latencias:
                         latencia_media = sum(latencias) / len(latencias)
                         if latencia_media > 50:
-                            await self.gerar_alerta({
-                                "tipo": "latencia_alta",
-                                "bot": bot_name,
-                                "valor": latencia_media,
-                                "threshold": 50,
-                                "severidade": "medium",
-                            })
+                            await self.gerar_alerta(
+                                {
+                                    "tipo": "latencia_alta",
+                                    "bot": bot_name,
+                                    "valor": latencia_media,
+                                    "threshold": 50,
+                                    "severidade": "medium",
+                                }
+                            )
         except Exception as e:
             logger.error(f"Erro ao verificar alertas do sistema: {e}")
 
@@ -617,29 +635,32 @@ class Monitor:
         """Exporta métricas no formato Prometheus"""
         try:
             metricas_prometheus = []
-            
+
             for bot_name, metricas_bot in self.metricas["por_bot"].items():
                 for metrica_name, valores in metricas_bot.items():
                     if isinstance(valores, list) and valores:
                         valor_atual = valores[-1] if valores else 0
                         metrica_prometheus = f"{bot_name}_{metrica_name} {valor_atual}"
                         metricas_prometheus.append(metrica_prometheus)
-            
+
             return "\n".join(metricas_prometheus)
         except Exception as e:
             logger.error(f"Erro ao exportar métricas Prometheus: {e}")
             return ""
 
-    async def salvar_relatorio_arquivo(self, relatorio: Dict[str, Any], nome_arquivo: str) -> None:
+    async def salvar_relatorio_arquivo(
+        self, relatorio: Dict[str, Any], nome_arquivo: str
+    ) -> None:
         """Salva relatório em arquivo"""
         try:
             import os
+
             os.makedirs("logs", exist_ok=True)
-            
+
             caminho_arquivo = f"logs/{nome_arquivo}"
             with open(caminho_arquivo, "w", encoding="utf-8") as f:
                 json.dump(relatorio, f, indent=2, default=str, ensure_ascii=False)
-            
+
             logger.info(f"Relatório salvo: {caminho_arquivo}")
         except Exception as e:
             logger.error(f"Erro ao salvar relatório {nome_arquivo}: {e}")
