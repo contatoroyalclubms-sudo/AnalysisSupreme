@@ -1,5 +1,5 @@
 import numpy as np
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Any
 import logging
 from dataclasses import dataclass
 from datetime import datetime
@@ -76,11 +76,11 @@ class GeradorSinais:
 
             if volumes and len(volumes) >= 20:
                 indicadores["volume_atual"] = volumes[-1]
-                indicadores["volume_avg"] = np.mean(volumes[-20:])
-                indicadores["volume_ratio"] = volumes[-1] / np.mean(volumes[-20:])
+                indicadores["volume_avg"] = float(np.mean(volumes[-20:]))
+                indicadores["volume_ratio"] = float(volumes[-1] / np.mean(volumes[-20:]))
             else:
                 indicadores["volume_atual"] = volumes[-1] if volumes else 100
-                indicadores["volume_avg"] = np.mean(volumes) if volumes else 100
+                indicadores["volume_avg"] = float(np.mean(volumes)) if volumes else 100.0
                 indicadores["volume_ratio"] = 1.0
 
             return indicadores
@@ -112,7 +112,7 @@ class GeradorSinais:
             rs = media_ganhos / media_perdas
             rsi = 100 - (100 / (1 + rs))
 
-            return rsi
+            return float(rsi)
 
         except Exception as e:
             logging.error(f"Erro no cálculo RSI: {e}")
@@ -214,7 +214,7 @@ class GeradorSinais:
                 "upper": upper,
                 "middle": media,
                 "lower": lower,
-                "position": max(0, min(1, position)),
+                "position": max(0.0, min(1.0, float(position))),
             }
 
         except Exception as e:
@@ -334,9 +334,9 @@ class GeradorSinais:
                 else 1.0
             )
 
-            sinais_compra = 0
-            sinais_venda = 0
-            forca_total = 0
+            sinais_compra = 0.0
+            sinais_venda = 0.0
+            forca_total = 0.0
 
             if rsi < self.configuracao["rsi_oversold"]:
                 sinais_compra += 1
@@ -351,10 +351,10 @@ class GeradorSinais:
 
             if macd > signal:
                 sinais_compra += 1
-                forca_total += min(abs(macd - signal) * 1000, 1.0)
+                forca_total += float(min(abs(macd - signal) * 1000, 1.0))
             elif macd < signal:
                 sinais_venda += 1
-                forca_total += min(abs(macd - signal) * 1000, 1.0)
+                forca_total += float(min(abs(macd - signal) * 1000, 1.0))
 
             if bb["position"] < self.configuracao["bb_extreme"]:
                 sinais_compra += 1
@@ -405,7 +405,7 @@ class GeradorSinais:
             logging.error(f"Erro ao gerar sinal: {e}")
             return Sinal("hold", 0.0, 0.0, razao=f"Erro: {str(e)}")
 
-    def analisar_mercado(self, dados_market: Dict) -> "Sinal":
+    def analisar_mercado(self, dados_market: Dict) -> Any:
         """Analisa mercado e gera sinal de trading (método para testes)"""
         try:
             ohlcv = dados_market.get("ohlcv", [])
@@ -413,14 +413,18 @@ class GeradorSinais:
 
             if not ohlcv or len(ohlcv) < 20:
 
-                class MockSinal:
-                    def __init__(self):
-                        self.acao = "parar"
-                        self.confidence = 0.0
-                        self.preco_entrada = 0.0
-                        self.razao = "Dados insuficientes"
+                from dataclasses import dataclass
+                
+                @dataclass
+                class MockSinalInsuficiente:
+                    acao: str = "parar"
+                    confidence: float = 0.0
+                    preco_entrada: float = 0.0
+                    razao: str = "Dados insuficientes"
+                    tipo: str = "parar"
+                    forca: float = 0.0
 
-                return MockSinal()
+                return MockSinalInsuficiente()
 
             precos = [candle[4] for candle in ohlcv]  # Close price
             volumes = [candle[5] for candle in ohlcv]  # Volume
@@ -458,36 +462,44 @@ class GeradorSinais:
 
             preco_atual = precos[-1]
 
-            class MockSinal:
-                def __init__(self):
-                    self.acao = sinal_final["acao"]
-                    self.confidence = sinal_final["confidence"]
-                    self.preco_entrada = preco_atual
-                    self.stop_loss = (
-                        preco_atual * 0.98
-                        if sinal_final["acao"] == "comprar"
-                        else preco_atual * 1.02
-                    )
-                    self.take_profit = (
-                        preco_atual * 1.04
-                        if sinal_final["acao"] == "comprar"
-                        else preco_atual * 0.96
-                    )
-                    self.razao = f"RSI:{rsi:.1f}, MACD:{macd:.4f}"
+            from dataclasses import dataclass
+            
+            @dataclass
+            class MockSinalFinal:
+                acao: str = sinal_final["acao"]
+                confidence: float = sinal_final["confidence"]
+                preco_entrada: float = preco_atual
+                stop_loss: float = (
+                    preco_atual * 0.98
+                    if sinal_final["acao"] == "comprar"
+                    else preco_atual * 1.02
+                )
+                take_profit: float = (
+                    preco_atual * 1.04
+                    if sinal_final["acao"] == "comprar"
+                    else preco_atual * 0.96
+                )
+                razao: str = f"RSI:{rsi:.1f}, MACD:{macd:.4f}"
+                tipo: str = sinal_final["acao"]
+                forca: float = sinal_final["confidence"]
 
-            return MockSinal()
+            return MockSinalFinal()
 
         except Exception as e:
             logging.error(f"Erro ao analisar mercado: {e}")
 
-            class MockSinal:
-                def __init__(self, error_msg):
-                    self.acao = "parar"
-                    self.confidence = 0.0
-                    self.preco_entrada = 0.0
-                    self.razao = f"Erro: {str(error_msg)}"
+            from dataclasses import dataclass
+            
+            @dataclass
+            class MockSinalErro:
+                acao: str = "parar"
+                confidence: float = 0.0
+                preco_entrada: float = 0.0
+                razao: str = f"Erro: {str(e)}"
+                tipo: str = "parar"
+                forca: float = 0.0
 
-            return MockSinal(e)
+            return MockSinalErro()
 
     def _calcular_indicadores_tecnicos(self, precos: List[float]) -> Dict:
         """Calcula indicadores técnicos (método privado para testes)"""
@@ -507,13 +519,17 @@ class GeradorSinais:
 
             indicadores = {}
 
-            indicadores["sma_20"] = np.mean(precos[-20:])
+            indicadores["sma_20"] = float(np.mean(precos[-20:]))
 
-            indicadores["rsi"] = self.calcular_rsi(precos)
+            indicadores["rsi"] = float(self.calcular_rsi(precos))
 
-            indicadores["macd"] = self.calcular_macd(precos)[0]
+            indicadores["macd"] = float(self.calcular_macd(precos)[0])
 
-            indicadores["bollinger_bands"] = self.calcular_bandas_bollinger(precos)
+            bb_result = self.calcular_bandas_bollinger(precos)
+            indicadores["bb_upper"] = bb_result.get("upper", 0.0)
+            indicadores["bb_middle"] = bb_result.get("middle", 0.0) 
+            indicadores["bb_lower"] = bb_result.get("lower", 0.0)
+            indicadores["bb_position"] = bb_result.get("position", 0.5)
 
             return indicadores
 
@@ -537,7 +553,7 @@ class GeradorSinais:
                 votos[acao] += 1
                 confidence_total[acao] += confidence
 
-            acao_vencedora = max(votos, key=votos.get)
+            acao_vencedora = max(votos.keys(), key=lambda k: votos[k])
 
             if votos[acao_vencedora] > 0:
                 confidence_media = (
@@ -552,80 +568,6 @@ class GeradorSinais:
             logging.error(f"Erro ao combinar sinais: {e}")
             return {"acao": "parar", "confidence": 0.0}
 
-    def _calcular_indicadores_tecnicos(self, precos: List[float]) -> Dict:
-        """Calcula indicadores técnicos básicos"""
-        try:
-            if not precos or len(precos) < 20:
-                return {}
-
-            indicadores = {}
-
-            indicadores["sma_20"] = np.mean(precos[-20:])
-
-            indicadores["rsi"] = self.calcular_rsi(precos)
-
-            macd, signal = self.calcular_macd(precos)
-            indicadores["macd"] = macd
-            indicadores["macd_signal"] = signal
-
-            bb = self.calcular_bandas_bollinger(precos)
-            indicadores["bollinger_bands"] = {
-                "upper": bb["upper"],
-                "middle": bb["middle"],
-                "lower": bb["lower"],
-            }
-
-            return indicadores
-
-        except Exception as e:
-            logging.error(f"Erro ao calcular indicadores técnicos: {e}")
-            return {}
-
-    def _combinar_sinais(self, sinais_individuais: List[Dict]) -> Dict:
-        """Combina sinais individuais em sinal final"""
-        try:
-            if not sinais_individuais:
-                return {"acao": "parar", "confidence": 0.0}
-
-            votos_comprar = 0
-            votos_vender = 0
-            votos_parar = 0
-            confidence_total = 0
-
-            for sinal in sinais_individuais:
-                acao = sinal.get("acao", "parar")
-                confidence = sinal.get("confidence", 0.0)
-
-                if acao == "comprar":
-                    votos_comprar += confidence
-                elif acao == "vender":
-                    votos_vender += confidence
-                else:
-                    votos_parar += confidence
-
-                confidence_total += confidence
-
-            if votos_comprar > votos_vender and votos_comprar > votos_parar:
-                acao_final = "comprar"
-                confidence_final = (
-                    votos_comprar / confidence_total if confidence_total > 0 else 0
-                )
-            elif votos_vender > votos_comprar and votos_vender > votos_parar:
-                acao_final = "vender"
-                confidence_final = (
-                    votos_vender / confidence_total if confidence_total > 0 else 0
-                )
-            else:
-                acao_final = "parar"
-                confidence_final = (
-                    votos_parar / confidence_total if confidence_total > 0 else 0
-                )
-
-            return {"acao": acao_final, "confidence": min(confidence_final, 1.0)}
-
-        except Exception as e:
-            logging.error(f"Erro ao combinar sinais: {e}")
-            return {"acao": "parar", "confidence": 0.0}
 
     def atualizar_configuracao(self, nova_config: Dict) -> None:
         """Atualiza configuração dos indicadores"""

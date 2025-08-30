@@ -503,7 +503,7 @@ class AutoTuner:
                 individuo = {}
                 for nome, param in self.parametros_otimizacao.items():
                     if param.tipo == "int":
-                        valor = np.random.randint(param.min_valor, param.max_valor + 1)
+                        valor = np.random.randint(int(param.min_valor), int(param.max_valor) + 1)
                     elif param.tipo == "bool":
                         valor = np.random.choice([True, False])
                     else:
@@ -596,7 +596,7 @@ class AutoTuner:
 
                     if param.tipo == "int":
                         individuo_mutado[nome] = np.random.randint(
-                            param.min_valor, param.max_valor + 1
+                            int(param.min_valor), int(param.max_valor) + 1
                         )
                     elif param.tipo == "bool":
                         individuo_mutado[nome] = not valor
@@ -659,7 +659,7 @@ class AutoTuner:
             logging.error(f"Erro na otimização bayesiana: {e}")
             return {"stop_loss": 0.02, "take_profit": 0.04}
 
-    def otimizar_parametros(self, estrategia: str, historico) -> Dict:
+    def otimizar_parametros_estrategia(self, estrategia: str, historico) -> Dict:
         """Otimiza parâmetros para uma estratégia específica (compatibilidade com testes)"""
         try:
             if isinstance(historico, list):

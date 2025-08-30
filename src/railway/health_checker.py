@@ -128,7 +128,8 @@ class HealthChecker:
                     url = deployment.get("url") or deployment.get("staticUrl")
 
                     if url and deployment.get("status") == "SUCCESS":
-                        self.service_urls[service_id] = url
+                        if isinstance(self.service_urls, dict):
+                            self.service_urls[service_id] = url
                         self.logger.info(f"🔗 Descoberto serviço {service_name}: {url}")
 
         except Exception as e:
@@ -156,10 +157,10 @@ class HealthChecker:
             tasks.append(task)
 
         if tasks:
-            health_checks = await asyncio.gather(*tasks, return_exceptions=True)
+            results = await asyncio.gather(*tasks, return_exceptions=True)
 
             health_checks = [
-                check for check in health_checks if isinstance(check, HealthCheck)
+                check for check in results if isinstance(check, HealthCheck)
             ]
 
         return health_checks
@@ -349,7 +350,8 @@ class HealthChecker:
         for service_id, stats in self.uptime_stats.items():
             service_name = asyncio.run(self._get_service_name(service_id))
 
-            report["services"][service_name] = {
+            if isinstance(report["services"], dict):
+                report["services"][service_name] = {
                 "uptime_percentage": round(stats.get("uptime_percentage", 0), 2),
                 "total_checks": stats.get("total_checks", 0),
                 "successful_checks": stats.get("successful_checks", 0),
@@ -361,6 +363,6 @@ class HealthChecker:
                 ).total_seconds()
                 / 60,
                 "currently_down": stats.get("last_downtime") is not None,
-            }
+                }
 
         return report

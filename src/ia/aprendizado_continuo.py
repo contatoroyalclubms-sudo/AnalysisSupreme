@@ -227,9 +227,7 @@ class AprendizadoContinuo:
 
             melhoria = self._calcular_melhoria(politica, bot_name)
 
-            if (
-                melhoria > 0 or random.random() < 0.2
-            ):  # 20% chance de exploração  # nosec B311
+            if melhoria > 0 or random.random() < 0.2:  # nosec B311
                 return True
 
             return False
@@ -378,8 +376,8 @@ class AprendizadoContinuo:
             if not dados_historicos:
                 return 0.0
 
-            total_reward = 0
-            num_trades = 0
+            total_reward = 0.0
+            num_trades = 0.0
 
             for dados in dados_historicos:
                 features = {
@@ -399,7 +397,7 @@ class AprendizadoContinuo:
                 }
 
                 reward = self.calcular_reward(trade_data)
-                total_reward += reward
+                total_reward += float(reward)
                 num_trades += 1
 
             fitness = total_reward / num_trades if num_trades > 0 else 0.0
@@ -443,13 +441,13 @@ class AprendizadoContinuo:
                 ]
             )
 
-            if hasattr(self, "modelo") and self.modelo:
+            if hasattr(self, "modelo") and getattr(self, "modelo", None):
                 try:
                     from sklearn.preprocessing import StandardScaler
 
-                    if hasattr(self, "scaler") and self.scaler:
-                        feature_scaled = self.scaler.transform(feature_array)
-                        predicao = self.modelo.predict(feature_scaled)[0]
+                    if hasattr(self, "scaler") and getattr(self, "scaler", None):
+                        feature_scaled = getattr(self, "scaler").transform(feature_array)
+                        predicao = getattr(self, "modelo").predict(feature_scaled)[0]
                         return float(predicao)
                 except:  # nosec B110
                     pass
