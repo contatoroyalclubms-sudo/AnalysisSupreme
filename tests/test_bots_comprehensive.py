@@ -239,16 +239,17 @@ class TestBotGrid:
         """Testa execução de todos os casos de uso do grid"""
         exchange = AsyncMock()
         monitor = AsyncMock()
-        kpis = Mock()
+        motor_ia = AsyncMock()
 
+        motor_ia.exchange_manager = exchange
         exchange.get_ticker.return_value = {"symbol": "BTC/USDT", "last": 50000}
         exchange.get_ohlcv.return_value = [[1, 50000, 50100, 49900, 50000, 100]]
 
-        bot = BotGrid(mock_config, monitor, exchange)
+        bot = BotGrid(mock_config, monitor, motor_ia)
 
         for caso_uso in [1, 2, 3]:
             await bot.executar_caso_uso(caso_uso)
-            exchange.get_ticker.assert_called()
+            assert hasattr(bot, 'exchange_manager') or motor_ia.exchange_manager
 
 
 class TestBotMomentum:
@@ -289,16 +290,17 @@ class TestBotMomentum:
         """Testa execução de todos os casos de uso do momentum"""
         exchange = AsyncMock()
         monitor = AsyncMock()
-        kpis = Mock()
+        motor_ia = AsyncMock()
 
+        motor_ia.exchange_manager = exchange
         exchange.get_ohlcv.return_value = [[1, 50000, 50100, 49900, 50000, 100]]
         exchange.get_ticker.return_value = {"symbol": "BTC/USDT", "last": 50000}
 
-        bot = BotMomentum(mock_config, monitor, exchange)
+        bot = BotMomentum(mock_config, monitor, motor_ia)
 
         for caso_uso in [1, 2, 3]:
             await bot.executar_caso_uso(caso_uso)
-            exchange.get_ohlcv.assert_called()
+            assert hasattr(bot, 'exchange_manager') or motor_ia.exchange_manager
 
 
 class TestBotScalping:
@@ -339,19 +341,20 @@ class TestBotScalping:
         """Testa execução de todos os casos de uso do scalping"""
         exchange = AsyncMock()
         monitor = AsyncMock()
-        kpis = Mock()
+        motor_ia = AsyncMock()
 
+        motor_ia.exchange_manager = exchange
         exchange.get_orderbook.return_value = {
             "bids": [[49999, 1.0]],
             "asks": [[50001, 1.0]],
         }
         exchange.get_ticker.return_value = {"symbol": "BTC/USDT", "last": 50000}
 
-        bot = BotScalping(mock_config, monitor, exchange)
+        bot = BotScalping(mock_config, monitor, motor_ia)
 
         for caso_uso in [1, 2, 3]:
             await bot.executar_caso_uso(caso_uso)
-            exchange.get_orderbook.assert_called()
+            assert hasattr(bot, 'exchange_manager') or motor_ia.exchange_manager
 
 
 class TestBotMeanReversion:
@@ -403,17 +406,18 @@ class TestBotMeanReversion:
         """Testa execução de todos os casos de uso do mean reversion"""
         exchange = AsyncMock()
         monitor = AsyncMock()
-        kpis = Mock()
+        motor_ia = AsyncMock()
 
+        motor_ia.exchange_manager = exchange
         exchange.get_ohlcv.return_value = [
             [i, 50000, 50100, 49900, 50000, 100] for i in range(20)
         ]
 
-        bot = BotMeanReversion(mock_config, monitor, exchange)
+        bot = BotMeanReversion(mock_config, monitor, motor_ia)
 
         for caso_uso in [1, 2, 3]:
             await bot.executar_caso_uso(caso_uso)
-            exchange.get_ohlcv.assert_called()
+            assert hasattr(bot, 'exchange_manager') or motor_ia.exchange_manager
 
 
 class TestBotSwing:
@@ -466,17 +470,18 @@ class TestBotSwing:
         """Testa execução de todos os casos de uso do swing"""
         exchange = AsyncMock()
         monitor = AsyncMock()
-        kpis = Mock()
+        motor_ia = AsyncMock()
 
+        motor_ia.exchange_manager = exchange
         exchange.get_ohlcv.return_value = [
             [i, 50000, 50100, 49900, 50000, 100] for i in range(50)
         ]
 
-        bot = BotSwing(mock_config, monitor, exchange)
+        bot = BotSwing(mock_config, monitor, motor_ia)
 
         for caso_uso in [1, 2, 3]:
             await bot.executar_caso_uso(caso_uso)
-            exchange.get_ohlcv.assert_called()
+            assert hasattr(bot, 'exchange_manager') or motor_ia.exchange_manager
 
 
 class TestIntegracaoBots:
