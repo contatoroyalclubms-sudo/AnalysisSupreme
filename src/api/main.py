@@ -69,21 +69,24 @@ async def startup_event():
 
         try:
             import os
+
             railway_token = os.getenv("RAILWAY_API_TOKEN")
             project_id = os.getenv("RAILWAY_PROJECT_ID")
-            
+
             if railway_token and project_id:
                 railway_integration = initialize_railway_integration(
                     railway_token, project_id, app_state["config"]
                 )
                 await railway_integration.initialize(app_state["config"])
-                
+
                 app_state["railway_integration"] = railway_integration
                 logger.info("Railway integration initialized successfully")
             else:
-                logger.warning("Railway API token or project ID not found in environment variables")
+                logger.warning(
+                    "Railway API token or project ID not found in environment variables"
+                )
                 app_state["railway_integration"] = None
-            
+
         except Exception as e:
             logger.warning(f"Could not initialize Railway integration: {e}")
             app_state["railway_integration"] = None
@@ -116,10 +119,12 @@ async def landing_page():
     """Landing page for the CryptoBot Supremo Global"""
     return FileResponse("public/index.html")
 
+
 @app.get("/demo")
 async def demo_page():
     """Demo page for the CryptoBot Supremo Global"""
     return FileResponse("public/index.html")
+
 
 @app.get("/health")
 async def health_check():
@@ -292,11 +297,11 @@ async def start_all_bots(background_tasks: BackgroundTasks):
 async def get_analysis(symbol: str):
     """Análise completa de mercado com cache e paralelização otimizada"""
     start_time = time.time()
-    
+
     try:
         if not app_state["initialized"]:
             raise HTTPException(status_code=503, detail="System not initialized")
-        
+
         if not app_state["motor_ia"]:
             config = cast(Optional[Configuracao], app_state["config"])
             if config:
@@ -305,41 +310,45 @@ async def get_analysis(symbol: str):
                         "modelo_path": "models/",
                         "treinamento_ativo": True,
                         "intervalo_retreino": 24,
-                        "parametros": {}
+                        "parametros": {},
                     }
                     app_state["motor_ia"] = MotorIA(simple_config)
                     await app_state["motor_ia"].inicializar()
                 except Exception as e:
                     logger.error(f"Error initializing MotorIA: {e}")
                     raise
-        
+
         motor_ia = cast(Optional[MotorIA], app_state["motor_ia"])
         if not motor_ia:
             raise HTTPException(status_code=500, detail="Motor IA not available")
-        
+
         dados_mercado = {
-            'ohlcv': [[50000 + i, 50100 + i, 49900 + i, 50050 + i, 1000] for i in range(100)],
-            'precos': [50000 + i for i in range(100)],
-            'volumes': [1000 + i for i in range(100)],
-            'preco_atual': 50050
+            "ohlcv": [
+                [50000 + i, 50100 + i, 49900 + i, 50050 + i, 1000] for i in range(100)
+            ],
+            "precos": [50000 + i for i in range(100)],
+            "volumes": [1000 + i for i in range(100)],
+            "preco_atual": 50050,
         }
-        
+
         resultado = await motor_ia.analisar_mercado(dados_mercado, symbol)
-        
+
         execution_time = (time.time() - start_time) * 1000  # em ms
-        
+
         return {
             "symbol": symbol,
             "analysis": resultado,
             "timestamp": resultado.get("timestamp"),
             "cached": resultado.get("cached", False),
             "execution_time_ms": round(execution_time, 2),
-            "performance_target_met": execution_time < 100  # Meta de <100ms
+            "performance_target_met": execution_time < 100,  # Meta de <100ms
         }
-        
+
     except Exception as e:
         execution_time = (time.time() - start_time) * 1000
-        logger.error(f"Error in analysis endpoint for {symbol}: {e} (took {execution_time:.2f}ms)")
+        logger.error(
+            f"Error in analysis endpoint for {symbol}: {e} (took {execution_time:.2f}ms)"
+        )
         raise HTTPException(status_code=500, detail=str(e))
 
 

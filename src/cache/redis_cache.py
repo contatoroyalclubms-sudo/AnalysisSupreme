@@ -29,7 +29,7 @@ class RedisCache:
             "balance": 5000,
             "orders": 1000,
             "sentiment": 3600000,  # 1 hora para sentimento
-            "signals": 30000,      # 30 segundos para sinais técnicos
+            "signals": 30000,  # 30 segundos para sinais técnicos
             "ml_predictions": 300000,  # 5 minutos para predições ML
             "market_data": 60000,  # 1 minuto para dados de mercado
         }
@@ -148,24 +148,34 @@ class RedisCache:
             "redis_available": self.redis_client is not None,
         }
 
-    async def get_cached_or_compute(self, cache_key: str, compute_func, *args, data_type: str = "general", **kwargs):
+    async def get_cached_or_compute(
+        self, cache_key: str, compute_func, *args, data_type: str = "general", **kwargs
+    ):
         """Obtém valor do cache ou computa se não existir"""
         try:
             cached_value = await self.get(cache_key, data_type)
             if cached_value is not None:
                 logger.debug(f"Cache hit for key: {cache_key}")
                 return cached_value
-            
+
             logger.debug(f"Cache miss for key: {cache_key}, computing...")
-            computed_value = await compute_func(*args, **kwargs) if asyncio.iscoroutinefunction(compute_func) else compute_func(*args, **kwargs)
-            
+            computed_value = (
+                await compute_func(*args, **kwargs)
+                if asyncio.iscoroutinefunction(compute_func)
+                else compute_func(*args, **kwargs)
+            )
+
             await self.set(cache_key, computed_value, data_type)
-            
+
             return computed_value
-            
+
         except Exception as e:
             logger.error(f"Erro em get_cached_or_compute: {e}")
-            return await compute_func(*args, **kwargs) if asyncio.iscoroutinefunction(compute_func) else compute_func(*args, **kwargs)
+            return (
+                await compute_func(*args, **kwargs)
+                if asyncio.iscoroutinefunction(compute_func)
+                else compute_func(*args, **kwargs)
+            )
 
     async def close(self):
         """Fecha conexão Redis"""

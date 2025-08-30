@@ -268,8 +268,9 @@ class BotArbitragem(BotBase):
             ticker = await self.exchange_manager.get_ticker(symbol, exchange)
             if not ticker:
                 return None
-            
+
             import secrets
+
             return secrets.SystemRandom().uniform(-0.02, 0.02)
         except Exception as e:
             self.logger.error(f"Erro ao obter funding rate: {e}")

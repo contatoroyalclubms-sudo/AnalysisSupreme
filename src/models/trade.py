@@ -10,7 +10,7 @@ from typing import Optional
 @dataclass
 class Trade:
     """Modelo de trade para o sistema de trading"""
-    
+
     id: str
     bot: str
     symbol: str

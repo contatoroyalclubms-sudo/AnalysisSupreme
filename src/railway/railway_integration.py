@@ -23,31 +23,31 @@ class RailwayIntegration:
         self.railway_token = railway_token
         self.project_id = project_id
         self.logger = logging.getLogger(__name__)
-        
+
         self.deploy_monitor: Optional[DeployMonitor] = None
         self.health_checker: Optional[HealthChecker] = None
-        
+
         self.monitor: Optional[Monitor] = None
         self.alertas_preditivos: Optional[AlertasPreditivos] = None
         self.dashboard: Optional[DashboardSupremo] = None
-        
+
         self.initialized = False
         self.monitoring_active = False
 
     async def initialize(self, config):
         """Inicializa toda a integração Railway"""
         self.logger.info("🚀 Inicializando Integração Railway Completa")
-        
+
         try:
             await self._initialize_observability_components(config)
-            
+
             await self._initialize_railway_components()
-            
+
             await self._setup_integrations()
-            
+
             self.initialized = True
             self.logger.info("✅ Integração Railway inicializada com sucesso")
-            
+
         except Exception as e:
             self.logger.error(f"❌ Erro na inicialização da integração Railway: {e}")
             raise
@@ -56,22 +56,22 @@ class RailwayIntegration:
         """Inicia todos os sistemas de monitoramento"""
         if not self.initialized:
             raise RuntimeError("Sistema não inicializado. Chame initialize() primeiro.")
-        
+
         self.logger.info("🔄 Iniciando monitoramento Railway completo")
-        
+
         tasks = []
-        
+
         if self.deploy_monitor:
             tasks.append(self.deploy_monitor.start_monitoring())
-        
+
         if self.health_checker:
             tasks.append(self.health_checker.start_health_monitoring())
-        
+
         if self.monitor:
             tasks.append(self.monitor.executar_monitoramento())
-        
+
         self.monitoring_active = True
-        
+
         await asyncio.gather(*tasks, return_exceptions=True)
 
     async def get_comprehensive_status(self) -> Dict[str, Any]:
@@ -81,37 +81,39 @@ class RailwayIntegration:
             "railway_integration": {
                 "initialized": self.initialized,
                 "monitoring_active": self.monitoring_active,
-                "project_id": self.project_id
-            }
+                "project_id": self.project_id,
+            },
         }
-        
+
         if self.deploy_monitor:
             status["deploy_monitoring"] = self.deploy_monitor.get_monitoring_stats()
-        
+
         if self.health_checker:
             status["health_monitoring"] = {
                 "current_status": self.health_checker.get_current_health_status(),
-                "uptime_report": self.health_checker.get_uptime_report()
+                "uptime_report": self.health_checker.get_uptime_report(),
             }
-        
+
         if self.monitor:
             status["system_monitoring"] = self.monitor.get_metricas_tempo_real()
-        
+
         if self.dashboard:
-            status["dashboard_metrics"] = await self.dashboard.generate_realtime_metrics()
-        
+            status["dashboard_metrics"] = (
+                await self.dashboard.generate_realtime_metrics()
+            )
+
         return status
 
     async def trigger_manual_health_check(self) -> Dict[str, Any]:
         """Dispara verificação manual de saúde"""
         if not self.health_checker:
             return {"error": "Health checker não inicializado"}
-        
+
         self.logger.info("🏥 Executando verificação manual de saúde")
-        
+
         health_results = await self.health_checker._check_all_services_health()
         await self.health_checker._process_health_results(health_results)
-        
+
         return {
             "manual_check_completed": True,
             "timestamp": datetime.now().isoformat(),
@@ -120,32 +122,31 @@ class RailwayIntegration:
                     "service": check.service_name,
                     "status": check.status.value,
                     "response_time": check.response_time,
-                    "url": check.url
+                    "url": check.url,
                 }
                 for check in health_results
-            ]
+            ],
         }
 
     async def simulate_deployment_failure(self, service_name: str) -> Dict[str, Any]:
         """Simula falha de deployment para teste"""
         if not self.deploy_monitor:
             return {"error": "Deploy monitor não inicializado"}
-        
+
         self.logger.info(f"🧪 Simulando falha de deployment para {service_name}")
-        
-        
+
         return {
             "simulation_started": True,
             "service": service_name,
             "timestamp": datetime.now().isoformat(),
-            "message": f"Simulação de falha iniciada para {service_name}"
+            "message": f"Simulação de falha iniciada para {service_name}",
         }
 
     async def get_deployment_history(self) -> Dict[str, Any]:
         """Obtém histórico de deployments"""
         if not self.deploy_monitor:
             return {"error": "Deploy monitor não inicializado"}
-        
+
         return {
             "deployment_history": [
                 {
@@ -153,34 +154,34 @@ class RailwayIntegration:
                     "service_name": dep.service_name,
                     "status": dep.status.value,
                     "created_at": dep.created_at.isoformat(),
-                    "url": dep.url
+                    "url": dep.url,
                 }
                 for dep in self.deploy_monitor.deployment_history
             ],
             "total_deployments": len(self.deploy_monitor.deployment_history),
-            "failure_patterns": self.deploy_monitor.failure_patterns
+            "failure_patterns": self.deploy_monitor.failure_patterns,
         }
 
     async def _initialize_observability_components(self, config):
         """Inicializa componentes de observabilidade existentes"""
         self.logger.info("📊 Inicializando componentes de observabilidade")
-        
+
         self.monitor = Monitor(config)
         await self.monitor.inicializar()
-        
+
         self.alertas_preditivos = AlertasPreditivos()
         await self.alertas_preditivos.initialize()
-        
+
         self.dashboard = DashboardSupremo()
 
     async def _initialize_railway_components(self):
         """Inicializa componentes Railway"""
         self.logger.info("🚂 Inicializando componentes Railway")
-        
+
         self.deploy_monitor = DeployMonitor(self.railway_token, self.project_id)
         if self.monitor and self.alertas_preditivos and self.deploy_monitor:
             await self.deploy_monitor.initialize(self.monitor, self.alertas_preditivos)
-        
+
         self.health_checker = HealthChecker(self.railway_token, self.project_id)
         if self.health_checker:
             await self.health_checker.initialize()
@@ -188,10 +189,10 @@ class RailwayIntegration:
     async def _setup_integrations(self):
         """Configura integrações entre componentes"""
         self.logger.info("🔗 Configurando integrações")
-        
+
         if self.monitor:
             await self.monitor.registrar_bot("railway_integration")
-        
+
         if self.alertas_preditivos:
             pass
 
@@ -205,7 +206,7 @@ class RailwayIntegration:
                 "health_checker": self.health_checker is not None,
                 "system_monitor": self.monitor is not None,
                 "predictive_alerts": self.alertas_preditivos is not None,
-                "dashboard": self.dashboard is not None
+                "dashboard": self.dashboard is not None,
             },
             "features": [
                 "automatic_deployment_monitoring",
@@ -215,14 +216,14 @@ class RailwayIntegration:
                 "real_time_health_monitoring",
                 "predictive_failure_alerts",
                 "comprehensive_uptime_tracking",
-                "integration_with_existing_observability"
+                "integration_with_existing_observability",
             ],
             "railway_project": {
                 "project_id": self.project_id,
-                "api_integration": "active"
+                "api_integration": "active",
             },
             "status": {
                 "initialized": self.initialized,
-                "monitoring_active": self.monitoring_active
-            }
+                "monitoring_active": self.monitoring_active,
+            },
         }
