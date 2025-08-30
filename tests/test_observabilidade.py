@@ -64,8 +64,8 @@ class TestMonitor:
         await monitor.inicializar()
 
         await monitor.registrar_metrica("arbitragem", "latencia_ms", 45.5)
-        assert "arbitragem" in monitor.metricas
-        assert "latencia_ms" in monitor.metricas["arbitragem"]
+        assert "arbitragem" in monitor.metricas["por_bot"]
+        assert "latencia_ms" in monitor.metricas["por_bot"]["arbitragem"]
 
     @pytest.mark.asyncio
     async def test_gerar_alerta(self, mock_config):
@@ -122,7 +122,7 @@ class TestMonitor:
             }
         )
 
-        monitor.metricas["momentum"] = {
+        monitor.metricas["por_bot"]["momentum"] = {
             "breakout_precisao": [0.65, 0.70, 0.68],
             "stop_eficiencia": [0.80, 0.85, 0.82],
         }
@@ -171,7 +171,7 @@ class TestMonitor:
         monitor = Monitor(mock_config)
         await monitor.inicializar()
 
-        monitor.metricas["arbitragem"] = {
+        monitor.metricas["por_bot"]["arbitragem"] = {
             "latencia_ms": [150, 160, 155]
         }  # Acima do threshold de 50ms
 
@@ -186,7 +186,7 @@ class TestMonitor:
         monitor = Monitor(mock_config)
         await monitor.inicializar()
 
-        monitor.metricas["scalping"] = {
+        monitor.metricas["por_bot"]["scalping"] = {
             "throughput_ops": [120, 115, 125],
             "latencia_ms": [25, 30, 28],
         }

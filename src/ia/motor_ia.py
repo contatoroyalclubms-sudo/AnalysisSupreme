@@ -997,6 +997,65 @@ class MotorIA:
             logger.error(f"Erro ao obter status: {e}")
             return {"erro": str(e)}
 
+    async def treinar_modelos(self, dados_treinamento: Dict[str, Any]) -> bool:
+        """Treina modelos de IA com dados fornecidos"""
+        try:
+            features = dados_treinamento.get("features", [])
+            targets = dados_treinamento.get("targets", [])
+            
+            logs_trades = []
+            for i, (feature, target) in enumerate(zip(features, targets)):
+                logs_trades.append({
+                    "features": feature,
+                    "target": target,
+                    "timestamp": datetime.now(),
+                })
+            
+            return await self.treinar_modelo_continuo(logs_trades)
+        except Exception as e:
+            logger.error(f"Erro ao treinar modelos: {e}")
+            return False
+
+    async def otimizar_parametros_bot(self, bot_type: str, historico_trades: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Otimiza parâmetros para um tipo específico de bot"""
+        try:
+            symbol = "BTC/USDT"
+            dados_historicos = []
+            
+            for trade in historico_trades:
+                dados_historicos.append({
+                    "symbol": trade.get("symbol", symbol),
+                    "pnl": trade.get("pnl", 0),
+                    "timestamp": datetime.now(),
+                    "bot_type": bot_type,
+                })
+            
+            resultado = await self.otimizar_estrategia(symbol, dados_historicos)
+            return resultado
+        except Exception as e:
+            logger.error(f"Erro ao otimizar parâmetros do bot {bot_type}: {e}")
+            return {
+                "bot_type": bot_type,
+                "parametros_otimos": {},
+                "sharpe_ratio": 0.0,
+                "iteracoes": 0,
+            }
+
+    async def finalizar(self) -> None:
+        """Finaliza o motor de IA"""
+        try:
+            self.is_running = False
+            
+            if self.historico_decisoes:
+                logger.info(f"Motor IA finalizado com {len(self.historico_decisoes)} decisões no histórico")
+            
+            self.posicoes_ativas.clear()
+            self.performance_metrics.clear()
+            
+            logger.info("Motor IA finalizado com sucesso")
+        except Exception as e:
+            logger.error(f"Erro ao finalizar motor IA: {e}")
+
 
 # Legacy classes for backward compatibility
 class Sinal:
