@@ -1,6 +1,6 @@
 import asyncio
 import logging
-import requests
+import requests  # type: ignore
 from typing import Dict, List, Optional
 import random
 from datetime import datetime
