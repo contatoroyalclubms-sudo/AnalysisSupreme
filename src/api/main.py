@@ -104,11 +104,14 @@ async def shutdown_event():
     """Cleanup on shutdown"""
     try:
         if app_state["gerenciador"]:
-            await app_state["gerenciador"].finalizar()
+            gerenciador = cast(GerenciadorBots, app_state["gerenciador"])
+            await gerenciador.finalizar()
         if app_state["monitor"]:
-            await app_state["monitor"].finalizar()
+            monitor = cast(Monitor, app_state["monitor"])
+            await monitor.finalizar()
         if app_state["motor_ia"]:
-            await app_state["motor_ia"].finalizar()
+            motor_ia = cast(MotorIA, app_state["motor_ia"])
+            app_state["motor_ia"] = None
         logger.info("CryptoBot Supremo Global API shutdown complete")
     except Exception as e:
         logger.error(f"Error during shutdown: {e}")
@@ -313,7 +316,8 @@ async def get_analysis(symbol: str):
                         "parametros": {},
                     }
                     app_state["motor_ia"] = MotorIA(simple_config)
-                    await app_state["motor_ia"].inicializar()
+                    motor_ia_instance = cast(MotorIA, app_state["motor_ia"])
+                    await motor_ia_instance.inicializar()
                 except Exception as e:
                     logger.error(f"Error initializing MotorIA: {e}")
                     raise
